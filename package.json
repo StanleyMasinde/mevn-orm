@@ -1,6 +1,6 @@
 {
   "name": "mevn-orm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "simple ORM for express js",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,16 @@
   "dependencies": {
     "boxen": "^4.2.0",
     "chalk": "^3.0.0",
+    "pluralize": "^8.0.0",
     "yargs": "^15.1.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stannlee/mevn-orm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stannlee/mevn-orm/issues"
+  },
+  "homepage": "https://github.com/stannlee/mevn-orm#readme"
 }

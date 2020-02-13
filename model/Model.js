@@ -1,7 +1,3 @@
-/**
- * Model
- */
-
 var pluralize = require('pluralize')
 var connection = require('../database/database')
 class Model {
