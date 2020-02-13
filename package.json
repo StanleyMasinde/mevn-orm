@@ -1,0 +1,22 @@
+{
+  "name": "mevn-orm",
+  "version": "1.0.0",
+  "description": "simple ORM for express js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit"
+  },
+  "keywords": [
+    "ORM",
+    "express",
+    "Mysql",
+    "mevn"
+  ],
+  "author": "Stanley Masinde",
+  "license": "MIT",
+  "dependencies": {
+    "boxen": "^4.2.0",
+    "chalk": "^3.0.0",
+    "yargs": "^15.1.0"
+  }
+}
