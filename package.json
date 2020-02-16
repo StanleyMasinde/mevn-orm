@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "simple ORM for express js",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit"
   },
@@ -17,6 +18,8 @@
   "dependencies": {
     "boxen": "^4.2.0",
     "chalk": "^3.0.0",
+    "dotenv": "^8.2.0",
+    "mysql": "^2.18.1",
     "pluralize": "^8.0.0",
     "yargs": "^15.1.0"
   },
