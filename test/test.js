@@ -3,34 +3,37 @@ var assert = require('assert')
 
 class User extends Model { }
 
-Database.query({
-    sql: `DROP TABLE IF EXISTS users, tests`
-})
-
-Schema.create('users', () => {
-    return [
-        new Table().bigIncrements(),
-        new Table().string('name'),
-        new Table().string('email').unique(),
-        new Table().string('password'),
-        new Table().timestamps()
-    ]
-})
-
-describe('Database', () => {
-    it('Has connected to the database', (done) => {
+describe('Schema', () => {
+    it('Has dropped tests and users', (done) => {
         Database.query({
-            sql: 'Show Tables',
-        }, (err, _results) => {
-            if (err) {
-                return done(err)
+            sql: `DROP TABLE IF EXISTS users, tests`
+        }, (e) => {
+            if (e) {
+                return done(e)
             }
+
             done()
         })
-
-
     })
 
+
+
+
+    it('Has created the users table', () => {
+        Schema.create('users', () => {
+            return [
+                new Table().bigIncrements(),
+                new Table().string('name'),
+                new Table().string('email').unique(),
+                new Table().string('password'),
+                new Table().timestamps()
+            ]
+        })
+    })
+})
+
+
+describe('Database', () => {
     it('Has created a table named tests', (done) => {
         Database.query({
             sql: `CREATE TABLE tests (
