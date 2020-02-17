@@ -37,7 +37,7 @@ class Table {
      * @param {Number} length 
      */
     string(name, length = 191) {
-        this.statement = `${name} VARCHAR(${length})`
+        this.statement = `${name} VARCHAR(${length}) NOT NULL`
 
         return this
     }
@@ -47,7 +47,7 @@ class Table {
      * @param {String} name 
      */
     text(name) {
-        this.statement = `${name} VARCHAR(500)`
+        this.statement = `${name} TEXT`
 
         return this
     }
