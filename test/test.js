@@ -82,5 +82,32 @@ describe('ORM', () => {
             done(err)
         })
     })
+
+    it('Should return a list of users', (done) => {
+        User.all().then((users) => {
+            assert.equal(Array.isArray(users), true)
+            done()
+        }).catch(err => {
+            done(err)
+        })
+    })
+
+    it('Should fetch the first user', (done) => {
+        User.first().then(user => {
+            assert.equal('John Doe', user.name)
+            done()
+        }).catch(err => {
+            done(err)
+        })
+    })
+
+    it('Should Delete user by ID', (done) => {
+        User.delete(1)
+            .then(() => {
+                done()
+            }).catch(err => {
+                done(err)
+            })
+    })
 })
 

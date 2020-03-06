@@ -5,7 +5,7 @@ class Model {
     key = 'id'
     id = null
     fillable = []
-    static collection = ['ff', 'fff']
+    static collection = []
 
     constructor(table) {
         table == undefined ? 0 : this.table = table
