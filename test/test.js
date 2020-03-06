@@ -24,6 +24,8 @@ describe('Schema', () => {
             return [
                 new Table().bigIncrements(),
                 new Table().string('name'),
+                new Table().string('occupation').nullable(),
+                new Table().integer('phone').nullable(),
                 new Table().string('email').unique(),
                 new Table().string('password'),
                 new Table().timestamps()
