@@ -156,6 +156,45 @@ class Model {
         let q = `INSERT INTO ${this.instanceTable()} SET ?`
         return this.instanceQuery(q, columns)
     }
+
+
+    /**
+     * ================================================================
+     *                    Relationships
+     * ================================================================
+     */
+
+    /**
+     * Has one relationship
+     * @param {*} related 
+     * @param {*} foreignKey 
+     * @param {*} localKey 
+     */
+    hasOne(related = '', foreignKey = '', localKey = '') { }
+
+    /**
+     * Has many relationship
+     * @param {*} related 
+     * @param {*} foreignKey 
+     * @param {*} localKey 
+     */
+    hasMany(related = '', foreignKey = '', localKey = '') { }
+
+    /**
+     * Belongs to relationship
+     * @param {*} related 
+     * @param {*} foreignKey 
+     * @param {*} localKey 
+     */
+    belongsTo(related = '', foreignKey = '', localKey = '') { }
+
+    /**
+     * Belongs to many relationship
+     * @param {*} related 
+     * @param {*} foreignKey 
+     * @param {*} localKey 
+     */
+    belongsToMany(related = '', foreignKey = '', localKey = '') { }
 }
 
 module.exports = Model
