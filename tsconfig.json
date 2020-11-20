@@ -10,7 +10,7 @@
     "importHelpers": true
   },
   "files": [
-    "src/index.ts"
+    "src/index.ts",
   ],
-  "exclude": ["/dist"]
+  "exclude": ["./dist"]
 }

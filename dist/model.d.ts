@@ -5,5 +5,5 @@ export default class Model {
     static table: any;
     constructor(config: any);
     static tableName(): any;
-    static all(): void;
+    static all(): Promise<any[]>;
 }
