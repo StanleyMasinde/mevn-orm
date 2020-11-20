@@ -5,8 +5,9 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "test": "mocha --exit",
+    "test": "NODE_ENV=development mocha  --exit",
     "build": "tsc",
+    "migrate": "knex migrate:latest",
     "watch": "tsc --watch"
   },
   "keywords": [
@@ -21,8 +22,10 @@
     "boxen": "^4.2.0",
     "chalk": "^3.0.0",
     "dotenv": "^8.2.0",
+    "knex": "^0.21.12",
     "mysql": "^2.18.1",
     "pluralize": "^8.0.0",
+    "sqlite3": "^5.0.0",
     "yargs": "^15.1.0"
   },
   "devDependencies": {

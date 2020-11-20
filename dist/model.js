@@ -12,12 +12,13 @@ class Model {
         return pluralize_1.default(this.name).toLowerCase();
     }
     static all() {
-        connection_1.default.query(`SELECT * FROM ${this.tableName()}`, (err, rows) => {
-            if (err) {
-                throw new Error(err.sqlMessage);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield connection_1.default.table(this.tableName()).select('*');
             }
-            console.log(rows);
-            return rows;
+            catch (error) {
+                throw new Error(error);
+            }
         });
     }
 }

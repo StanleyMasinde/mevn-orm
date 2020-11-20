@@ -1,4 +1,4 @@
-import connection from './connection'
+import queryBuilder from './connection'
 import pluralize from 'pluralize'
 
 export default class Model {
@@ -6,22 +6,21 @@ export default class Model {
     table: String;
     name: any;
     static table: any;
-    constructor(config) {
+    constructor(config: any) {
         this.config = config
         this.table = pluralize(this.name)
     }
 
     static tableName() {
-       return pluralize(this.name).toLowerCase()
+        return pluralize(this.name).toLowerCase()
     }
 
-    public static all() {
-       connection.query(`SELECT * FROM ${this.tableName()}`, (err, rows) => {
-           if (err) {
-               throw new Error(err.sqlMessage);
-           }
-           console.log(rows);
-           return rows
-       })
+    public static async all() {
+        try {
+            return await queryBuilder.table(this.tableName()).select('*')
+        } catch (error) {
+            throw new Error(error);
+        }
+
     }
 }

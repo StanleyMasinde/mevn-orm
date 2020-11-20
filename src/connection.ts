@@ -1,25 +1,6 @@
-import { config } from './config/config';
-import mySql from 'mysql'
+import config from './config/knexfile'
+const { development, production } = config
+import knex from 'knex'
 
-
-const connection = mySql.createConnection({
-    user: config.username,
-    password: config.password,
-    database: config.database,
-    host: config.host
-})
-
-connection.connect()
-connection.on('connect', (err) => {
-    if (err) {
-        console.log(err);
-        
-        throw new Error(err)
-    }
-
-    console.log('Connected');
-
-})
-
+const connection = knex(process.env.NODE_ENV === 'development' ? development : production)
 export default connection
-
