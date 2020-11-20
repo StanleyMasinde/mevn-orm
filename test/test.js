@@ -1,113 +1,19 @@
-var { Database, Model, Schema, Table } = require('../index')
-var assert = require('assert')
+require('dotenv').config()
+const { expect } = require('chai')
+const { Model } = require('../dist/index')
 
+/**
+ * Create a user class
+ */
 class User extends Model { }
-
-describe('Schema', () => {
-    it('Has dropped tests and users', (done) => {
-        Database.query({
-            sql: `DROP TABLE IF EXISTS users, tests`
-        }, (e) => {
-            if (e) {
-                return done(e)
-            }
-
-            done()
-        })
+describe('Static model tests', () => {
+    it('Should plurarize the table name', (done) => {
+        expect(User.tableName()).equals('users')
+        done()
     })
 
-
-
-
-    it('Has created the users table', () => {
-        Schema.create('users', () => {
-            return [
-                new Table().bigIncrements(),
-                new Table().string('name'),
-                new Table().string('occupation').nullable(),
-                new Table().integer('phone').nullable(),
-                new Table().string('email').unique(),
-                new Table().string('password'),
-                new Table().timestamps()
-            ]
-        })
+    it('Should return all records', (done) => {
+        User.all()
+        done()
     })
 })
-
-
-describe('Database', () => {
-    it('Has created a table named tests', (done) => {
-        Database.query({
-            sql: `CREATE TABLE tests (
-                id BigInt(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                title VARCHAR(256)
-            )`
-        }, (error, _results) => {
-            if (error) {
-                return done(error)
-            }
-
-            done()
-        })
-    })
-
-    it('Has added a record', (done) => {
-        Database.query({
-            sql: `INSERT INTO tests (title) values('All Good')`
-        }, (error, results) => {
-            if (error) {
-                return done(error)
-            }
-
-            done()
-        })
-    })
-})
-
-// ORM TESTS
-describe('ORM', () => {
-    it('The table name needs to be pluralised', () => {
-        assert.equal(User.getTable(), 'users')
-    })
-
-    it('Should Create a new user', (done) => {
-        let john = new User()
-        john.save({
-            name: 'John Doe',
-            email: 'john@example.com',
-            password: 'secret'
-        }).then(() => {
-            done()
-        }).catch(err => {
-            done(err)
-        })
-    })
-
-    it('Should return a list of users', (done) => {
-        User.all().then((users) => {
-            assert.equal(Array.isArray(users), true)
-            done()
-        }).catch(err => {
-            done(err)
-        })
-    })
-
-    it('Should fetch the first user', (done) => {
-        User.first().then(user => {
-            assert.equal('John Doe', user.name)
-            done()
-        }).catch(err => {
-            done(err)
-        })
-    })
-
-    it('Should Delete user by ID', (done) => {
-        User.delete(1)
-            .then(() => {
-                done()
-            }).catch(err => {
-                done(err)
-            })
-    })
-})
-
