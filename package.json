@@ -1,8 +1,7 @@
 {
   "name": "mevn-orm",
-  "version": "2.0.0-beta-1",
+  "version": "2.0.0-beta-2",
   "description": "simple ORM for express js",
-  "main": "index.js",
   "type": "commonjs",
   "scripts": {
     "test": "NODE_ENV=development mocha  --exit",
@@ -47,5 +46,6 @@
   "bugs": {
     "url": "https://github.com/StanleyMasinde/mevn-orm/issues"
   },
-  "homepage": "https://github.com/StanleyMasinde/mevn-orm#readme"
+  "homepage": "https://github.com/StanleyMasinde/mevn-orm#readme",
+  "main": "dist/index.js"
 }
