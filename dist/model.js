@@ -8,18 +8,42 @@ class Model {
         this.config = config;
         this.table = pluralize_1.default(this.name);
     }
+    /**
+     * The models table name
+     * eg Movie will automatically be movies
+     * @returns String
+     */
     static tableName() {
         return pluralize_1.default(this.name).toLowerCase();
     }
-    static all() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            try {
-                return yield connection_1.default.table(this.tableName()).select('*');
-            }
-            catch (error) {
-                throw new Error(error);
-            }
-        });
+    /**
+     * Get all rows from the database
+     *
+     * @returns Promise<>
+     */
+    static async all() {
+        try {
+            return await connection_1.default.table(this.tableName()).select('*');
+        }
+        catch (error) {
+            throw new Error(error);
+        }
+    }
+    /**
+     * Get the first record for the database
+     *
+     * @returns Promise
+     */
+    static async first() {
+        try {
+            return await connection_1.default
+                .table(this.tableName())
+                .select('*')
+                .first();
+        }
+        catch (error) {
+            throw new Error(error);
+        }
     }
 }
 exports.default = Model;
