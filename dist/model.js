@@ -45,5 +45,35 @@ class Model {
             throw new Error(error);
         }
     }
+    /**
+     * Find model by Id
+     * @param id
+     */
+    static async find(id) {
+        try {
+            return await connection_1.default
+                .table(this.tableName())
+                .where({ id })
+                .first();
+        }
+        catch (error) {
+            throw new Error(error);
+        }
+    }
+    /**
+     * Delete a model from the database
+     * @param id
+     */
+    static async delete(id) {
+        try {
+            return await connection_1.default
+                .table(this.tableName())
+                .where({ id })
+                .del();
+        }
+        catch (error) {
+            throw new Error(error);
+        }
+    }
 }
 exports.default = Model;

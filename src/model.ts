@@ -50,4 +50,34 @@ export default class Model {
 
         }
     }
+
+    /**
+     * Find model by Id
+     * @param id 
+     */
+    public static async find(id: number) {
+        try {
+            return await queryBuilder
+                .table(this.tableName())
+                .where({ id })
+                .first()
+        } catch (error) {
+            throw new Error(error)
+        }
+    }
+
+    /**
+     * Delete a model from the database
+     * @param id 
+     */
+    public static async delete(id: number) {
+        try {
+            return await queryBuilder
+                .table(this.tableName())
+                .where({ id })
+                .del()
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
 }

@@ -5,6 +5,7 @@
   "type": "commonjs",
   "scripts": {
     "test": "NODE_ENV=development mocha  --exit",
+    "init:db": "NODE_ENV=development node initDb",
     "build": "tsc",
     "migrate": "knex migrate:latest",
     "watch": "tsc --watch"

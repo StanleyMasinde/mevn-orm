@@ -22,4 +22,14 @@ export default class Model {
      * @returns Promise
      */
     static first(): Promise<any>;
+    /**
+     * Find model by Id
+     * @param id
+     */
+    static find(id: number): Promise<any>;
+    /**
+     * Delete a model from the database
+     * @param id
+     */
+    static delete(id: number): Promise<number>;
 }
