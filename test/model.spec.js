@@ -13,6 +13,21 @@ describe('Static model methods tests', () => {
         done()
     })
 
+    it('create()', (done) => {
+        Farmer
+            .create({
+                name: 'John Doe',
+                email: 'john@mail.com'
+            })
+            .then((res) => {
+                done()
+            })
+            .catch(err => {
+                done(err)
+            })
+
+    })
+
     it('all()', (done) => {
         Farmer.all().then(res => {
             expect(res).to.be.an('array')

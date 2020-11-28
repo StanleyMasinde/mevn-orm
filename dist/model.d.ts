@@ -1,9 +1,9 @@
 export default class Model {
-    config: any;
     table: String;
     name: any;
     static table: any;
-    constructor(config: any);
+    attributes: any;
+    constructor(attributes: any);
     /**
      * The models table name
      * eg Movie will automatically be movies
@@ -32,4 +32,9 @@ export default class Model {
      * @param id
      */
     static delete(id: number): Promise<number>;
+    /**
+     * Create a new Model
+     * @param attributes
+     */
+    static create(attributes?: any[]): Promise<number[]>;
 }

@@ -5,18 +5,14 @@ const { default: { development, production } } = require('./dist/config/knexfile
 
 async function initDatabase() {
     const DB = Knex(process.env.NODE_ENV === 'development' ? development : production)
-    await DB.schema.dropTableIfExists('Farmers')
-    await DB.schema.createTable('Farmers', (table) => {
+    await DB.schema.dropTableIfExists('farmers')
+    await DB.schema.createTable('farmers', (table) => {
         table.bigIncrements('id')
         table.string('name')
         table.string('email').unique()
     })
 
     await DB.table('Farmers').insert([
-        {
-            name: 'John Doe',
-            email: 'john@mail.com'
-        },
         {
             name: 'Jane Doe',
             email: 'jane@mail.com'

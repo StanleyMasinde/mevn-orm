@@ -4,8 +4,8 @@ const tslib_1 = require("tslib");
 const connection_1 = tslib_1.__importDefault(require("./connection"));
 const pluralize_1 = tslib_1.__importDefault(require("pluralize"));
 class Model {
-    constructor(config) {
-        this.config = config;
+    constructor(attributes) {
+        this.attributes = attributes;
         this.table = pluralize_1.default(this.name);
     }
     /**
@@ -70,6 +70,20 @@ class Model {
                 .table(this.tableName())
                 .where({ id })
                 .del();
+        }
+        catch (error) {
+            throw new Error(error);
+        }
+    }
+    /**
+     * Create a new Model
+     * @param attributes
+     */
+    static async create(attributes = []) {
+        try {
+            return await connection_1.default
+                .table(this.tableName())
+                .insert(attributes);
         }
         catch (error) {
             throw new Error(error);

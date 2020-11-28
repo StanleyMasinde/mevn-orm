@@ -2,12 +2,12 @@ import queryBuilder from './connection'
 import pluralize from 'pluralize'
 
 export default class Model {
-    config: any;
     table: String;
     name: any;
     static table: any;
-    constructor(config: any) {
-        this.config = config
+    attributes: any;
+    constructor(attributes: any) {
+        this.attributes = attributes
         this.table = pluralize(this.name)
     }
 
@@ -80,4 +80,27 @@ export default class Model {
             throw new Error(error);
         }
     }
+
+    /**
+     * Create a new Model
+     * @param attributes 
+     */
+    public static async create(attributes = []) {
+        try {
+            return await queryBuilder
+            .table(this.tableName())
+            .insert(attributes)
+        } catch (error) {
+            throw new Error(error)
+        }
+    }
+
+    /**
+     * INSTANCE METHODS
+     */
+
+
+     /**
+      * RELATIONSHIPS
+      */
 }
