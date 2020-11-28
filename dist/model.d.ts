@@ -10,6 +10,11 @@ export default class Model {
      * @returns String
      */
     static tableName(): any;
+    /**
+     * Get all rows from the database
+     *
+     * @returns Promise<>
+     */
     static all(): Promise<any[]>;
     /**
      * Get the first record for the database

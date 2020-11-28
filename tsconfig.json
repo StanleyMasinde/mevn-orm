@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
     "declaration": true,          
-    "target": "ES6",
+    "target": "ESNext",
     "module": "CommonJS",
     "outDir": "./dist",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "importHelpers": true
+    "importHelpers": true,
+    "moduleResolution": "Node"
   },
   "files": [
     "src/index.ts",

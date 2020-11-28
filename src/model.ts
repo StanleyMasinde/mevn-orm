@@ -11,10 +11,20 @@ export default class Model {
         this.table = pluralize(this.name)
     }
 
+    /**
+     * The models table name
+     * eg Movie will automatically be movies
+     * @returns String
+     */
     static tableName() {
         return pluralize(this.name).toLowerCase()
     }
 
+    /**
+     * Get all rows from the database
+     * 
+     * @returns Promise<>
+     */
     public static async all() {
         try {
             return await queryBuilder.table(this.tableName()).select('*')
