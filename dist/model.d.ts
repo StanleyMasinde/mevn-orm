@@ -4,6 +4,11 @@ export default class Model {
     static table: any;
     attributes: any;
     constructor(attributes: any);
+    /**
+     * The models table name
+     * eg Movie will automatically be movies
+     * @returns String
+     */
     static tableName(): any;
     static all(): Promise<any[]>;
     /**

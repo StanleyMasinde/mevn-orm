@@ -89,5 +89,19 @@ class Model {
             }
         });
     }
+    /**
+     * Create a new Model
+     * @param attributes
+     */
+    static async create(attributes = []) {
+        try {
+            return await connection_1.default
+                .table(this.tableName())
+                .insert(attributes);
+        }
+        catch (error) {
+            throw new Error(error);
+        }
+    }
 }
 exports.default = Model;
