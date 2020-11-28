@@ -1,0 +1,32 @@
+#!/bin/env node
+require('dotenv').config()
+const Knex = require('knex')
+const { default: { development, production } } = require('./dist/config/knexfile')
+
+async function initDatabase() {
+    const DB = Knex(process.env.NODE_ENV === 'development' ? development : production)
+    await DB.schema.dropTableIfExists('farmers')
+    await DB.schema.createTable('farmers', (table) => {
+        table.bigIncrements('id')
+        table.string('name')
+        table.string('email').unique()
+    })
+
+    await DB.table('Farmers').insert([
+        {
+            name: 'Jane Doe',
+            email: 'jane@mail.com'
+        },
+        {
+            name: 'Ashley Doe',
+            email: 'ashley@mail.com'
+        },
+        {
+            name: 'Alice Doe',
+            email: 'alice@mail.com'
+        }
+    ])
+
+    process.exit(0)
+}
+initDatabase()
