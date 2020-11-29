@@ -1,0 +1,11 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: 'cimg/node:14.14.0'
+    steps:
+      - checkout
+      - run: node --version
+      - run: npm i
+      - run: npm run init:db
+      - run: npm test
