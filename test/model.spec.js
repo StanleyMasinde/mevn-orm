@@ -59,6 +59,17 @@ describe('Static model methods tests', () => {
             })
     })
 
+    it('count()', (done) => {
+        Farmer
+            .count()
+            .then(res => {
+                done()
+            })
+            .catch(e => {
+                done(e)
+            })
+    })
+
     it('delete()', (done) => {
         Farmer.delete(2)
             .then(res => {

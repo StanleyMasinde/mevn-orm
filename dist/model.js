@@ -17,6 +17,19 @@ class Model {
         return pluralize_1.default(this.name).toLowerCase();
     }
     /**
+     * Get the Model count
+     */
+    static async count() {
+        try {
+            return await connection_1.default
+                .table(this.tableName())
+                .count();
+        }
+        catch (error) {
+            throw new Error(error);
+        }
+    }
+    /**
      * Get all rows from the database
      *
      * @returns Promise<>
