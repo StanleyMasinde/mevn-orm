@@ -21,6 +21,19 @@ export default class Model {
     }
 
     /**
+     * Get the Model count
+     */
+    public static async count() {
+        try {
+            return await queryBuilder
+                .table(this.tableName())
+                .count()
+        } catch (error) {
+            throw new Error(error)
+        }
+    }
+
+    /**
      * Get all rows from the database
      * 
      * @returns Promise<>
@@ -88,8 +101,8 @@ export default class Model {
     public static async create(attributes = []) {
         try {
             return await queryBuilder
-            .table(this.tableName())
-            .insert(attributes)
+                .table(this.tableName())
+                .insert(attributes)
         } catch (error) {
             throw new Error(error)
         }
@@ -100,7 +113,7 @@ export default class Model {
      */
 
 
-     /**
-      * RELATIONSHIPS
-      */
+    /**
+     * RELATIONSHIPS
+     */
 }

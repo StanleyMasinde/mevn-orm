@@ -11,6 +11,12 @@ export default class Model {
      */
     static tableName(): any;
     /**
+     * Get the Model count
+     */
+    static count(): Promise<{
+        [k: string]: string | number;
+    }[]>;
+    /**
      * Get all rows from the database
      *
      * @returns Promise<>
