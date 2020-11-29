@@ -3,18 +3,24 @@
 ```javascript
    const { Model } = require('mevn-orm')
 
-   class User extends Model {
-       
-   }
+   class User extends Model {}
 
 let columns = {
     name: 'John Doe',
     email: 'john@example.com',
-    password: secrer // remember to hash the password
+    password: secret // remember to hash the password
 }
-   new User().save(columns).then(created => {}).catch(err => {})
-```
+User()
+   .create(columns)
+   .then(created => {
+      // Do something after the creation
+   })
+   .catch(err => {
+      // Handle the error
+   })
 
-* By default the table for the user class is users,  Post Class posts etc to override this use `new User('table_name')`
+// With aync await
+const userId = await User.create(columns)
+```
 
 _Still under development hence not ready for production_
