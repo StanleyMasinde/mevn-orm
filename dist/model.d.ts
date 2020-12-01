@@ -21,7 +21,7 @@ export default class Model {
      *
      * @returns Promise<>
      */
-    static all(): Promise<any[]>;
+    static all(): Promise<Error | any[]>;
     /**
      * Get the first record for the database
      *
@@ -37,10 +37,10 @@ export default class Model {
      * Delete a model from the database
      * @param id
      */
-    static delete(id: number): Promise<number>;
+    static delete(id: number): Promise<number | Error>;
     /**
      * Create a new Model
      * @param attributes
      */
-    static create(attributes?: any[]): Promise<number[]>;
+    static create(attributes?: any[]): Promise<Error | number[]>;
 }

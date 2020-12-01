@@ -39,7 +39,7 @@ class Model {
             return await connection_1.default.table(this.tableName()).select('*');
         }
         catch (error) {
-            throw new Error(error);
+            return new Error(error);
         }
     }
     /**
@@ -55,7 +55,7 @@ class Model {
                 .first();
         }
         catch (error) {
-            throw new Error(error);
+            return new Error(error);
         }
     }
     /**
@@ -70,7 +70,7 @@ class Model {
                 .first();
         }
         catch (error) {
-            throw new Error(error);
+            return new Error(error);
         }
     }
     /**
@@ -85,7 +85,7 @@ class Model {
                 .del();
         }
         catch (error) {
-            throw new Error(error);
+            return new Error(error);
         }
     }
     /**
@@ -99,7 +99,7 @@ class Model {
                 .insert(attributes);
         }
         catch (error) {
-            throw new Error(error);
+            return new Error(error);
         }
     }
 }
