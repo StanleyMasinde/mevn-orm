@@ -26,7 +26,7 @@ class Model {
                 .count();
         }
         catch (error) {
-            throw new Error(error);
+            throw error;
         }
     }
     /**
@@ -39,7 +39,11 @@ class Model {
             return await connection_1.default.table(this.tableName()).select('*');
         }
         catch (error) {
+<<<<<<< HEAD
+            throw error;
+=======
             return new Error(error);
+>>>>>>> master
         }
     }
     /**
@@ -55,7 +59,11 @@ class Model {
                 .first();
         }
         catch (error) {
+<<<<<<< HEAD
+            throw error;
+=======
             return new Error(error);
+>>>>>>> master
         }
     }
     /**
@@ -70,7 +78,11 @@ class Model {
                 .first();
         }
         catch (error) {
+<<<<<<< HEAD
+            throw error;
+=======
             return new Error(error);
+>>>>>>> master
         }
     }
     /**
@@ -85,7 +97,11 @@ class Model {
                 .del();
         }
         catch (error) {
+<<<<<<< HEAD
+            throw error;
+=======
             return new Error(error);
+>>>>>>> master
         }
     }
     /**
@@ -99,7 +115,11 @@ class Model {
                 .insert(attributes);
         }
         catch (error) {
+<<<<<<< HEAD
+            throw error;
+=======
             return new Error(error);
+>>>>>>> master
         }
     }
 }
