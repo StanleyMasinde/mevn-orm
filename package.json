@@ -11,6 +11,9 @@
     "migrate": "knex migrate:latest",
     "watch": "tsc --watch"
   },
+  "peerDependencies": {
+    "knex": "0.21.6"
+  },
   "keywords": [
     "ORM",
     "express",

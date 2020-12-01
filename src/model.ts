@@ -42,7 +42,7 @@ export default class Model {
         try {
             return await queryBuilder.table(this.tableName()).select('*')
         } catch (error) {
-            throw new Error(error);
+            return new Error(error);
         }
 
     }
@@ -59,7 +59,7 @@ export default class Model {
                 .select('*')
                 .first()
         } catch (error) {
-            throw new Error(error);
+            return new Error(error);
 
         }
     }
@@ -75,7 +75,7 @@ export default class Model {
                 .where({ id })
                 .first()
         } catch (error) {
-            throw new Error(error)
+            return new Error(error)
         }
     }
 
@@ -90,7 +90,7 @@ export default class Model {
                 .where({ id })
                 .del()
         } catch (error) {
-            throw new Error(error);
+            return new Error(error);
         }
     }
 
@@ -104,7 +104,7 @@ export default class Model {
                 .table(this.tableName())
                 .insert(attributes)
         } catch (error) {
-            throw new Error(error)
+            return new Error(error)
         }
     }
 
