@@ -7,5 +7,4 @@ jobs:
       - checkout
       - run: node --version
       - run: npm i
-      - run: npm run init:db
       - run: npm test

@@ -4,6 +4,7 @@
   "description": "simple ORM for express js",
   "type": "commonjs",
   "scripts": {
+    "pretest": "NODE_ENV=development node initDb",
     "test": "NODE_ENV=development mocha  --exit",
     "init:db": "NODE_ENV=development node initDb",
     "build": "tsc",
