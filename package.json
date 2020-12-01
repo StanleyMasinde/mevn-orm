@@ -20,6 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^8.2.0",
+    "import-cwd": "^3.0.0",
     "knex": "^0.21.12",
     "mysql": "^2.18.1",
     "pluralize": "^8.0.0",
