@@ -83,7 +83,6 @@ export default class Model {
             // in the form of model_id
             .where(fk, pk)
             .first()
-            .toSQL()
     }
 
     /**
@@ -98,9 +97,7 @@ export default class Model {
         const pk = primaryKey || this.id
         return queryBuilder
             .table(pluralize(related.toLowerCase()))
-            // in the form of model_id
             .where(fk, pk)
-            .toSQL()
     }
 
     /**
@@ -117,7 +114,6 @@ export default class Model {
             .table(this.table)
             // in the form of model_id
             .where(fk, pk)
-            .toSQL()
     }
 
     /**

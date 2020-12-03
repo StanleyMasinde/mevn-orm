@@ -64,8 +64,7 @@ class Model {
             .table(pluralize_1.default(related.toLowerCase()))
             // in the form of model_id
             .where(fk, pk)
-            .first()
-            .toSQL();
+            .first();
     }
     /**
      * Define a HasMany relationship
@@ -79,9 +78,7 @@ class Model {
         const pk = primaryKey || this.id;
         return connection_1.default
             .table(pluralize_1.default(related.toLowerCase()))
-            // in the form of model_id
-            .where(fk, pk)
-            .toSQL();
+            .where(fk, pk);
     }
     /**
      * Define a reverse has one relationship
@@ -96,8 +93,7 @@ class Model {
         return connection_1.default
             .table(this.table)
             // in the form of model_id
-            .where(fk, pk)
-            .toSQL();
+            .where(fk, pk);
     }
     /**
      * Define a Many to many relationship relationship

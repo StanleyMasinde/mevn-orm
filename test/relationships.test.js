@@ -10,8 +10,8 @@ class Farmer extends Model {
      * Create a crop relationship
      * @returns relationship
      */
-    crops() {
-        return this.hasMany('Crop')
+    farms() {
+        return this.hasMany('Farm')
     }
 
     /**
@@ -22,7 +22,23 @@ class Farmer extends Model {
         return this.hasOne('Profile')
     }
 }
-
+// The first farmer in the database
 const farmer = new Farmer(1)
-console.log(farmer.crops())
-console.log(farmer.profile())
+
+describe('Model relationships', (done) => {
+    it('hasOne()', (done) => {
+        farmer.profile().then(p => {
+            done()
+        }).catch(e => {
+            done(e)
+        })
+    })
+
+    it('hasMany()', (done) => {
+        farmer.farms().then(p => {
+            done()
+        }).catch(e => {
+            done(e)
+        })
+    })
+})

@@ -6,10 +6,23 @@ const { development, production } = require('./knexfile')
 async function initDatabase() {
     const DB = Knex(process.env.NODE_ENV === 'development' ? development : production)
     await DB.schema.dropTableIfExists('farmers')
+    await DB.schema.dropTableIfExists('farms')
+    await DB.schema.dropTableIfExists('profiles')
     await DB.schema.createTable('farmers', (table) => {
         table.bigIncrements('id')
         table.string('name')
         table.string('email').unique()
+    })
+    await DB.schema.createTable('farms', (table) => {
+        table.bigIncrements('id')
+        table.bigInteger('farmer_id')
+        table.string('name')
+    })
+
+    await DB.schema.createTable('profiles', (table) => {
+        table.bigIncrements('id')
+        table.bigInteger('farmer_id')
+        table.string('name')
     })
 
     await DB.table('Farmers').insert([
@@ -24,6 +37,28 @@ async function initDatabase() {
         {
             name: 'Alice Doe',
             email: 'alice@mail.com'
+        }
+    ])
+
+    await DB.table('farms').insert([
+        {
+            farmer_id: 1,
+            name: 'Awesome Farm'
+        },
+        {
+            farmer_id: 1,
+            name: 'Awesome Farm two'
+        },
+        {
+            farmer_id: 1,
+            name: 'Awesome Farm three'
+        }
+    ])
+
+    await DB.table('profiles').insert([
+        {
+            farmer_id: 1,
+            name: 'Profile for farmer one'
         }
     ])
 

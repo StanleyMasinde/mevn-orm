@@ -32,21 +32,45 @@ export default class Model {
      * @param {String} primaryKey
      * @param {String} foreignKey
      */
-    hasOne(related: string, primaryKey?: number | any, foreignKey?: number | any): import("knex").Sql;
+    hasOne(related: string, primaryKey?: number | any, foreignKey?: number | any): import("knex").QueryBuilder<unknown, {
+        _base: unknown;
+        _hasSelection: false;
+        _keys: never;
+        _aliases: {};
+        _single: false;
+        _intersectProps: {};
+        _unionProps: undefined;
+    }>;
     /**
      * Define a HasMany relationship
      * @param {String} related
      * @param {String} primaryKey
      * @param {String} foreignKey
      */
-    hasMany(related: string, primaryKey?: string, foreignKey?: string): import("knex").Sql;
+    hasMany(related: string, primaryKey?: string, foreignKey?: string): import("knex").QueryBuilder<unknown, {
+        _base: unknown;
+        _hasSelection: false;
+        _keys: never;
+        _aliases: {};
+        _single: false;
+        _intersectProps: {};
+        _unionProps: never;
+    }[]>;
     /**
      * Define a reverse has one relationship
      * @param {String} related
      * @param {String} primaryKey
      * @param {String} foreignKey
      */
-    belongsTo(related: string, primaryKey?: string, foreignKey?: string): import("knex").Sql;
+    belongsTo(related: string, primaryKey?: string, foreignKey?: string): import("knex").QueryBuilder<unknown, {
+        _base: unknown;
+        _hasSelection: false;
+        _keys: never;
+        _aliases: {};
+        _single: false;
+        _intersectProps: {};
+        _unionProps: never;
+    }[]>;
     /**
      * Define a Many to many relationship relationship
      * @param {String} related
