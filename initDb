@@ -1,7 +1,7 @@
 #!/bin/env node
 require('dotenv').config()
 const Knex = require('knex')
-const { default: { development, production } } = require('./dist/config/knexfile')
+const { development, production } = require('./knexfile')
 
 async function initDatabase() {
     const DB = Knex(process.env.NODE_ENV === 'development' ? development : production)
