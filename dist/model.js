@@ -9,10 +9,29 @@ class Model {
      * @param id the database ID of the model
      */
     constructor(id = 0) {
+        this.collection = {};
+        this.hidden = [];
         this.id = id;
         this.modelName = this.constructor.name.toLowerCase();
         this.table = pluralize_1.default(this.modelName);
         this.foreignKey = `${this.modelName}_id`;
+        this.fetch().then((c) => {
+            this.currentModel = c;
+        });
+    }
+    /**
+     * Fetch the current model from the database
+     */
+    async fetch() {
+        try {
+            return connection_1.default
+                .table(this.table)
+                .where('id', this.id)
+                .first();
+        }
+        catch (error) {
+            throw new Error(error).stack;
+        }
     }
     /**
      * Delete the current model
@@ -51,16 +70,28 @@ class Model {
      * -----------------------------------------------
      */
     /**
+     * Relationships to load this the current model
+     * @param {Array} relations
+     */
+    load(relations = []) {
+        this.collection[this.modelName] = this.currentModel;
+        relations.forEach(function (relation) {
+            const rows = this[relation]();
+            this.collection[this.modelName][relation] = rows;
+        }, this);
+        return this.collection[this.modelName];
+    }
+    /**
      * Define a HasOne relationship
      * @param {String} related
      * @param {String} primaryKey
      * @param {String} foreignKey
      */
-    hasOne(related, primaryKey = null, foreignKey = null) {
+    async hasOne(related, primaryKey = null, foreignKey = null) {
         // I should get a query to get related records
         const fk = foreignKey || this.foreignKey;
         const pk = primaryKey || this.id;
-        return connection_1.default
+        return await connection_1.default
             .table(pluralize_1.default(related.toLowerCase()))
             // in the form of model_id
             .where(fk, pk)
@@ -72,13 +103,14 @@ class Model {
      * @param {String} primaryKey
      * @param {String} foreignKey
      */
-    hasMany(related, primaryKey = null, foreignKey = null) {
+    async hasMany(related, primaryKey = null, foreignKey = null) {
         // I should get a query to get related records
         const fk = foreignKey || this.foreignKey;
         const pk = primaryKey || this.id;
-        return connection_1.default
+        return await connection_1.default
             .table(pluralize_1.default(related.toLowerCase()))
-            .where(fk, pk);
+            .where(fk, pk)
+            .select('*');
     }
     /**
      * Define a reverse has one relationship

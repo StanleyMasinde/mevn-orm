@@ -28,6 +28,7 @@ const farmer = new Farmer(1)
 describe('Model relationships', (done) => {
     it('hasOne()', (done) => {
         farmer.profile().then(p => {
+            expect(p).to.be.an('Object')
             done()
         }).catch(e => {
             done(e)
@@ -35,10 +36,16 @@ describe('Model relationships', (done) => {
     })
 
     it('hasMany()', (done) => {
-        farmer.farms().then(p => {
+        farmer.farms().then(farms => {
+            expect(farms).to.be.an('Array')
             done()
         }).catch(e => {
             done(e)
         })
+    })
+
+    it('load()', (done) => {
+        const f = farmer.load(['farms', 'profile'])
+        done()
     })
 })

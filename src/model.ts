@@ -20,15 +20,45 @@ export default class Model {
     // The default foreign key in the form of model_id
     foreignKey: string;
 
+    // Values to be hidden in collections
+    hidden: [];
+
+    // return a collection
+    collection: {};
+
+    // The current Model
+    currentModel: Promise<any[]>;
+    
+
     /**
      * New Model instance
      * @param id the database ID of the model
      */
     constructor(id = 0) {
+        this.collection = {}
+        this.hidden = []
         this.id = id
         this.modelName = this.constructor.name.toLowerCase()
         this.table = pluralize(this.modelName)
         this.foreignKey = `${this.modelName}_id`
+
+        this.fetch().then((c) => {
+            this.currentModel = c
+        })
+    }
+
+    /**
+     * Fetch the current model from the database
+     */
+    async fetch() {
+        try {
+            return queryBuilder
+                .table(this.table)
+                .where('id', this.id)
+                .first()
+        } catch (error) {
+            throw new Error(error).stack;
+        }
     }
 
     /**
@@ -69,16 +99,30 @@ export default class Model {
      */
 
     /**
+     * Relationships to load this the current model
+     * @param {Array} relations 
+     */
+    load(relations: Array<any> = []) {
+        this.collection[this.modelName] = this.currentModel
+        relations.forEach(function (relation: string | number) {
+            const rows = this[relation]()
+            this.collection[this.modelName][relation] = rows
+        }, this)
+        return this.collection[this.modelName]
+    }
+
+    /**
      * Define a HasOne relationship
      * @param {String} related 
      * @param {String} primaryKey 
      * @param {String} foreignKey 
      */
-    hasOne(related: string, primaryKey: number | any = null, foreignKey: number | any = null) {
+    async hasOne(related: string, primaryKey: number | any = null, foreignKey: number | any = null) {
         // I should get a query to get related records
         const fk = foreignKey || this.foreignKey
         const pk = primaryKey || this.id
-        return queryBuilder
+
+        return await queryBuilder
             .table(pluralize(related.toLowerCase()))
             // in the form of model_id
             .where(fk, pk)
@@ -91,13 +135,14 @@ export default class Model {
      * @param {String} primaryKey 
      * @param {String} foreignKey 
      */
-    hasMany(related: string, primaryKey: string = null, foreignKey: string = null) {
+    async hasMany(related: string, primaryKey: string = null, foreignKey: string = null) {
         // I should get a query to get related records
         const fk = foreignKey || this.foreignKey
         const pk = primaryKey || this.id
-        return queryBuilder
+        return await queryBuilder
             .table(pluralize(related.toLowerCase()))
             .where(fk, pk)
+            .select('*')
     }
 
     /**
