@@ -21,31 +21,31 @@ class Farmer extends Model {
     profile() {
         return this.hasOne('Profile')
     }
+
+    /**
+     * A farmer can have many crops
+     * 
+     */
+    crops() {
+        return this.belongsToMany('Crop')
+    }
 }
 // The first farmer in the database
 const farmer = new Farmer(1)
 
 describe('Model relationships', (done) => {
     it('hasOne()', (done) => {
-        farmer.profile().then(p => {
-            expect(p).to.be.an('Object')
-            done()
-        }).catch(e => {
-            done(e)
-        })
+        farmer.profile()
+        done()
     })
 
     it('hasMany()', (done) => {
-        farmer.farms().then(farms => {
-            expect(farms).to.be.an('Array')
-            done()
-        }).catch(e => {
-            done(e)
-        })
+        farmer.farms()
+        done()
     })
 
     it('load()', (done) => {
-        const f = farmer.load(['farms', 'profile'])
+      farmer.load(['farms', 'profile'])
         done()
     })
 })

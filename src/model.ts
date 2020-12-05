@@ -28,7 +28,7 @@ export default class Model {
 
     // The current Model
     currentModel: Promise<any[]>;
-    
+
 
     /**
      * New Model instance
@@ -127,6 +127,12 @@ export default class Model {
             // in the form of model_id
             .where(fk, pk)
             .first()
+            .asCallback((err: any, rows: any) => {
+                if (err) {
+                    throw err
+                }
+                return rows
+            })
     }
 
     /**
@@ -139,10 +145,17 @@ export default class Model {
         // I should get a query to get related records
         const fk = foreignKey || this.foreignKey
         const pk = primaryKey || this.id
+
         return await queryBuilder
             .table(pluralize(related.toLowerCase()))
             .where(fk, pk)
             .select('*')
+            .asCallback((err: any, rows: any) => {
+                if (err) {
+                    throw err
+                }
+                return rows
+            })
     }
 
     /**
@@ -151,23 +164,46 @@ export default class Model {
      * @param {String} primaryKey 
      * @param {String} foreignKey 
      */
-    belongsTo(related: string, primaryKey: string = null, foreignKey: string = null) {
+    async belongsTo(related: string, primaryKey: string = null, foreignKey: string = null) {
         // I should get a query to get related records
         const fk = foreignKey || this.foreignKey
         const pk = primaryKey || this.id
-        return queryBuilder
+        return await queryBuilder
             .table(this.table)
             // in the form of model_id
             .where(fk, pk)
+            .asCallback((err: any, rows: any) => {
+                if (err) {
+                    throw err
+                }
+                return rows
+            })
     }
 
     /**
      * Define a Many to many relationship relationship
      * @param {String} related 
-     * @param {String} primaryKey 
-     * @param {String} foreignKey 
      */
-    BelongsToMany(related: string, primaryKey: string = null, foreignKey: string = null) { }
+    belongsToMany(related: string, primaryKey: string = null, foreignKey: string = null) {
+        // look for a pivot table
+        // eg Farmer has many Crops crop_farmer is the table
+        // We'll use class names ['This Class, Related Class'].sort
+        const relatedName = related.toLowerCase()
+        const pivotTable = [this.modelName, relatedName].sort().join('_')
+        const firstCol = `${this.modelName}_id`
+        const secondCol = `${relatedName}_id`
+
+        // TODO Honestly I believe there is a better way
+        // Gets the related IDs from the pivot table
+        const firstQuery = queryBuilder
+            .table(pivotTable)
+            .where(firstCol, this.id)
+            .select(secondCol)
+            .toQuery()
+
+        // Get the records for the other table
+        return firstQuery
+    }
 
     /**
      * The models table name
