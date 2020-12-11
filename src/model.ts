@@ -242,6 +242,36 @@ export default class Model {
     }
 
     /**
+     * Get rows that match some conditions
+     * @param {Object} conditions 
+     */
+    public static async where(conditions: object = {}) {
+        try {
+            return await queryBuilder
+            .table(this.tableName())
+            .where(conditions)
+            .select('*')
+        } catch (error) {
+            throw error
+        }
+    }
+
+    /**
+     * Get rows that match some conditions
+     * @param {Object} conditions 
+     */
+    public static async whereFirst(conditions: object = {}) {
+        try {
+            return await queryBuilder
+            .table(this.tableName())
+            .where(conditions)
+            .first()
+        } catch (error) {
+            throw error
+        }
+    }
+
+    /**
      * Get the first record for the database
      * 
      * @returns Promise

@@ -80,4 +80,28 @@ describe('Static model methods tests', () => {
                 done(e)
             })
     })
+
+    it('where()', (done) => {
+        Farmer
+        .where({name: 'John Doe'})
+        .then(f => {
+            expect(f).to.be.an('Array')
+            done()
+        })
+        .catch(e => {
+            done(e)
+        })
+    })
+
+    it('whereFirst()', (done) => {
+        Farmer
+        .whereFirst({name: 'John Doe'})
+        .then(f => {
+            expect(f).to.be.an('Object')
+            done()
+        })
+        .catch(e => {
+            done(e)
+        })
+    })
 })
