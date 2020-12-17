@@ -1,6 +1,6 @@
 {
   "name": "mevn-orm",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "simple ORM for express js",
   "type": "commonjs",
   "scripts": {
@@ -13,7 +13,7 @@
     "watch": "tsc --watch"
   },
   "peerDependencies": {
-    "knex": "0.21.6"
+    "knex": "@latest"
   },
   "keywords": [
     "ORM",

@@ -1,8 +1,8 @@
 import dotenv from 'dotenv'
 dotenv.config()
 import Model from './model'
-import User from './user'
+import DB from './connection'
 
 export = {
-    Model, User
+    Model, DB
 }
