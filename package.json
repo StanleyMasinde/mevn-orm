@@ -4,7 +4,7 @@
   "description": "simple ORM for express js",
   "type": "commonjs",
   "scripts": {
-    "postinstall": "tsc",
+    "prepare": "tsc",
     "pretest": "NODE_ENV=development node initDb && tsc",
     "test": "NODE_ENV=development mocha  --exit",
     "init:db": "NODE_ENV=development node initDb",
@@ -13,7 +13,7 @@
     "watch": "tsc --watch"
   },
   "peerDependencies": {
-    "knex": "@latest"
+    "knex": " 0.21.14"
   },
   "keywords": [
     "ORM",
