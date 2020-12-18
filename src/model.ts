@@ -29,6 +29,10 @@ export default class Model {
     // The current Model
     currentModel: Promise<any[]>;
 
+    // The current models attributes 
+    // Same as above but this is used during instanciations
+    attributes: Promise<any>;
+
 
     /**
      * New Model instance
@@ -41,6 +45,7 @@ export default class Model {
         this.modelName = this.constructor.name.toLowerCase()
         this.table = pluralize(this.modelName)
         this.foreignKey = `${this.modelName}_id`
+        this.attributes = this.fetch()
 
         this.fetch().then((c) => {
             this.currentModel = c
