@@ -24,7 +24,7 @@ export default class Model {
     hidden: [];
 
     // return a collection
-    collection: {};
+    collection: any;
 
     // The current Model
     currentModel: Promise<any[]>;
@@ -33,19 +33,26 @@ export default class Model {
     // Same as above but this is used during instanciations
     attributes: Promise<any>;
 
+    static collection = []
+
 
     /**
      * New Model instance
      * @param id the database ID of the model
      */
-    constructor(id = 0) {
+    constructor(id = 0, attributes: { [x: string]: any; } = {}) {
         this.collection = {}
         this.hidden = []
         this.id = id
         this.modelName = this.constructor.name.toLowerCase()
         this.table = pluralize(this.modelName)
         this.foreignKey = `${this.modelName}_id`
-        this.attributes = this.fetch()
+        
+        for (const a in attributes) {
+            if (Object.prototype.hasOwnProperty.call(attributes, a)) {
+                this[a] = attributes[a]
+            }
+        }
 
         this.fetch().then((c) => {
             this.currentModel = c
@@ -210,6 +217,23 @@ export default class Model {
         return firstQuery
     }
 
+     
+     /**
+      * ========================================================================
+      *      STATIC METHODS
+      * ========================================================================
+      */
+     
+     /**
+      * Create a collection to return to the user
+      * @param { String| Array } elements 
+      * @returns Array()
+      */
+    private static collect(elements: string | Array<any> = '') {
+        console.log(this.collection);
+        
+        this.collection.push(elements)
+    }
     /**
      * The models table name
      * eg Movie will automatically be movies
@@ -299,10 +323,11 @@ export default class Model {
      */
     public static async find(id: number) {
         try {
-            return await queryBuilder
+            const m = await queryBuilder
                 .table(this.tableName())
                 .where({ id })
                 .first()
+            return new this(id, m)
         } catch (error) {
             throw error
         }
@@ -331,18 +356,10 @@ export default class Model {
         try {
             return await queryBuilder
                 .table(this.tableName())
+                .returning('*')
                 .insert(attributes)
         } catch (error) {
             throw error
         }
     }
-
-    /**
-     * INSTANCE METHODS
-     */
-
-
-    /**
-     * RELATIONSHIPS
-     */
 }

@@ -12,6 +12,7 @@ async function initDatabase() {
         table.bigIncrements('id')
         table.string('name')
         table.string('email').unique()
+        table.string('password')
     })
     await DB.schema.createTable('farms', (table) => {
         table.bigIncrements('id')
@@ -28,15 +29,18 @@ async function initDatabase() {
     await DB.table('Farmers').insert([
         {
             name: 'Jane Doe',
-            email: 'jane@mail.com'
+            email: 'jane@mail.com',
+            password: 'pasword'
         },
         {
             name: 'Ashley Doe',
-            email: 'ashley@mail.com'
+            email: 'ashley@mail.com',
+            password: 'pasword'
         },
         {
             name: 'Alice Doe',
-            email: 'alice@mail.com'
+            email: 'alice@mail.com',
+            password: 'pasword'
         }
     ])
 
