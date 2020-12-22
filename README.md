@@ -1,4 +1,7 @@
 # Mevn-orm
+![npm](https://img.shields.io/npm/v/mevn-orm?style=for-the-badge)
+[![GitHub license](https://img.shields.io/github/license/stanleymasinde/mevn-orm?style=for-the-badge)](https://github.com/StanleyMasinde/mevn-orm/blob/master/LICENSE)
+![GitHub issues](https://img.shields.io/github/issues/stanleymasinde/mevn-orm?style=for-the-badge)
 
 ```javascript
    const { Model } = require('mevn-orm')
