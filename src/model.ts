@@ -356,7 +356,6 @@ export default class Model {
         try {
             return await queryBuilder
                 .table(this.tableName())
-                .returning('*')
                 .insert(attributes)
         } catch (error) {
             throw error
