@@ -29,23 +29,49 @@ class Farmer extends Model {
     crops() {
         return this.belongsToMany('Crop')
     }
+
+    /**
+     * A farmer has many articles
+     */
+    articles() {
+        return this.morphMany('Article', 'postable')
+    }
+
+    /**
+     * A farmer has one article
+     * 
+     */
+    article() {
+        return this.morphOne('Article', 'postable')
+    }
 }
 // The first farmer in the database
 const farmer = new Farmer(1)
 
-describe('Model relationships', (done) => {
-    it('hasOne()', (done) => {
-        farmer.profile()
-        done()
+describe('Model relationships', async () => {
+    it('HasOne()', async () => {
+        const profile = await farmer.profile()
+        expect(profile.farmer_id).equals(1)
     })
 
-    it('hasMany()', (done) => {
-        farmer.farms()
-        done()
+    it('hasMany()', async () => {
+        const farms = await farmer.farms()
+        expect(farms).to.be.an('Array')
     })
 
-    it('load()', (done) => {
-      farmer.load(['farms', 'profile'])
-        done()
+    it('load()', () => {
+        const model = farmer.load(['farms', 'profile']).toArray()
+        expect(model).to.have.haveOwnProperty('farms')
+        expect(model).to.have.haveOwnProperty('profile')
+    })
+
+    it('morphOne()', async () => {
+        const articles = await farmer.articles()
+        expect(articles).to.be.an('Array')
+    })
+
+    it('morphMany()', async () => {
+        const articles = await farmer.article()
+        expect(articles).to.be.an('Object')
     })
 })

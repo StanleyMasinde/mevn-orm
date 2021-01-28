@@ -8,6 +8,7 @@ async function initDatabase() {
     await DB.schema.dropTableIfExists('farmers')
     await DB.schema.dropTableIfExists('farms')
     await DB.schema.dropTableIfExists('profiles')
+    await DB.schema.dropTableIfExists('articles')
     await DB.schema.createTable('farmers', (table) => {
         table.bigIncrements('id')
         table.string('name')
@@ -24,6 +25,14 @@ async function initDatabase() {
         table.bigIncrements('id')
         table.bigInteger('farmer_id')
         table.string('name')
+    })
+
+    await DB.schema.createTable('articles', (table) => {
+        table.bigIncrements('id')
+        table.string('title')
+        table.text('body')
+        table.bigInteger('postable_id')
+        table.string('postable_type')
     })
 
     await DB.table('Farmers').insert([
@@ -63,6 +72,15 @@ async function initDatabase() {
         {
             farmer_id: 1,
             name: 'Profile for farmer one'
+        }
+    ])
+
+    await DB.table('articles').insert([
+        {
+            title: 'Awesome Post',
+            body: 'fffgjdfjdbdb something #1',
+            postable_id: 1,
+            postable_type: 'Farmer'
         }
     ])
 
