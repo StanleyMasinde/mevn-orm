@@ -202,7 +202,7 @@ class Model {
                 .table(this.tableName())
                 .select('*')
                 .first()
-                return new this(record.id, record)
+            return new this(record.id, record)
         } catch (error) {
             throw error
         }
@@ -218,7 +218,10 @@ class Model {
                 .table(this.tableName())
                 .where({ id })
                 .first()
-            return new this(id, m)
+            if (m) {
+                return new this(id, m);
+            }
+            return null
         } catch (error) {
             throw error
         }

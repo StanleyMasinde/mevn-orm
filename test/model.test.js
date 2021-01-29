@@ -58,6 +58,17 @@ describe('Static model methods tests', () => {
             })
     })
 
+    it('find() Should null', (done) => {
+        Farmer.find(100)
+            .then(res => {
+                expect(res).equals(null)
+                done()
+            })
+            .catch(e => {
+                done(e)
+            })
+    })
+
     it('count()', (done) => {
         Farmer
             .count()
