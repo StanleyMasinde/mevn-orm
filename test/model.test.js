@@ -1,6 +1,5 @@
 const { expect } = require('chai')
 const { Model } = require('../dist/index')
-const { development, production } = require('../knexfile')
 
 /**
  * Create a Farmer class
