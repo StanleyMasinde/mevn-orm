@@ -12,106 +12,57 @@ describe('Static model methods tests', () => {
         done()
     })
 
-    it('create()', (done) => {
-        Farmer
-            .create({
-                name: 'John Doe',
-                email: 'john@mail.com'
-            })
-            .then((res) => {
-                done()
-            })
-            .catch(err => {
-                done(err)
-            })
-
-    })
-
-    it('all()', (done) => {
-        Farmer.all().then(res => {
-            expect(res).to.be.an('array')
-            done()
-        }).catch(err => {
-            done(err)
+    it('create()', async () => {
+        const farmer = await Farmer.create({
+            name: 'John Doe',
+            email: 'john@mail.com'
         })
+        expect(farmer).to.be.an('Object')
+        expect(farmer).to.haveOwnProperty('name', 'John Doe')
+        expect(farmer).to.haveOwnProperty('email', 'john@mail.com')
+    })
+
+    it('all()', async () => {
+        const res = await Farmer.all()
+        expect(res).to.be.an('array')
+    })
+
+    it('first()', async () => {
+        const res = await Farmer.first()
+        expect(res).to.be.an('object')
 
     })
 
-    it('first()', (done) => {
-        Farmer.first().then(res => {
-            expect(res).to.be.an('object')
-            done()
-        }).catch(err => {
-            done(err)
-        })
-
+    it('find()', async () => {
+        const res = await Farmer.find(1)
+        expect(res).to.be.an('object')
     })
 
-    it('find()', (done) => {
-        Farmer.find(1)
-            .then(res => {
-                expect(res).to.be.an('object')
-                done()
-            })
-            .catch(e => {
-                done(e)
-            })
+    it('find() Should null', async () => {
+        const res = await Farmer.find(100)
+        expect(res).equals(null)
     })
 
-    it('find() Should null', (done) => {
-        Farmer.find(100)
-            .then(res => {
-                expect(res).equals(null)
-                done()
-            })
-            .catch(e => {
-                done(e)
-            })
+    it('count()', async () => {
+        const count = await Farmer.count()
     })
 
-    it('count()', (done) => {
-        Farmer
-            .count()
-            .then(res => {
-                done()
-            })
-            .catch(e => {
-                done(e)
-            })
+    it('delete()', async () => {
+        const res = await Farmer.delete(2)
+        expect(res).equals(1)
     })
 
-    it('delete()', (done) => {
-        Farmer.delete(2)
-            .then(res => {
-                expect(res).equals(1)
-                done()
-            })
-            .catch(e => {
-                done(e)
-            })
+    it('where().get()', async () => {
+        const f = await Farmer
+            .where({ name: 'John Doe' })
+            .get()
+        expect(f).to.be.an('Array')
     })
 
-    it('where()', (done) => {
-        Farmer
-        .where({name: 'John Doe'})
-        .then(f => {
-            expect(f).to.be.an('Array')
-            done()
-        })
-        .catch(e => {
-            done(e)
-        })
-    })
-
-    it('whereFirst()', (done) => {
-        Farmer
-        .whereFirst({name: 'John Doe'})
-        .then(f => {
-            expect(f).to.be.an('Object')
-            done()
-        })
-        .catch(e => {
-            done(e)
-        })
+    it('where().first()', async () => {
+        const f = await Farmer
+            .where({ name: 'John Doe' })
+            .first()
+        expect(f).to.be.an('Object')
     })
 })

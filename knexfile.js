@@ -12,7 +12,7 @@ module.exports = {
   },
 
   staging: {
-    client: process.env.DB_CLIENT || "mysql",
+    client: process.env.DB_CLIENT || "mysql2",
     connection: {
       database: process.env.DB_DATABASE || 'my_db',
       user: process.env.DB_USER || "username",
@@ -28,7 +28,7 @@ module.exports = {
   },
 
   production: {
-    client: process.env.DB_CLIENT || "mysql",
+    client: process.env.DB_CLIENT || "mysql2",
     connection: {
       database: process.env.DB_DATABASE || "my_db",
       user: process.env.DB_USER || "username",

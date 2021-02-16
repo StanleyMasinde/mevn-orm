@@ -34,26 +34,38 @@ class Model {
     currentModel: any
 
     static collection: any
+    #foreignKey: string
+    #collection: {}
+    #hidden: any[]
+    #modelName: string
+    #currentModel: any
+    #table: any
+    static currentStaticQuery: any
     /**
      * New Model instance
      * @param id the database ID of the model
      */
-    constructor(id = 0, attributes: { [x: string]: any; } = {}) {
-        this.collection = {}
-        this.hidden = []
+    constructor(id: number, attributes: { [x: string]: any; } = {}) {
+        this.#collection = {}
+        this.#hidden = []
         this.id = id
-        this.modelName = this.constructor.name.toLowerCase()
-        this.table = pluralize(this.modelName)
-        this.foreignKey = `${this.modelName}_id`
+        this.#modelName = this.constructor.name.toLowerCase()
+        this.#table = pluralize(this.#modelName)
+        this.#foreignKey = `${this.#modelName}_id`
 
-        for (const a in attributes) {
-            if (Object.prototype.hasOwnProperty.call(attributes, a)) {
-                this[a] = attributes[a]
+        if (attributes) {
+            for (const a in attributes) {
+                if (Object.prototype.hasOwnProperty.call(attributes, a)) {
+                    this[a] = attributes[a]
+                }
             }
         }
 
         this.fetch().then((c) => {
-            this.currentModel = c
+            this.#currentModel = c
+            for (const a in c) {
+                this[a] = c[a]
+            }
         })
     }
 
@@ -63,7 +75,7 @@ class Model {
     async fetch() {
         try {
             return queryBuilder
-                .table(this.table)
+                .table(this.#table)
                 .where('id', this.id)
                 .first()
         } catch (error) {
@@ -78,7 +90,7 @@ class Model {
     async destroy(): Promise<any> {
         try {
             await queryBuilder
-                .table(this.table)
+                .table(this.#table)
                 .where({ id: this.id })
                 .delete()
         } catch (error) {
@@ -94,9 +106,10 @@ class Model {
     async update(attributes: Array<any> = []): Promise<any> {
         try {
             await queryBuilder
-                .table(this.table)
+                .table(this.#table)
                 .where({ id: this.id })
                 .update(attributes)
+                .returning('*')
         } catch (error) {
             throw error
         }
@@ -106,7 +119,7 @@ class Model {
      * Return an array rep of a model
      */
     toArray() {
-        return this.currentModel
+        return this.#currentModel
     }
 
     /**
@@ -135,6 +148,21 @@ class Model {
     }
 
     /**
+     * Return the models that match a given condition
+     * @param columns The columns to return
+     * @returns 
+     */
+    static async get(columns = '*') {
+        const m = await this.currentStaticQuery.select(columns)
+        if (Array.isArray(m)) {
+            return m.map((model) => {
+                return new this(model.id, model)
+            })
+        }
+        return new this(m.id, m)
+    }
+
+    /**
      * Get the Model count
      */
     public static async count() {
@@ -154,7 +182,10 @@ class Model {
      */
     public static async all() {
         try {
-            return await queryBuilder.table(this.tableName()).select('*')
+            const models = await queryBuilder.table(this.tableName()).select('*')
+            return models.map((m) => {
+                return new this(m.id, m)
+            })
         } catch (error) {
             throw error
         }
@@ -165,12 +196,13 @@ class Model {
      * Get rows that match some conditions
      * @param {Object} conditions 
      */
-    public static async where(conditions: object = {}) {
+    public static where(conditions: object = {}) {
         try {
-            return await queryBuilder
+            this.currentStaticQuery = queryBuilder
                 .table(this.tableName())
                 .where(conditions)
                 .select('*')
+            return this
         } catch (error) {
             throw error
         }
@@ -182,6 +214,7 @@ class Model {
      */
     public static async whereFirst(conditions: object = {}) {
         try {
+            console.warn('where.first() has been deprecated and will be removed in future please use where().first() instead');
             return await queryBuilder
                 .table(this.tableName())
                 .where(conditions)
@@ -198,6 +231,12 @@ class Model {
      */
     public static async first() {
         try {
+            if (this.currentStaticQuery) {
+                // It means it is chained
+                const model = await this.currentStaticQuery.first()
+                return new this(model.id, model)
+            }
+            // It is not being chained
             const record = await queryBuilder
                 .table(this.tableName())
                 .select('*')
@@ -248,9 +287,12 @@ class Model {
      */
     public static async create(attributes = []) {
         try {
-            return await queryBuilder
+            const ids = await queryBuilder
                 .table(this.tableName())
                 .insert(attributes)
+            const m = new this(ids[0])
+            await m.fetch()
+            return m
         } catch (error) {
             throw error
         }
@@ -266,10 +308,10 @@ class Model {
      * @param {Array} relations 
      */
     load(relations: Array<any> = []) {
-        this.collection[this.modelName] = this.currentModel
+        this.#collection[this.#modelName] = this.#currentModel
         relations.forEach(function (relation: string | number) {
             const rows = this[relation]()
-            this.collection[this.modelName][relation] = rows
+            this.#collection[this.#modelName][relation] = rows
         }, this)
 
         return this
@@ -283,7 +325,7 @@ class Model {
      */
     async hasOne(related: string, primaryKey: number | any = null, foreignKey: number | any = null) {
         // I should get a query to get related records
-        const fk = foreignKey || this.foreignKey
+        const fk = foreignKey || this.#foreignKey
         const pk = primaryKey || this.id
 
         return await queryBuilder
@@ -307,10 +349,10 @@ class Model {
      */
     async belongsTo(related: string, primaryKey: string = null, foreignKey: string = null) {
         // I should get a query to get related records
-        const fk = foreignKey || this.foreignKey
+        const fk = foreignKey || this.#foreignKey
         const pk = primaryKey || this.id
         return await queryBuilder
-            .table(this.table)
+            .table(this.#table)
             // in the form of model_id
             .where(fk, pk)
             .asCallback((err: any, rows: any) => {
@@ -330,8 +372,8 @@ class Model {
         // eg Farmer has many Crops crop_farmer is the table
         // We'll use class names ['This Class, Related Class'].sort
         const relatedName = related.toLowerCase()
-        const pivotTable = [this.modelName, relatedName].sort().join('_')
-        const firstCol = `${this.modelName}_id`
+        const pivotTable = [this.#modelName, relatedName].sort().join('_')
+        const firstCol = `${this.#modelName}_id`
         const secondCol = `${relatedName}_id`
 
         // TODO Honestly I believe there is a better way
@@ -354,7 +396,7 @@ class Model {
          */
     async hasMany(related: string, primaryKey: string = null, foreignKey: string = null) {
         // I should get a query to get related records
-        const fk = foreignKey || this.foreignKey
+        const fk = foreignKey || this.#foreignKey
         const pk = primaryKey || this.id
 
         return await queryBuilder
@@ -376,7 +418,7 @@ class Model {
      */
     async morphOne(related: String, reference: String) {
         const foreign_id = `${reference}_id`
-        const foreign_type = `${this.modelName}_type`
+        const foreign_type = `${this.#modelName}_type`
 
         let condition = {}
         condition[`${reference}_id`] = this.id
@@ -395,7 +437,7 @@ class Model {
      */
     async morphMany(related: String, reference: String) {
         const foreign_id = `${reference}_id`
-        const foreign_type = `${this.modelName}_type`
+        const foreign_type = `${this.#modelName}_type`
 
         let condition = {}
         condition[`${reference}_id`] = this.id
