@@ -109,7 +109,6 @@ class Model {
                 .table(this.#table)
                 .where({ id: this.id })
                 .update(attributes)
-                .returning('*')
         } catch (error) {
             throw error
         }
@@ -234,7 +233,10 @@ class Model {
             if (this.currentStaticQuery) {
                 // It means it is chained
                 const model = await this.currentStaticQuery.first()
-                return new this(model.id, model)
+                if (model) {
+                    return new this(model.id, model)
+                }
+                return null
             }
             // It is not being chained
             const record = await queryBuilder
