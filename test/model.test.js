@@ -59,10 +59,25 @@ describe('Static model methods tests', () => {
         expect(f).to.be.an('Array')
     })
 
+    it('where().get() on null', async () => {
+        const f = await Farmer
+            .where({ name: 'John Doe Jake' })
+            .get()
+        expect(f).to.be.an('Array')
+        expect(f.length).equals(0)
+    })
+
     it('where().first()', async () => {
         const f = await Farmer
             .where({ name: 'John Doe' })
             .first()
         expect(f).to.be.an('Object')
+    })
+
+    it('where().first() null', async () => {
+        const f = await Farmer
+            .where({ name: 'John Doe Jake' })
+            .first()
+        expect(f).equals(null)
     })
 })
