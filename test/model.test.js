@@ -1,83 +1,43 @@
+/* eslint-disable no-undef */
+const { Model } = require('../index')
+const faker = require('faker')
 const { expect } = require('chai')
-const { Model } = require('../dist/index')
+class Profile extends Model {
+	fillable = ['farmer_id', 'bio']
+}
+class Farmer extends Model {
+	fillable = ['name', 'email', 'password']
+	hidden = ['password']
 
-/**
- * Create a Farmer class
- */
-class Farmer extends Model { }
+	profile() {
+		return this.hasOne(Profile)
+	}
+}
 
-describe('Static model methods tests', () => {
-    it('Should plurarize the table name', (done) => {
-        expect(Farmer.tableName()).equals('farmers')
-        done()
-    })
+describe('#Model tests', () => {
+	it('#Model instance', async () => {
+		const farmer = new Farmer({
+			name: faker.name.findName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+		await farmer.save()
+		expect(farmer).to.an('Object')
+	})
 
-    it('create()', async () => {
-        const farmer = await Farmer.create({
-            name: 'John Doe',
-            email: 'john@mail.com'
-        })
-        expect(farmer).to.be.an('Object')
-        expect(farmer).to.haveOwnProperty('name', 'John Doe')
-        expect(farmer).to.haveOwnProperty('email', 'john@mail.com')
-    })
-
-    it('all()', async () => {
-        const res = await Farmer.all()
-        expect(res).to.be.an('array')
-    })
-
-    it('first()', async () => {
-        const res = await Farmer.first()
-        expect(res).to.be.an('object')
-
-    })
-
-    it('find()', async () => {
-        const res = await Farmer.find(1)
-        expect(res).to.be.an('object')
-    })
-
-    it('find() Should null', async () => {
-        const res = await Farmer.find(100)
-        expect(res).equals(null)
-    })
-
-    it('count()', async () => {
-        const count = await Farmer.count()
-    })
-
-    it('delete()', async () => {
-        const res = await Farmer.delete(2)
-        expect(res).equals(1)
-    })
-
-    it('where().get()', async () => {
-        const f = await Farmer
-            .where({ name: 'John Doe' })
-            .get()
-        expect(f).to.be.an('Array')
-    })
-
-    it('where().get() on null', async () => {
-        const f = await Farmer
-            .where({ name: 'John Doe Jake' })
-            .get()
-        expect(f).to.be.an('Array')
-        expect(f.length).equals(0)
-    })
-
-    it('where().first()', async () => {
-        const f = await Farmer
-            .where({ name: 'John Doe' })
-            .first()
-        expect(f).to.be.an('Object')
-    })
-
-    it('where().first() null', async () => {
-        const f = await Farmer
-            .where({ name: 'John Doe Jake' })
-            .first()
-        expect(f).equals(null)
-    })
+	it('#Has one relationship', async () => {
+		const farmer = new Farmer({
+			name: faker.name.findName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+		await farmer.save()
+		await new Profile({
+			farmer_id: farmer.id,
+			bio: faker.lorem.sentence()
+		}).save()
+		expect(farmer).to.an('Object')
+		const farmerProfile = await farmer.profile()
+		expect(farmerProfile).to.haveOwnProperty('farmer_id', farmer.id)
+	})
 })
