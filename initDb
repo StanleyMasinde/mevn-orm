@@ -3,7 +3,11 @@ require('dotenv').config()
 const Knex = require('knex')
 const { development, staging, production } = require('./knexfile')
 let config
+
 switch (process.env.NODE_ENV) {
+case 'testing':
+	config = development
+	break
 case 'development':
 	config = development
 	break
