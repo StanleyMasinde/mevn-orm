@@ -4,7 +4,6 @@
   "description": "simple ORM for express js",
   "type": "commonjs",
   "scripts": {
-    "prepare": "lint",
     "pretest": "node initDb",
     "test": "mocha  --exit",
     "init:db": "node initDb",
