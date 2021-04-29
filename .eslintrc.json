@@ -1,0 +1,36 @@
+{
+    "env": {
+        "commonjs": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "plugins": ["@babel"],
+    "parser": "@babel/eslint-parser",
+    "parserOptions": {
+        "ecmaVersion": 12
+    },
+    "rules": {
+        "no-console":"warn",
+        "constructor-super":"off",
+        "no-this-before-super":"off",
+        "arrow-parens":"error",
+        "class-methods-use-this":"error",
+        "indent": [
+            "error",
+            "tab"
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "never"
+        ]
+    }
+}

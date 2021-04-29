@@ -1,0 +1,54 @@
+{
+  "name": "stano-orm",
+  "version": "0.1.0",
+  "description": "simple ORM for express js",
+  "type": "commonjs",
+  "scripts": {
+    "pretest": "node initDb",
+    "test": "mocha  --exit",
+    "init:db": "node initDb",
+    "migrate": "knex migrate:latest",
+    "lint": "eslint --ext .js ./"
+  },
+  "peerDependencies": {
+    "knex": "^0.21"
+  },
+  "keywords": [
+    "ORM",
+    "express",
+    "Mysql",
+    "mevn"
+  ],
+  "author": "Stanley Masinde",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "knex": "^0.21",
+    "pluralize": "^8.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.13.16",
+    "@babel/core": "^7.13.16",
+    "@babel/eslint-parser": "^7.13.14",
+    "@babel/eslint-plugin": "^7.13.16",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "chai": "^4.2.0",
+    "eslint": "^7.25.0",
+    "faker": "^5.5.3",
+    "mocha": "^8.3.0",
+    "sqlite3": "^5.0.0"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StanleyMasinde/mevn-orm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/StanleyMasinde/mevn-orm/issues"
+  },
+  "homepage": "https://github.com/StanleyMasinde/mevn-orm#readme",
+  "main": "dist/index.js"
+}
