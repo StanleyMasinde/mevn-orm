@@ -11,7 +11,7 @@
     "lint": "eslint --ext .js ./"
   },
   "peerDependencies": {
-    "knex": "^0.21"
+    "knex": "^0.95"
   },
   "keywords": [
     "ORM",
@@ -23,7 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^8.2.0",
-    "knex": "^0.21",
+    "knex": "^0.95",
     "pluralize": "^8.0.0"
   },
   "devDependencies": {
