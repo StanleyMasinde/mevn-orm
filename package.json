@@ -1,6 +1,6 @@
 {
   "name": "mevn-orm",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "simple ORM for express js",
   "type": "commonjs",
   "scripts": {
