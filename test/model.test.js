@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const { Model } = require('../index')
+const { Model, DB } = require('../index')
 const faker = require('faker')
 const { expect } = require('chai')
 class Profile extends Model {
@@ -13,6 +13,8 @@ class Farmer extends Model {
 		return this.hasOne(Profile)
 	}
 }
+
+DB(Farmer)
 
 describe('#Model tests', () => {
 	it('#Model instance', async () => {
