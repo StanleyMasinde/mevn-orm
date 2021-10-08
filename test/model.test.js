@@ -27,6 +27,12 @@ describe('#Model tests', () => {
 		expect(farmer).to.an('Object')
 	})
 
+	it('#find a model', async () => {
+		const farmer = await Farmer.find(1)
+		console.log(farmer)
+		expect(farmer).to.an('Object')
+	})
+
 	it('#Has one relationship', async () => {
 		const farmer = new Farmer({
 			name: faker.name.findName(),
