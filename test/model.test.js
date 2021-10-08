@@ -29,8 +29,17 @@ describe('#Model tests', () => {
 
 	it('#find a model', async () => {
 		const farmer = await Farmer.find(1)
-		console.log(farmer)
 		expect(farmer).to.an('Object')
+	})
+
+	it('#create a model', async () => {
+		const farmer = await Farmer.create({
+			name: faker.name.findName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+		expect(farmer).to.an('Object')
+		expect(farmer.id).to.be.a('number')
 	})
 
 	it('#Has one relationship', async () => {
