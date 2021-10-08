@@ -42,6 +42,16 @@ describe('#Model tests', () => {
 		expect(farmer.id).to.be.a('number')
 	})
 
+	it('#Update a model with a new instance', async () => {
+		const farmer = await Farmer.find(1)
+		await farmer.update({
+			name: 'new name',
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+		expect(farmer).to.an('Object')
+	})
+
 	it('#Has one relationship', async () => {
 		const farmer = new Farmer({
 			name: faker.name.findName(),
