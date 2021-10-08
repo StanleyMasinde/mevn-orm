@@ -52,6 +52,11 @@ describe('#Model tests', () => {
 		expect(farmer).to.an('Object')
 	})
 
+	it('#chain where and first', async () => {
+		const farmer = await Farmer.where({ id: 1 }).first()
+		expect(farmer).to.an('Object')
+	})
+
 	it('#Has one relationship', async () => {
 		const farmer = new Farmer({
 			name: faker.name.findName(),
