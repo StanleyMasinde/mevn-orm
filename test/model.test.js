@@ -57,6 +57,11 @@ describe('#Model tests', () => {
 		expect(farmer).to.an('Object')
 	})
 
+	it('#Return null when not found', async () => {
+		const farmer = await Farmer.where({ id: 'ggggggg' }).first()
+		expect(farmer).to.be.null
+	})
+
 	it('#Has one relationship', async () => {
 		const farmer = new Farmer({
 			name: faker.name.findName(),
