@@ -11,7 +11,9 @@
     "lint": "eslint --ext .js ./"
   },
   "peerDependencies": {
-    "knex": "^0.95"
+    "knex": "^0.95",
+    "dotenv": "^10.0.0",
+    "mysql": "^2.18.0"
   },
   "keywords": [
     "ORM",
@@ -22,19 +24,19 @@
   "author": "Stanley Masinde",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "^8.2.0",
-    "knex": "^0.95",
     "pluralize": "^8.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.13.16",
-    "@babel/core": "^7.13.16",
+    "@babel/core": "^7.15.8",
     "@babel/eslint-parser": "^7.13.14",
     "@babel/eslint-plugin": "^7.13.16",
-    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/plugin-proposal-class-properties": "^7.14.5",
     "chai": "^4.2.0",
+    "dotenv": "^8.6.0",
     "eslint": "^7.25.0",
     "faker": "^5.5.3",
+    "knex": "^0.95.11",
     "mocha": "^9.1.2",
     "mysql2": "^2.3.0",
     "sqlite3": "^5.0.0"
@@ -51,5 +53,5 @@
     "url": "https://github.com/StanleyMasinde/mevn-orm/issues"
   },
   "homepage": "https://github.com/StanleyMasinde/mevn-orm#readme",
-  "main": "dist/index.js"
+  "main": "index.js"
 }
