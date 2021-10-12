@@ -62,6 +62,12 @@ describe('#Model tests', () => {
 		expect(farmer).to.be.null
 	})
 
+	it('#Delete a model', async () => {
+		const farmer = await Farmer.find(1)
+		await farmer.delete()
+		expect(await Farmer.find(1)).to.be.null
+	})
+
 	it('#Has one relationship', async () => {
 		const farmer = new Farmer({
 			name: faker.name.findName(),
