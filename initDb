@@ -1,7 +1,7 @@
 #!/bin/env node
 require('dotenv').config()
 const Knex = require('knex')
-const { development, staging, production } = require('./knexfile')
+const { development, staging, production } = require('./knexfile.cjs')
 let config
 
 switch (process.env.NODE_ENV) {
