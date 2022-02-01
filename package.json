@@ -1,6 +1,6 @@
 {
   "name": "mevn-orm",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "simple ORM for express js",
   "type": "commonjs",
   "scripts": {
@@ -16,10 +16,10 @@
     "mysql": "^2.18.1"
   },
   "peerDependenciesMeta": {
-    "dotenv":{
+    "dotenv": {
       "optional": false
     },
-    "knex":{
+    "knex": {
       "optional": false
     }
   },
