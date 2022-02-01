@@ -12,7 +12,7 @@
   },
   "peerDependencies": {
     "dotenv": "^15.0.0",
-    "knex": "^1.0.1",
+    "knex": "^0.95.11",
     "mysql": "^2.18.1"
   },
   "keywords": [
