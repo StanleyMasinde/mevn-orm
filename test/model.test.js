@@ -79,6 +79,7 @@ describe('#Model tests', () => {
 			farmer_id: farmer.id,
 			bio: faker.lorem.sentence()
 		}).save()
+
 		expect(farmer).to.an('Object')
 		const farmerProfile = await farmer.profile()
 		expect(farmerProfile).to.haveOwnProperty('farmer_id', farmer.id)
