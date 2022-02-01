@@ -15,13 +15,21 @@
     "knex": "^1.0.1",
     "mysql": "^2.18.1"
   },
+  "peerDependenciesMeta": {
+    "dotenv":{
+      "optional": false
+    },
+    "knex":{
+      "optional": false
+    }
+  },
   "keywords": [
     "ORM",
     "express",
     "Mysql",
     "mevn"
   ],
-  "author": "Stanley Masinde",
+  "author": "Stanley Masinde <stanmasinde@gmail.com> (https://stanleymasinde.github.io)",
   "contributors": [
     "Stanley Masinde <stanmasinde@gmail.com>"
   ],
@@ -45,15 +53,14 @@
     "mysql2": "^2.3.0"
   },
   "directories": {
+    "lib": "lib",
     "test": "test"
   },
   "private": false,
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/StanleyMasinde/mevn-orm.git"
-  },
+  "repository": "git+https://github.com/StanleyMasinde/mevn-orm.git",
   "bugs": {
-    "url": "https://github.com/StanleyMasinde/mevn-orm/issues"
+    "url": "https://github.com/StanleyMasinde/mevn-orm/issues",
+    "email": "stanmasinde@gmail.com"
   },
   "homepage": "https://github.com/StanleyMasinde/mevn-orm#readme",
   "main": "index.js"
