@@ -3,3 +3,4 @@ local_test
 .env
 *.sqlite
 dist
+.DS_Store

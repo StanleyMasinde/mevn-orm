@@ -11,9 +11,9 @@
     "lint": "eslint --ext .js ./"
   },
   "peerDependencies": {
-    "knex": "^0.95",
-    "dotenv": "^10.0.0",
-    "mysql": "^2.18.0"
+    "dotenv": "^15.0.0",
+    "knex": "^1.0.1",
+    "mysql": "^2.18.1"
   },
   "keywords": [
     "ORM",
@@ -22,6 +22,9 @@
     "mevn"
   ],
   "author": "Stanley Masinde",
+  "contributors": [
+    "Stanley Masinde <stanmasinde@gmail.com>"
+  ],
   "license": "MIT",
   "dependencies": {
     "pluralize": "^8.0.0"
@@ -39,7 +42,7 @@
     "knex": "^0.95.11",
     "mocha": "^9.1.2",
     "mysql2": "^2.3.0",
-    "sqlite3": "^5.0.0"
+    "sqlite3": "^4.2.0"
   },
   "directories": {
     "test": "test"
