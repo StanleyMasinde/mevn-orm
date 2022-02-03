@@ -1,7 +1,16 @@
 #!/bin/env node
+const fs = require('fs')
 require('dotenv').config()
 const Knex = require('knex')
-const { development, staging, production } = require('./knexfile.js')
+
+let knexfilePath
+
+if (fs.existsSync(process.cwd() + '/knexfile.js')) {
+	knexfilePath = process.cwd() + '/knexfile.js'
+} else {
+	knexfilePath = process.cwd() + '/knexfile.cjs'
+}
+const { development, staging, production } = require(knexfilePath)
 let config
 
 switch (process.env.NODE_ENV) {
