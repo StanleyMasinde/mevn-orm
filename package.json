@@ -11,8 +11,8 @@
     "lint": "eslint --ext .js ./"
   },
   "peerDependencies": {
-    "dotenv": "^15.0.0",
-    "knex": "^1.0.1",
+    "dotenv": "^16.0.0",
+    "knex": "^1.0.2",
     "mysql": "^2.18.1"
   },
   "peerDependenciesMeta": {
@@ -27,7 +27,11 @@
     "ORM",
     "express",
     "Mysql",
-    "mevn"
+    "mevn",
+    "database",
+    "orm",
+    "orm-express",
+    "orm-mysql"
   ],
   "author": "Stanley Masinde <stanmasinde@gmail.com> (https://stanleymasinde.github.io)",
   "contributors": [
