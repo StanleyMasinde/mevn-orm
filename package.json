@@ -12,7 +12,7 @@
   },
   "peerDependencies": {
     "dotenv": "^16.0.0",
-    "knex": "^1.0.2",
+    "knex": "^2.2.0",
     "mysql": "^2.18.1"
   },
   "peerDependenciesMeta": {
@@ -47,12 +47,11 @@
     "@babel/eslint-parser": "^7.13.14",
     "@babel/eslint-plugin": "^7.13.16",
     "@babel/plugin-proposal-class-properties": "^7.14.5",
-    "@vscode/sqlite3": "^5.0.7",
     "chai": "^4.2.0",
     "dotenv": "^15.0.0",
     "eslint": "^7.25.0",
     "faker": "^5.5.3",
-    "knex": "^1.0.1",
+    "knex": "^2.2.0",
     "mocha": "^9.1.2",
     "mysql2": "^2.3.0"
   },
