@@ -13,7 +13,7 @@
   "peerDependencies": {
     "dotenv": "^16.0.0",
     "knex": "^2.2.0",
-    "mysql": "^2.18.1"
+    "mysql2": "^2.3.3"
   },
   "peerDependenciesMeta": {
     "dotenv": {

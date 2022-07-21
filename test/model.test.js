@@ -42,6 +42,16 @@ describe('#Model tests', () => {
 		expect(farmer.id).to.be.a('number')
 	})
 
+	it('#create a model emoji', async () => {
+		const farmer = await Farmer.create({
+			name: 'Name has emoji 😎',
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+		expect(farmer).to.an('Object')
+		expect(farmer.id).to.be.a('number')
+	})
+
 	it('#Update a model with a new instance', async () => {
 		const farmer = await Farmer.find(1)
 		await farmer.update({
