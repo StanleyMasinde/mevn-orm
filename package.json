@@ -11,9 +11,9 @@
     "lint": "eslint --ext .js ./"
   },
   "peerDependencies": {
-    "dotenv": "^16.0.0",
-    "knex": "^2.2.0",
-    "mysql2": "^2.3.3"
+    "dotenv": "^16.0.3",
+    "knex": "^2.3.0",
+    "mysql": "2.18.1"
   },
   "peerDependenciesMeta": {
     "dotenv": {
