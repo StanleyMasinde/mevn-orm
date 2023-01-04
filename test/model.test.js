@@ -32,6 +32,11 @@ describe('#Model tests', () => {
 		expect(farmer).to.an('Object')
 	})
 
+	it('#Find model should return null on not found', async () => {
+		const nonExistent = await Farmer.find(4000)
+		expect(nonExistent).to.equals(null)
+	})
+
 	it('#create a model', async () => {
 		const farmer = await Farmer.create({
 			name: faker.name.findName(),
