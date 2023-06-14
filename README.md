@@ -1,3 +1,7 @@
+## This project has been archived
+while I have a vision to create an intuitive ORM, I am not able to contitnue with this project at this time.
+I have to go back to the drawing board and come up with a better tool using the learnings from this.
+
 # Mevn-orm
 ![npm](https://img.shields.io/npm/v/mevn-orm?style=for-the-badge)
 [![GitHub license](https://img.shields.io/github/license/stanleymasinde/mevn-orm?style=for-the-badge)](https://github.com/StanleyMasinde/mevn-orm/blob/master/LICENSE)
