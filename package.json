@@ -12,7 +12,7 @@
   },
   "peerDependencies": {
     "dotenv": "^16.0.3",
-    "knex": "^2.3.0",
+    "knex": "^3.1.0",
     "mysql2": "3.2.0"
   },
   "peerDependenciesMeta": {
@@ -51,7 +51,7 @@
     "dotenv": "^16.0.3",
     "eslint": "^8.31.0",
     "faker": "^5.5.3",
-    "knex": "^2.3.0",
+    "knex": "^3.1.0",
     "mocha": "^10.2.0",
     "mysql": "^2.18.1",
     "sqlite3": "^5.1.4"
