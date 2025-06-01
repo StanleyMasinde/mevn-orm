@@ -46,7 +46,7 @@
     "@babel/core": "^7.24.5",
     "@babel/eslint-parser": "^7.24.3",
     "@babel/eslint-plugin": "^7.24.0",
-    "@faker-js/faker": "^8.4.0",
+    "@faker-js/faker": "^9.8.0",
     "chai": "^4.4.1",
     "dotenv": "^16.4.5",
     "knex": "^3.0.0",
