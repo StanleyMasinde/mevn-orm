@@ -5,15 +5,15 @@
   "type": "commonjs",
   "scripts": {
     "pretest": "node initDb",
-    "test": "mocha  --exit",
+    "test": "mocha --exit",
     "init:db": "node initDb",
     "migrate": "knex migrate:latest",
     "lint": "eslint --ext .js ./"
   },
   "peerDependencies": {
-    "dotenv": "^16.0.3",
-    "knex": "^2.3.0",
-    "mysql2": "3.2.0"
+    "dotenv": "^16.4.5",
+    "knex": "^3.0.0",
+    "mysql2": "^3.9.3"
   },
   "peerDependenciesMeta": {
     "dotenv": {
@@ -42,19 +42,17 @@
     "pluralize": "^8.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.20.7",
-    "@babel/core": "^7.20.7",
-    "@babel/eslint-parser": "^7.19.1",
-    "@babel/eslint-plugin": "^7.19.1",
-    "@babel/plugin-proposal-class-properties": "^7.18.6",
-    "chai": "^4.3.7",
-    "dotenv": "^16.0.3",
-    "eslint": "^8.31.0",
-    "faker": "^5.5.3",
-    "knex": "^2.3.0",
-    "mocha": "^10.2.0",
+    "@babel/cli": "^7.24.5",
+    "@babel/core": "^7.24.5",
+    "@babel/eslint-parser": "^7.24.3",
+    "@babel/eslint-plugin": "^7.24.0",
+    "@faker-js/faker": "^8.4.0",
+    "chai": "^4.4.1",
+    "dotenv": "^16.4.5",
+    "knex": "^3.0.0",
+    "mocha": "^10.4.0",
     "mysql": "^2.18.1",
-    "sqlite3": "^5.1.4"
+    "sqlite3": "^5.1.7"
   },
   "directories": {
     "lib": "lib",

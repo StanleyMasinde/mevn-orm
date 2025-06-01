@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 const { Model, DB } = require('../index')
-const faker = require('faker')
+const {faker} = require('@faker-js/faker')
 const { expect } = require('chai')
 class Profile extends Model {
 	fillable = ['farmer_id', 'bio']
@@ -19,7 +19,7 @@ DB(Farmer)
 describe('#Model tests', () => {
 	it('#Model instance', async () => {
 		const farmer = new Farmer({
-			name: faker.name.findName(),
+			name: faker.person.fullName(),
 			email: faker.internet.email(),
 			password: faker.internet.password()
 		})
@@ -39,7 +39,7 @@ describe('#Model tests', () => {
 
 	it('#create a model', async () => {
 		const farmer = await Farmer.create({
-			name: faker.name.findName(),
+			name: faker.person.fullName(),
 			email: faker.internet.email(),
 			password: faker.internet.password()
 		})
@@ -85,7 +85,7 @@ describe('#Model tests', () => {
 
 	it('#Has one relationship', async () => {
 		const farmer = new Farmer({
-			name: faker.name.findName(),
+			name: faker.person.fullName(),
 			email: faker.internet.email(),
 			password: faker.internet.password()
 		})
