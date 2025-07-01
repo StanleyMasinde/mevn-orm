@@ -11,7 +11,7 @@
     "lint": "eslint --ext .js ./"
   },
   "peerDependencies": {
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.0.1",
     "knex": "^3.0.0",
     "mysql2": "^3.9.3"
   },
@@ -48,7 +48,7 @@
     "@babel/eslint-plugin": "^7.24.0",
     "@faker-js/faker": "^9.8.0",
     "chai": "^4.4.1",
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.0.1",
     "knex": "^3.0.0",
     "mocha": "^10.4.0",
     "mysql": "^2.18.1",
