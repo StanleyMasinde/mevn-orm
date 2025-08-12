@@ -2,7 +2,11 @@
 
 ![npm](https://img.shields.io/npm/v/mevn-orm?style=for-the-badge)  [![GitHub license](https://img.shields.io/github/license/stanleymasinde/mevn-orm?style=for-the-badge)](https://github.com/StanleyMasinde/mevn-orm/blob/master/LICENSE)  ![GitHub issues](https://img.shields.io/github/issues/stanleymasinde/mevn-orm?style=for-the-badge)
 
-**Mevn ORM** is a lightweight ORM for Express.js and MySQL that provides a clean, fluent interface for building queries and managing models.  
+### Do not use This
+When I started this, I had so much intertest in the JS ecosytem and ORMs. I still have some intertest in javascript
+bit not ORMs.
+
+**Mevn ORM** is a lightweight ORM for Express.js and MySQL that provides a clean, fluent interface for building queries and managing models.
 It is under maintenance mode and receives security updates. Development is paused, but the core ORM functionality is complete and usable.
 
 ## Getting Started
