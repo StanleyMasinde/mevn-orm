@@ -53,9 +53,9 @@ const user = await User.create({
 This project uses [Vitest](https://vitest.dev/) for testing.
 
 ```bash
-npm install
-npm run migrate
-npm run test
+pnpm install
+pnpm run migrate
+pnpm run test
 ```
 
 ## License
