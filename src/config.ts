@@ -52,6 +52,7 @@ interface MigrationResult {
 	log: string[]
 }
 
+/** Returns the active Knex instance or throws if the ORM has not been configured. */
 const getDB = (): Knex => {
 	if (!DB) {
 		throw new Error('Mevn ORM is not configured. Call configure({ client, connection, ... }) before using Model.')
@@ -60,6 +61,7 @@ const getDB = (): Knex => {
 	return DB
 }
 
+/** Configures the ORM using a Knex config object or an existing Knex instance. */
 const configure = (config: Knex.Config | Knex): Knex => {
 	if (typeof config === 'function') {
 		DB = config
@@ -70,11 +72,13 @@ const configure = (config: Knex.Config | Knex): Knex => {
 	return DB
 }
 
+/** Sets default migration options used by migration helpers. */
 const setMigrationConfig = (config: Knex.MigratorConfig): Knex.MigratorConfig => {
 	defaultMigrationConfig = { ...config }
 	return { ...defaultMigrationConfig }
 }
 
+/** Returns the currently configured default migration options. */
 const getMigrationConfig = (): Knex.MigratorConfig => ({ ...defaultMigrationConfig })
 
 const resolveMigrationConfig = (config?: Knex.MigratorConfig): Knex.MigratorConfig => ({
@@ -159,6 +163,7 @@ const buildConnection = (config: SimpleDatabaseConfig): NonNullable<Knex.Config[
 	return connection
 }
 
+/** Builds a Knex config from a simplified, dialect-first configuration object. */
 const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
 	const client = normalizeDialect(config.dialect)
 	const base: Knex.Config = {
@@ -179,8 +184,10 @@ const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
 	return base
 }
 
+/** Configures the ORM from simplified database options. */
 const configureDatabase = (config: SimpleDatabaseConfig): Knex => configure(createKnexConfig(config))
 
+/** Generates a migration file and returns its path. */
 const makeMigration = async (name: string, config?: Knex.MigratorConfig): Promise<string> => {
 	try {
 		return await getDB().migrate.make(name, resolveMigrationConfig(config))
@@ -189,6 +196,7 @@ const makeMigration = async (name: string, config?: Knex.MigratorConfig): Promis
 	}
 }
 
+/** Runs pending migrations and returns the batch number and migration filenames. */
 const migrateLatest = async (config?: Knex.MigratorConfig): Promise<MigrationResult> => {
 	try {
 		const [batch, log] = await getDB().migrate.latest(resolveMigrationConfig(config))
@@ -198,6 +206,7 @@ const migrateLatest = async (config?: Knex.MigratorConfig): Promise<MigrationRes
 	}
 }
 
+/** Rolls back migrations. Set `all` to true to rollback all completed batches. */
 const migrateRollback = async (config?: Knex.MigratorConfig, all = false): Promise<MigrationResult> => {
 	try {
 		const [batch, log] = all
@@ -209,6 +218,7 @@ const migrateRollback = async (config?: Knex.MigratorConfig, all = false): Promi
 	}
 }
 
+/** Returns the current migration version recorded by Knex. */
 const migrateCurrentVersion = async (config?: Knex.MigratorConfig): Promise<string> => {
 	try {
 		return await getDB().migrate.currentVersion(resolveMigrationConfig(config))
@@ -217,6 +227,7 @@ const migrateCurrentVersion = async (config?: Knex.MigratorConfig): Promise<stri
 	}
 }
 
+/** Returns completed and pending migration filenames. */
 const migrateList = async (config?: Knex.MigratorConfig): Promise<{ completed: string[]; pending: string[] }> => {
 	try {
 		const [completed, pending] = await getDB().migrate.list(resolveMigrationConfig(config))

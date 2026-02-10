@@ -122,13 +122,22 @@ await found?.update({ name: 'Jane Updated' })
   - Deletes current row by `id`.
 - `hasOne(RelatedModel, localKey?, foreignKey?): Promise<Model | null>`
   - Loads one related record.
+- `hasMany(RelatedModel, localKey?, foreignKey?): Promise<Model[]>`
+  - Loads related records by foreign key.
+- `belongsTo(RelatedModel, foreignKey?, ownerKey?): Promise<Model | null>`
+  - Loads the owning/parent record.
 
 ### Static methods
 
 - `find(id, columns = '*'): Promise<Model | null>`
+- `findOrFail(id, columns = '*'): Promise<Model>`
 - `create(properties): Promise<Model>`
+- `createMany(properties[]): Promise<Model[]>`
+- `firstOrCreate(attributes, values = {}): Promise<Model>`
 - `where(conditions = {}): typeof Model`
 - `first(columns = '*'): Promise<Model | null>`
+- `all(columns = '*'): Promise<Model[]>`
+- `count(column = '*'): Promise<number>`
 - `update(properties): Promise<number | undefined>`
 - `destroy(): Promise<number | undefined>`
 

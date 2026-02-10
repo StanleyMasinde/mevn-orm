@@ -32,6 +32,18 @@ class Farmer extends Model {
 	profile(): Promise<Model | null> {
 		return this.hasOne(Profile)
 	}
+
+	farms(): Promise<Model[]> {
+		return this.hasMany(Farm)
+	}
+}
+
+class Farm extends Model {
+	override fillable = ['farmer_id', 'name']
+
+	farmer(): Promise<Model | null> {
+		return this.belongsTo(Farmer, 'farmer_id')
+	}
 }
 
 describe('#Model tests', () => {
@@ -77,7 +89,7 @@ describe('#Model tests', () => {
 	})
 
 	it('#find a model', async () => {
-		const farmer = await Farmer.find(1)
+		const farmer = await Farmer.find(1) as Farmer | null
 		expect(farmer).toBeTypeOf('object')
 	})
 
@@ -107,7 +119,7 @@ describe('#Model tests', () => {
 	})
 
 	it('#Update a model with a new instance', async () => {
-		const farmer = await Farmer.find(1)
+		const farmer = await Farmer.find(1) as Farmer | null
 		expect(farmer).not.toBeNull()
 		if (!farmer) {
 			return
@@ -158,6 +170,34 @@ describe('#Model tests', () => {
 		expect(farmerProfile).not.toHaveProperty('bio')
 	})
 
+	it('#Has many relationship', async () => {
+		const owner = await Farmer.create({
+			name: faker.person.fullName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		}) as Farmer
+		await Farm.create({ farmer_id: owner.id, name: 'Farm One' })
+		await Farm.create({ farmer_id: owner.id, name: 'Farm Two' })
+		const farms = await owner.farms()
+		expect(Array.isArray(farms)).toBe(true)
+		expect(farms.length).toBe(2)
+	})
+
+	it('#Belongs to relationship', async () => {
+		const owner = await Farmer.create({
+			name: faker.person.fullName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+		const farm = await Farm.create({
+			farmer_id: owner.id,
+			name: 'Belongs To Farm'
+		}) as Farm
+		const parentFarmer = await farm.farmer()
+		expect(parentFarmer).not.toBeNull()
+		expect(parentFarmer).toHaveProperty('id', farm.farmer_id)
+	})
+
 	it('#where scope is consumed after first()', async () => {
 		const none = await Farmer.where({ id: 999999 }).first()
 		expect(none).toBe(null)
@@ -203,5 +243,69 @@ describe('#Model tests', () => {
 		expect(deleted).toBe(1)
 		expect(await Farmer.find(first.id as number)).toBe(null)
 		expect(await Farmer.find(second.id as number)).not.toBe(null)
+	})
+
+	it('#all returns models and consumes where scope', async () => {
+		const created = await Farmer.create({
+			name: faker.person.fullName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+		const filtered = await Farmer.where({ id: created.id }).all()
+		expect(filtered.length).toBe(1)
+
+		const allRows = await Farmer.all()
+		expect(allRows.length).toBeGreaterThan(1)
+	})
+
+	it('#count returns table and scoped counts', async () => {
+		const created = await Farmer.create({
+			name: faker.person.fullName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+		const total = await Farmer.count()
+		expect(total).toBeGreaterThan(0)
+
+		const scoped = await Farmer.where({ id: created.id }).count()
+		expect(scoped).toBe(1)
+	})
+
+	it('#createMany inserts multiple records', async () => {
+		const created = await Farmer.createMany([
+			{
+				name: faker.person.fullName(),
+				email: faker.internet.email(),
+				password: faker.internet.password()
+			},
+			{
+				name: faker.person.fullName(),
+				email: faker.internet.email(),
+				password: faker.internet.password()
+			}
+		])
+		expect(created.length).toBe(2)
+		expect(created[0]).toHaveProperty('id')
+		expect(created[1]).toHaveProperty('id')
+	})
+
+	it('#firstOrCreate reuses existing and creates when missing', async () => {
+		const uniqueEmail = `first-or-create-${Date.now()}@mail.test`
+		const first = await Farmer.firstOrCreate(
+			{ email: uniqueEmail },
+			{ name: 'First Or Create', password: 'secret' }
+		)
+		expect(first).toHaveProperty('email', uniqueEmail)
+
+		const second = await Farmer.firstOrCreate(
+			{ email: uniqueEmail },
+			{ name: 'Should Not Replace', password: 'secret' }
+		)
+		expect(second).toHaveProperty('id', first.id)
+		expect(second).not.toHaveProperty('name', 'Should Not Replace')
+	})
+
+	it('#findOrFail throws when record is missing', async () => {
+		await expect(Farmer.findOrFail(9999999)).rejects.toThrow('not found')
 	})
 })
