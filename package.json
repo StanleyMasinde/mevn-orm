@@ -58,6 +58,7 @@
     "lib": "lib",
     "test": "test"
   },
+  "packageManager": "pnpm@10.29.2",
   "private": false,
   "repository": "git+https://github.com/StanleyMasinde/mevn-orm.git",
   "bugs": {
