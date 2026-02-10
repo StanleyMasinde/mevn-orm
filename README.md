@@ -187,6 +187,75 @@ configureDatabase({
 })
 ```
 
+## Nuxt/Nitro Example
+
+Use a server plugin to initialize the ORM once at Nitro startup.
+
+`server/plugins/mevn-orm.ts`:
+
+```ts
+import { defineNitroPlugin } from 'nitropack/runtime'
+import { configureDatabase } from 'mevn-orm'
+
+export default defineNitroPlugin(() => {
+  configureDatabase({
+    dialect: 'postgres',
+    connectionString: process.env.DATABASE_URL
+  })
+})
+```
+
+`server/models/User.ts`:
+
+```ts
+import { Model } from 'mevn-orm'
+
+export class User extends Model {
+  override fillable = ['name', 'email', 'password']
+  override hidden = ['password']
+}
+```
+
+`server/api/users.get.ts`:
+
+```ts
+import { User } from '../models/User'
+
+export default defineEventHandler(async () => {
+  return await User.all()
+})
+```
+
+`server/api/users.post.ts`:
+
+```ts
+import { User } from '../models/User'
+
+export default defineEventHandler(async (event) => {
+  const body = await readBody(event)
+  return await User.create({
+    name: body.name,
+    email: body.email,
+    password: body.password // hash before storing
+  })
+})
+```
+
+If you prefer Nuxt runtime config:
+
+`nuxt.config.ts`:
+
+```ts
+export default defineNuxtConfig({
+  runtimeConfig: {
+    db: {
+      dialect: 'postgres',
+      connectionString: process.env.DATABASE_URL
+    }
+  }
+})
+```
+
 ## Migrations
 
 Migrations are now programmatic and use Knex’s migration API under the hood.
