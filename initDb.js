@@ -1,20 +1,23 @@
 #!/bin/env node
-const fs = require('fs')
-require('dotenv').config()
-const Knex = require('knex')
+import { existsSync } from 'node:fs'
+import { pathToFileURL } from 'node:url'
+import 'dotenv/config'
+import knexModule from 'knex'
 
-let knexfilePath
+const Knex = knexModule.knex ?? knexModule
 
-if (fs.existsSync(process.cwd() + '/knexfile.js')) {
-	knexfilePath = process.cwd() + '/knexfile.js'
-} else {
-	knexfilePath = process.cwd() + '/knexfile.cjs'
+const knexfilePath = process.cwd() + '/knexfile.js'
+if (!existsSync(knexfilePath)) {
+	throw new Error('knexfile.js not found in current working directory')
 }
-const { development, staging, production } = require(knexfilePath)
+const knexConfigModule = await import(pathToFileURL(knexfilePath).href)
+const knexConfig = knexConfigModule.default ?? knexConfigModule
+const { development, staging, production } = knexConfig
 let config
 
 switch (process.env.NODE_ENV) {
 case 'testing':
+case 'test':
 	config = development
 	break
 case 'development':

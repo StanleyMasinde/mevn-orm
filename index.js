@@ -1,3 +1,4 @@
-require('dotenv').config()
-const {Model, DB} = require('./lib/model')
-module.exports = { Model, DB }
+import 'dotenv/config'
+import { Model, DB } from './lib/model.js'
+
+export { Model, DB }

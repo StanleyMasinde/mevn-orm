@@ -2,11 +2,11 @@
   "name": "mevn-orm",
   "version": "3.2.2",
   "description": "simple ORM for express js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
-    "pretest": "node initDb",
-    "test": "mocha --exit",
-    "init:db": "node initDb",
+    "pretest": "node initDb.js",
+    "test": "vitest run",
+    "init:db": "node initDb.js",
     "migrate": "knex migrate:latest",
     "lint": "eslint --ext .js ./"
   },
@@ -47,10 +47,9 @@
     "@babel/eslint-parser": "^7.24.3",
     "@babel/eslint-plugin": "^7.24.0",
     "@faker-js/faker": "^10.0.0",
-    "chai": "^6.2.0",
     "dotenv": "^17.0.1",
     "knex": "^3.0.0",
-    "mocha": "^11.7.4",
+    "vitest": "^4.0.16",
     "mysql": "^2.18.1",
     "sqlite3": "^5.1.7"
   },
