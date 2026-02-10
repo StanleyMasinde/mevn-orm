@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
-const { Model, DB } = require('../index')
-const {faker} = require('@faker-js/faker')
-const { expect } = require('chai')
+import { faker } from '@faker-js/faker'
+import { describe, it, expect } from 'vitest'
+import { Model, DB } from '../index.js'
 class Profile extends Model {
 	fillable = ['farmer_id', 'bio']
 }
@@ -24,17 +24,17 @@ describe('#Model tests', () => {
 			password: faker.internet.password()
 		})
 		await farmer.save()
-		expect(farmer).to.an('Object')
+		expect(farmer).toBeTypeOf('object')
 	})
 
 	it('#find a model', async () => {
 		const farmer = await Farmer.find(1)
-		expect(farmer).to.an('Object')
+		expect(farmer).toBeTypeOf('object')
 	})
 
 	it('#Find model should return null on not found', async () => {
 		const nonExistent = await Farmer.find(4000)
-		expect(nonExistent).to.equals(null)
+		expect(nonExistent).toBe(null)
 	})
 
 	it('#create a model', async () => {
@@ -43,8 +43,8 @@ describe('#Model tests', () => {
 			email: faker.internet.email(),
 			password: faker.internet.password()
 		})
-		expect(farmer).to.an('Object')
-		expect(farmer.id).to.be.a('number')
+		expect(farmer).toBeTypeOf('object')
+		expect(farmer.id).toBeTypeOf('number')
 	})
 
 	it('#create a model emoji', async () => {
@@ -53,8 +53,8 @@ describe('#Model tests', () => {
 			email: faker.internet.email(),
 			password: faker.internet.password()
 		})
-		expect(farmer).to.an('Object')
-		expect(farmer.id).to.be.a('number')
+		expect(farmer).toBeTypeOf('object')
+		expect(farmer.id).toBeTypeOf('number')
 	})
 
 	it('#Update a model with a new instance', async () => {
@@ -64,23 +64,23 @@ describe('#Model tests', () => {
 			email: faker.internet.email(),
 			password: faker.internet.password()
 		})
-		expect(farmer).to.an('Object')
+		expect(farmer).toBeTypeOf('object')
 	})
 
 	it('#chain where and first', async () => {
 		const farmer = await Farmer.where({ id: 1 }).first()
-		expect(farmer).to.an('Object')
+		expect(farmer).toBeTypeOf('object')
 	})
 
 	it('#Return null when not found', async () => {
 		const farmer = await Farmer.where({ id: 'ggggggg' }).first()
-		expect(farmer).to.be.null
+		expect(farmer).toBe(null)
 	})
 
 	it('#Delete a model', async () => {
 		const farmer = await Farmer.find(1)
 		await farmer.delete()
-		expect(await Farmer.find(1)).to.be.null
+		expect(await Farmer.find(1)).toBe(null)
 	})
 
 	it('#Has one relationship', async () => {
@@ -95,8 +95,8 @@ describe('#Model tests', () => {
 			bio: faker.lorem.sentence()
 		}).save()
 
-		expect(farmer).to.an('Object')
+		expect(farmer).toBeTypeOf('object')
 		const farmerProfile = await farmer.profile()
-		expect(farmerProfile).to.haveOwnProperty('farmer_id', farmer.id)
+		expect(farmerProfile).toHaveProperty('farmer_id', farmer.id)
 	})
 })

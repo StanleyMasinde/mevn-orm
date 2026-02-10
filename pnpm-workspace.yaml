@@ -1,4 +1,5 @@
 onlyBuiltDependencies:
+  - esbuild
   - sqlite3
 
 overrides:

@@ -12,7 +12,7 @@ It is under maintenance mode and receives security updates. Development is pause
 ## Getting Started
 
 ```javascript
-const { Model } = require('mevn-orm')
+import { Model } from 'mevn-orm'
 
 class User extends Model {}
 
@@ -52,7 +52,7 @@ const user = await User.create({
 
 Use Node.js 24.x (LTS) with pnpm.
 
-This project uses [Mocha](https://mochajs.org/) for testing.
+This project uses [Vitest](https://vitest.dev/) for testing.
 
 ```bash
 pnpm install
