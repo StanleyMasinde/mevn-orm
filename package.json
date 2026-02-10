@@ -4,21 +4,18 @@
   "description": "simple ORM for express js",
   "type": "module",
   "scripts": {
-    "pretest": "node initDb.js",
+    "pretest": "node --import tsx initDb.ts",
     "test": "vitest run",
-    "init:db": "node initDb.js",
+    "init:db": "node --import tsx initDb.ts",
+    "typecheck": "tsc --noEmit",
     "migrate": "knex migrate:latest",
-    "lint": "eslint --ext .js ./"
+    "lint": "eslint --ext .js,.ts ./"
   },
   "peerDependencies": {
-    "dotenv": "^17.0.1",
     "knex": "^3.0.0",
     "mysql2": "^3.9.3"
   },
   "peerDependenciesMeta": {
-    "dotenv": {
-      "optional": false
-    },
     "knex": {
       "optional": false
     }
@@ -46,15 +43,18 @@
     "@babel/core": "^7.24.5",
     "@babel/eslint-parser": "^7.24.3",
     "@babel/eslint-plugin": "^7.24.0",
+    "@types/node": "^24.6.0",
     "@faker-js/faker": "^10.0.0",
     "dotenv": "^17.0.1",
     "knex": "^3.0.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.16",
     "mysql": "^2.18.1",
     "sqlite3": "^5.1.7"
   },
   "directories": {
-    "lib": "lib",
+    "src": "src",
     "test": "test"
   },
   "packageManager": "pnpm@10.29.2",
@@ -65,5 +65,5 @@
     "email": "stanleymasinde1@gmail.com"
   },
   "homepage": "https://github.com/StanleyMasinde/mevn-orm#readme",
-  "main": "index.js"
+  "main": "index.ts"
 }

@@ -1,20 +1,25 @@
-/* eslint-disable no-undef */
 import { faker } from '@faker-js/faker'
 import { describe, it, expect } from 'vitest'
-import { Model, DB } from '../index.js'
-class Profile extends Model {
-	fillable = ['farmer_id', 'bio']
-}
-class Farmer extends Model {
-	fillable = ['name', 'email', 'password']
-	hidden = ['password']
+import { Model, configureDatabase } from '../index.js'
 
-	profile() {
+configureDatabase({
+	dialect: 'sqlite',
+	filename: './dev.sqlite'
+})
+
+class Profile extends Model {
+	override fillable = ['farmer_id', 'bio']
+	override hidden = ['bio']
+}
+
+class Farmer extends Model {
+	override fillable = ['name', 'email', 'password']
+	override hidden = ['password']
+
+	profile(): Promise<Model | null> {
 		return this.hasOne(Profile)
 	}
 }
-
-DB(Farmer)
 
 describe('#Model tests', () => {
 	it('#Model instance', async () => {
@@ -59,6 +64,10 @@ describe('#Model tests', () => {
 
 	it('#Update a model with a new instance', async () => {
 		const farmer = await Farmer.find(1)
+		expect(farmer).not.toBeNull()
+		if (!farmer) {
+			return
+		}
 		await farmer.update({
 			name: 'new name',
 			email: faker.internet.email(),
@@ -79,6 +88,10 @@ describe('#Model tests', () => {
 
 	it('#Delete a model', async () => {
 		const farmer = await Farmer.find(1)
+		expect(farmer).not.toBeNull()
+		if (!farmer) {
+			return
+		}
 		await farmer.delete()
 		expect(await Farmer.find(1)).toBe(null)
 	})
@@ -98,5 +111,53 @@ describe('#Model tests', () => {
 		expect(farmer).toBeTypeOf('object')
 		const farmerProfile = await farmer.profile()
 		expect(farmerProfile).toHaveProperty('farmer_id', farmer.id)
+		expect(farmerProfile).not.toHaveProperty('bio')
+	})
+
+	it('#where scope is consumed after first()', async () => {
+		const none = await Farmer.where({ id: 999999 }).first()
+		expect(none).toBe(null)
+
+		const anyFarmer = await Farmer.first()
+		expect(anyFarmer).not.toBe(null)
+	})
+
+	it('#static update applies where scope', async () => {
+		const first = await Farmer.create({
+			name: faker.person.fullName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+		const second = await Farmer.create({
+			name: faker.person.fullName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+
+		const updated = await Farmer.where({ id: first.id }).update({ name: 'Scoped Update' })
+		expect(updated).toBe(1)
+
+		const firstAfter = await Farmer.find(first.id as number)
+		const secondAfter = await Farmer.find(second.id as number)
+		expect(firstAfter).toHaveProperty('name', 'Scoped Update')
+		expect(secondAfter).not.toHaveProperty('name', 'Scoped Update')
+	})
+
+	it('#static destroy applies where scope', async () => {
+		const first = await Farmer.create({
+			name: faker.person.fullName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+		const second = await Farmer.create({
+			name: faker.person.fullName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		})
+
+		const deleted = await Farmer.where({ id: first.id }).destroy()
+		expect(deleted).toBe(1)
+		expect(await Farmer.find(first.id as number)).toBe(null)
+		expect(await Farmer.find(second.id as number)).not.toBe(null)
 	})
 })
