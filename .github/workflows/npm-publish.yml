@@ -16,6 +16,7 @@ jobs:
         with:
           node-version: 24.x
       - uses: pnpm/action-setup@v4
+      - run: cp .env.example .env
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
 
