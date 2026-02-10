@@ -50,7 +50,9 @@ const user = await User.create({
 
 ## Testing
 
-This project uses [Vitest](https://vitest.dev/) for testing.
+Use Node.js 24.x (LTS) with pnpm.
+
+This project uses [Mocha](https://mochajs.org/) for testing.
 
 ```bash
 pnpm install
