@@ -1,14 +1,9 @@
 import type { Knex } from 'knex'
-import knexModule from 'knex'
 import pluralize from 'pluralize'
+import { getDB } from './config.js'
+import { createRelationshipMethods } from './relationships.js'
 
 type Row = Record<string, unknown>
-
-type KnexFactory = (config: Knex.Config) => Knex
-
-const knexFactory: KnexFactory =
-	(knexModule as unknown as { knex?: KnexFactory }).knex ??
-	(knexModule as unknown as KnexFactory)
 
 const toError = (error: unknown): Error => {
 	if (error instanceof Error) {
@@ -16,236 +11,6 @@ const toError = (error: unknown): Error => {
 	}
 
 	return new Error(String(error))
-}
-
-let DB: Knex | undefined
-let defaultMigrationConfig: MigrationConfig = {}
-
-type SimpleDialect =
-	| 'sqlite'
-	| 'better-sqlite3'
-	| 'mysql'
-	| 'mysql2'
-	| 'postgres'
-	| 'postgresql'
-	| 'pg'
-	| 'pgnative'
-	| 'cockroachdb'
-	| 'redshift'
-	| 'mssql'
-	| 'oracledb'
-	| 'oracle'
-
-interface SimpleDatabaseConfig {
-	dialect: SimpleDialect
-	connectionString?: string
-	filename?: string
-	host?: string
-	port?: number
-	user?: string
-	password?: string
-	database?: string
-	ssl?: boolean | Record<string, unknown>
-	debug?: boolean
-	pool?: Knex.PoolConfig
-}
-
-type MigrationConfig = Knex.MigratorConfig
-
-interface MigrationResult {
-	batch: number
-	log: string[]
-}
-
-const getDB = (): Knex => {
-	if (!DB) {
-		throw new Error('Mevn ORM is not configured. Call configure({ client, connection, ... }) before using Model.')
-	}
-
-	return DB
-}
-
-const configure = (config: Knex.Config | Knex): Knex => {
-	if (typeof config === 'function') {
-		DB = config
-		return DB
-	}
-
-	DB = knexFactory(config)
-	return DB
-}
-
-const setMigrationConfig = (config: MigrationConfig): MigrationConfig => {
-	defaultMigrationConfig = { ...config }
-	return { ...defaultMigrationConfig }
-}
-
-const getMigrationConfig = (): MigrationConfig => ({ ...defaultMigrationConfig })
-
-const resolveMigrationConfig = (config?: MigrationConfig): MigrationConfig => ({
-	...defaultMigrationConfig,
-	...(config ?? {}),
-})
-
-const normalizeDialect = (dialect: SimpleDialect): string => {
-	switch (dialect) {
-	case 'sqlite':
-		return 'sqlite3'
-	case 'mysql':
-		return 'mysql2'
-	case 'postgres':
-	case 'postgresql':
-	case 'pg':
-		return 'pg'
-	case 'oracle':
-		return 'oracledb'
-	default:
-		return dialect
-	}
-}
-
-const requireField = (value: unknown, field: string, dialect: string): void => {
-	if (value === undefined || value === null || value === '') {
-		throw new Error(`Missing required field "${field}" for dialect "${dialect}".`)
-	}
-}
-
-const buildConnection = (config: SimpleDatabaseConfig): NonNullable<Knex.Config['connection']> => {
-	if (config.connectionString) {
-		return config.connectionString
-	}
-
-	const client = normalizeDialect(config.dialect)
-
-	if (client === 'sqlite3' || client === 'better-sqlite3') {
-		requireField(config.filename, 'filename', config.dialect)
-		return { filename: config.filename as string }
-	}
-
-	if (client === 'mssql') {
-		const server = config.host
-		requireField(server, 'host', config.dialect)
-		requireField(config.user, 'user', config.dialect)
-		requireField(config.database, 'database', config.dialect)
-		const connection: Record<string, unknown> = {
-			server: server as string,
-			user: config.user as string,
-			database: config.database as string,
-		}
-		if (typeof config.port === 'number') {
-			connection.port = config.port
-		}
-		if (config.password !== undefined) {
-			connection.password = config.password
-		}
-		if (config.ssl) {
-			connection.options = { encrypt: true }
-		}
-		return connection
-	}
-
-	requireField(config.host, 'host', config.dialect)
-	requireField(config.user, 'user', config.dialect)
-	requireField(config.database, 'database', config.dialect)
-	const connection: Record<string, unknown> = {
-		host: config.host as string,
-		user: config.user as string,
-		database: config.database as string,
-	}
-	if (typeof config.port === 'number') {
-		connection.port = config.port
-	}
-	if (config.password !== undefined) {
-		connection.password = config.password
-	}
-	if (config.ssl !== undefined) {
-		connection.ssl = config.ssl
-	}
-	return connection
-}
-
-const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
-	const client = normalizeDialect(config.dialect)
-	const base: Knex.Config = {
-		client,
-		connection: buildConnection(config),
-	}
-	if (config.pool) {
-		base.pool = config.pool
-	}
-	if (typeof config.debug === 'boolean') {
-		base.debug = config.debug
-	}
-
-	if (client === 'sqlite3') {
-		base.useNullAsDefault = true
-	}
-
-	return base
-}
-
-const configureDatabase = (config: SimpleDatabaseConfig): Knex => configure(createKnexConfig(config))
-
-const makeMigration = async (name: string, config?: MigrationConfig): Promise<string> => {
-	try {
-		return await getDB().migrate.make(name, resolveMigrationConfig(config))
-	} catch (error) {
-		throw toError(error)
-	}
-}
-
-const migrateLatest = async (config?: MigrationConfig): Promise<MigrationResult> => {
-	try {
-		const [batch, log] = await getDB().migrate.latest(resolveMigrationConfig(config))
-		return { batch, log }
-	} catch (error) {
-		throw toError(error)
-	}
-}
-
-const migrateRollback = async (config?: MigrationConfig, all = false): Promise<MigrationResult> => {
-	try {
-		const [batch, log] = all
-			? await getDB().migrate.rollback(resolveMigrationConfig(config), true)
-			: await getDB().migrate.rollback(resolveMigrationConfig(config))
-		return { batch, log }
-	} catch (error) {
-		throw toError(error)
-	}
-}
-
-const migrateCurrentVersion = async (config?: MigrationConfig): Promise<string> => {
-	try {
-		return await getDB().migrate.currentVersion(resolveMigrationConfig(config))
-	} catch (error) {
-		throw toError(error)
-	}
-}
-
-const migrateList = async (config?: MigrationConfig): Promise<{ completed: string[]; pending: string[] }> => {
-	try {
-		const [completed, pending] = await getDB().migrate.list(resolveMigrationConfig(config))
-		const toName = (entry: unknown): string => {
-			if (typeof entry === 'string') {
-				return entry
-			}
-			if (entry && typeof entry === 'object') {
-				if ('name' in entry) {
-					return String((entry as { name: unknown }).name)
-				}
-				if ('file' in entry) {
-					return String((entry as { file: unknown }).file)
-				}
-			}
-			return String(entry)
-		}
-		return {
-			completed: completed.map(toName),
-			pending: pending.map(toName),
-		}
-	} catch (error) {
-		throw toError(error)
-	}
 }
 
 class Model {
@@ -383,28 +148,6 @@ class Model {
 		}
 	}
 
-	async hasOne(
-		Related: typeof Model,
-		localKey?: number | string,
-		foreignKey?: string,
-	): Promise<Model | null> {
-		const table = new Related().table
-		const relation: Row = {}
-		const keyValue = localKey ?? this.id
-		const relationKey = foreignKey ?? `${this.modelName}_id`
-
-		if (keyValue !== undefined) {
-			relation[relationKey] = keyValue
-			const result = await getDB()(table).where(relation).first<Row>()
-			if (result) {
-				const related = new Related(result)
-				return related.stripColumns(related)
-			}
-		}
-
-		return null
-	}
-
 	static where(this: typeof Model, conditions: Row = {}): typeof Model {
 		const table = pluralize(this.name.toLowerCase())
 		this.currentQuery = getDB()(table).where(conditions) as Knex.QueryBuilder<Row, Row[]>
@@ -436,8 +179,18 @@ class Model {
 	}
 }
 
+interface Model {
+	hasOne(
+		Related: typeof Model,
+		localKey?: number | string,
+		foreignKey?: string,
+	): Promise<Model | null>
+}
+
+Object.assign(Model.prototype, createRelationshipMethods(getDB) as Pick<Model, 'hasOne'>)
+
+export { Model }
 export {
-	Model,
 	DB,
 	getDB,
 	configure,
@@ -450,4 +203,4 @@ export {
 	migrateRollback,
 	migrateCurrentVersion,
 	migrateList,
-}
+} from './config.js'
