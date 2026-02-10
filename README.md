@@ -190,20 +190,65 @@ configureDatabase({
 ## Nuxt/Nitro Example
 
 Use a server plugin to initialize the ORM once at Nitro startup.
+You can also run idempotent migrations (and optional rollback) during boot.
 
 `server/plugins/mevn-orm.ts`:
 
 ```ts
 import { defineNitroPlugin } from 'nitropack/runtime'
-import { configureDatabase } from 'mevn-orm'
+import {
+  configureDatabase,
+  setMigrationConfig,
+  migrateLatest,
+  migrateRollback
+} from 'mevn-orm'
 
-export default defineNitroPlugin(() => {
+const isIgnorableMigrationError = (error: unknown): boolean => {
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase()
+  return (
+    message.includes('already exists') ||
+    message.includes('duplicate') ||
+    message.includes('does not exist') ||
+    message.includes('no such table') ||
+    message.includes('the migration directory is corrupt')
+  )
+}
+
+export default defineNitroPlugin(async () => {
   configureDatabase({
     dialect: 'postgres',
     connectionString: process.env.DATABASE_URL
   })
+
+  setMigrationConfig({
+    directory: './server/database/migrations',
+    extension: 'ts'
+  })
+
+  // Idempotent at boot: if already migrated, Knex returns empty log.
+  try {
+    await migrateLatest()
+  } catch (error) {
+    if (!isIgnorableMigrationError(error)) {
+      throw error
+    }
+  }
+
+  // Optional rollback at boot (usually only for dev/preview).
+  if (process.env.NITRO_ROLLBACK_ON_BOOT === 'true') {
+    try {
+      await migrateRollback(undefined, false)
+    } catch (error) {
+      if (!isIgnorableMigrationError(error)) {
+        throw error
+      }
+    }
+  }
 })
 ```
+
+For fully idempotent behavior across SQL dialects, write migrations with guards
+(`createTableIfNotExists`, checking column existence, or raw `IF EXISTS/IF NOT EXISTS`).
 
 `server/models/User.ts`:
 
