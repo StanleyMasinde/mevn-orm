@@ -192,10 +192,31 @@ configureDatabase({
 Use a server plugin to initialize the ORM once at Nitro startup.
 You can also run idempotent migrations (and optional rollback) during boot.
 
+Because Nitro bundles server code, migration files must be copied into the build output.
+
+`nuxt.config.ts`:
+
+```ts
+import { cp } from 'node:fs/promises'
+
+export default defineNuxtConfig({
+  nitro: {
+    hooks: {
+      compiled: async () => {
+        await cp('server/assets/migrations', '.output/server/assets/migrations', {
+          recursive: true
+        })
+      }
+    }
+  }
+})
+```
+
 `server/plugins/mevn-orm.ts`:
 
 ```ts
 import { defineNitroPlugin } from 'nitropack/runtime'
+import { existsSync } from 'node:fs'
 import {
   configureDatabase,
   setMigrationConfig,
@@ -220,8 +241,13 @@ export default defineNitroPlugin(async () => {
     connectionString: process.env.DATABASE_URL
   })
 
+  // Nitro runtime path differs in dev vs built server.
+  const migrationDirectory = existsSync('./.output/server/assets/migrations')
+    ? './.output/server/assets/migrations'
+    : './server/assets/migrations'
+
   setMigrationConfig({
-    directory: './server/database/migrations',
+    directory: migrationDirectory,
     extension: 'ts'
   })
 
