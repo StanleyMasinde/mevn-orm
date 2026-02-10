@@ -19,6 +19,7 @@ const toError = (error: unknown): Error => {
 }
 
 let DB: Knex | undefined
+let defaultMigrationConfig: MigrationConfig = {}
 
 type SimpleDialect =
 	| 'sqlite'
@@ -49,6 +50,13 @@ interface SimpleDatabaseConfig {
 	pool?: Knex.PoolConfig
 }
 
+type MigrationConfig = Knex.MigratorConfig
+
+interface MigrationResult {
+	batch: number
+	log: string[]
+}
+
 const getDB = (): Knex => {
 	if (!DB) {
 		throw new Error('Mevn ORM is not configured. Call configure({ client, connection, ... }) before using Model.')
@@ -66,6 +74,18 @@ const configure = (config: Knex.Config | Knex): Knex => {
 	DB = knexFactory(config)
 	return DB
 }
+
+const setMigrationConfig = (config: MigrationConfig): MigrationConfig => {
+	defaultMigrationConfig = { ...config }
+	return { ...defaultMigrationConfig }
+}
+
+const getMigrationConfig = (): MigrationConfig => ({ ...defaultMigrationConfig })
+
+const resolveMigrationConfig = (config?: MigrationConfig): MigrationConfig => ({
+	...defaultMigrationConfig,
+	...(config ?? {}),
+})
 
 const normalizeDialect = (dialect: SimpleDialect): string => {
 	switch (dialect) {
@@ -165,6 +185,68 @@ const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
 }
 
 const configureDatabase = (config: SimpleDatabaseConfig): Knex => configure(createKnexConfig(config))
+
+const makeMigration = async (name: string, config?: MigrationConfig): Promise<string> => {
+	try {
+		return await getDB().migrate.make(name, resolveMigrationConfig(config))
+	} catch (error) {
+		throw toError(error)
+	}
+}
+
+const migrateLatest = async (config?: MigrationConfig): Promise<MigrationResult> => {
+	try {
+		const [batch, log] = await getDB().migrate.latest(resolveMigrationConfig(config))
+		return { batch, log }
+	} catch (error) {
+		throw toError(error)
+	}
+}
+
+const migrateRollback = async (config?: MigrationConfig, all = false): Promise<MigrationResult> => {
+	try {
+		const [batch, log] = all
+			? await getDB().migrate.rollback(resolveMigrationConfig(config), true)
+			: await getDB().migrate.rollback(resolveMigrationConfig(config))
+		return { batch, log }
+	} catch (error) {
+		throw toError(error)
+	}
+}
+
+const migrateCurrentVersion = async (config?: MigrationConfig): Promise<string> => {
+	try {
+		return await getDB().migrate.currentVersion(resolveMigrationConfig(config))
+	} catch (error) {
+		throw toError(error)
+	}
+}
+
+const migrateList = async (config?: MigrationConfig): Promise<{ completed: string[]; pending: string[] }> => {
+	try {
+		const [completed, pending] = await getDB().migrate.list(resolveMigrationConfig(config))
+		const toName = (entry: unknown): string => {
+			if (typeof entry === 'string') {
+				return entry
+			}
+			if (entry && typeof entry === 'object') {
+				if ('name' in entry) {
+					return String((entry as { name: unknown }).name)
+				}
+				if ('file' in entry) {
+					return String((entry as { file: unknown }).file)
+				}
+			}
+			return String(entry)
+		}
+		return {
+			completed: completed.map(toName),
+			pending: pending.map(toName),
+		}
+	} catch (error) {
+		throw toError(error)
+	}
+}
 
 class Model {
 	[key: string]: unknown
@@ -354,4 +436,18 @@ class Model {
 	}
 }
 
-export { Model, DB, getDB, configure, createKnexConfig, configureDatabase }
+export {
+	Model,
+	DB,
+	getDB,
+	configure,
+	createKnexConfig,
+	configureDatabase,
+	setMigrationConfig,
+	getMigrationConfig,
+	makeMigration,
+	migrateLatest,
+	migrateRollback,
+	migrateCurrentVersion,
+	migrateList,
+}

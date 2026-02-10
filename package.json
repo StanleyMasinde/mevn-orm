@@ -8,7 +8,11 @@
     "test": "vitest run",
     "init:db": "node --import tsx initDb.ts",
     "typecheck": "tsc --noEmit",
-    "migrate": "knex migrate:latest",
+    "migrate": "node --import tsx scripts/migrate.ts latest",
+    "migrate:make": "node --import tsx scripts/migrate.ts make",
+    "migrate:rollback": "node --import tsx scripts/migrate.ts rollback",
+    "migrate:list": "node --import tsx scripts/migrate.ts list",
+    "migrate:version": "node --import tsx scripts/migrate.ts version",
     "lint": "eslint --ext .js,.ts ./"
   },
   "peerDependencies": {

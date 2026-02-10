@@ -1,6 +1,19 @@
+import { mkdtempSync, existsSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { basename, join } from 'node:path'
 import { faker } from '@faker-js/faker'
 import { describe, it, expect } from 'vitest'
-import { Model, configureDatabase } from '../index.js'
+import {
+	Model,
+	configureDatabase,
+	makeMigration,
+	migrateLatest,
+	migrateRollback,
+	migrateCurrentVersion,
+	migrateList,
+	setMigrationConfig,
+	getMigrationConfig
+} from '../index.js'
 
 configureDatabase({
 	dialect: 'sqlite',
@@ -22,6 +35,37 @@ class Farmer extends Model {
 }
 
 describe('#Model tests', () => {
+	it('#migration api supports generation and execution', async () => {
+		const directory = mkdtempSync(join(tmpdir(), 'mevn-orm-migrations-'))
+		const filenameDb = join(tmpdir(), `mevn-orm-${Date.now()}.sqlite`)
+		configureDatabase({
+			dialect: 'sqlite',
+			filename: filenameDb
+		})
+		setMigrationConfig({ directory, extension: 'js' })
+		expect(getMigrationConfig()).toHaveProperty('directory', directory)
+
+		const filename = await makeMigration(`create_test_table_${Date.now()}`)
+		expect(existsSync(filename)).toBe(true)
+
+		const latest = await migrateLatest()
+		expect(latest.log).toContain(basename(filename))
+
+		const listed = await migrateList()
+		expect(listed.completed).toContain(basename(filename))
+
+		const version = await migrateCurrentVersion()
+		expect(version).not.toBe('none')
+
+		const rollback = await migrateRollback()
+		expect(rollback.log).toContain(basename(filename))
+
+		configureDatabase({
+			dialect: 'sqlite',
+			filename: './dev.sqlite'
+		})
+	})
+
 	it('#Model instance', async () => {
 		const farmer = new Farmer({
 			name: faker.person.fullName(),

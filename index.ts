@@ -1,3 +1,31 @@
-import { Model, DB, getDB, configure, createKnexConfig, configureDatabase } from './src/model.js'
+import {
+	Model,
+	DB,
+	getDB,
+	configure,
+	createKnexConfig,
+	configureDatabase,
+	setMigrationConfig,
+	getMigrationConfig,
+	makeMigration,
+	migrateLatest,
+	migrateRollback,
+	migrateCurrentVersion,
+	migrateList,
+} from './src/model.js'
 
-export { Model, DB, getDB, configure, createKnexConfig, configureDatabase }
+export {
+	Model,
+	DB,
+	getDB,
+	configure,
+	createKnexConfig,
+	configureDatabase,
+	setMigrationConfig,
+	getMigrationConfig,
+	makeMigration,
+	migrateLatest,
+	migrateRollback,
+	migrateCurrentVersion,
+	migrateList,
+}

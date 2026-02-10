@@ -10,6 +10,7 @@ It exports:
 - `Model`: base class for your models
 - `configureDatabase`: initialize with simple DB options by dialect
 - `configure`: initialize with raw Knex config (advanced)
+- migration helpers: `makeMigration`, `migrateLatest`, `migrateRollback`, `migrateList`, `migrateCurrentVersion`
 - `DB`: initialized Knex instance (after `configure`)
 
 ## Status
@@ -93,6 +94,13 @@ await found?.update({ name: 'Jane Updated' })
 - `configure(config: Knex.Config | Knex): Knex`
 - `getDB(): Knex`
 - `DB` (Knex instance once configured)
+- `setMigrationConfig(config): MigrationConfig`
+- `getMigrationConfig(): MigrationConfig`
+- `makeMigration(name, config?): Promise<string>`
+- `migrateLatest(config?): Promise<{ batch: number; log: string[] }>`
+- `migrateRollback(config?, all?): Promise<{ batch: number; log: string[] }>`
+- `migrateCurrentVersion(config?): Promise<string>`
+- `migrateList(config?): Promise<{ completed: string[]; pending: string[] }>`
 
 ### Model instance members
 
@@ -168,6 +176,46 @@ configureDatabase({
   database: 'app_db',
   ssl: true
 })
+```
+
+## Migrations
+
+Migrations are now programmatic and use Knex’s migration API under the hood.
+
+```ts
+import {
+  configureDatabase,
+  setMigrationConfig,
+  makeMigration,
+  migrateLatest,
+  migrateRollback,
+  migrateList
+} from 'mevn-orm'
+
+configureDatabase({
+  dialect: 'sqlite',
+  filename: './dev.sqlite'
+})
+
+setMigrationConfig({
+  directory: './migrations',
+  extension: 'ts'
+})
+
+await makeMigration('create_users_table')
+await migrateLatest()
+const { completed, pending } = await migrateList()
+await migrateRollback(undefined, false) // rollback last batch
+```
+
+Repository migration commands (no `knexfile` required):
+
+```bash
+pnpm run migrate
+pnpm run migrate:make -- create_users_table
+pnpm run migrate:rollback
+pnpm run migrate:list
+pnpm run migrate:version
 ```
 
 ## Security Notes
