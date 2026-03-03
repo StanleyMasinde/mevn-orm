@@ -20,9 +20,9 @@ updates:
     time: '00:00'
   open-pull-requests-limit: 10
   reviewers:
-    - stanleymasinde
+    - StanleyMasinde
   assignees:
-    - stanleymasinde
+    - StanleyMasinde
   commit-message:
     prefix: fix
     prefix-development: chore
