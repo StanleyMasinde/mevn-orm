@@ -49,21 +49,21 @@
     "@babel/core": "^7.29.0",
     "@babel/eslint-parser": "^7.28.6",
     "@babel/eslint-plugin": "^7.27.1",
-    "@faker-js/faker": "^10.3.0",
+    "@faker-js/faker": "^10.4.0",
     "@types/node": "^25.5.0",
     "dotenv": "^17.3.1",
-    "knex": "^3.1.0",
+    "knex": "^3.2.6",
     "mysql": "^2.18.1",
     "sqlite3": "^6.0.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.0"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
   },
   "directories": {
     "src": "src",
     "test": "test"
   },
-  "packageManager": "pnpm@10.32.1",
+  "packageManager": "pnpm@10.33.0",
   "private": false,
   "repository": "git+https://github.com/StanleyMasinde/mevn-orm.git",
   "bugs": {

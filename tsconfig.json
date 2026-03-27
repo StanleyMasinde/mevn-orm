@@ -10,7 +10,6 @@
     "useUnknownInCatchVariables": true,
     "noEmit": true,
     "skipLibCheck": false,
-    "esModuleInterop": false,
     "forceConsistentCasingInFileNames": true,
     "types": [
       "node",
