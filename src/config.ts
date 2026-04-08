@@ -18,7 +18,8 @@ const toError = (error: unknown): Error => {
 let DB: Knex | undefined
 let defaultMigrationConfig: Knex.MigratorConfig = {}
 
-type SimpleDialect =
+type SupportedClient =
+	| 'sqlite3'
 	| 'sqlite'
 	| 'better-sqlite3'
 	| 'mysql'
@@ -34,7 +35,9 @@ type SimpleDialect =
 	| 'oracle'
 
 interface SimpleDatabaseConfig {
-	dialect: SimpleDialect
+	client?: SupportedClient
+	dialect?: SupportedClient
+	connection?: NonNullable<Knex.Config['connection']>
 	connectionString?: string
 	filename?: string
 	host?: string
@@ -86,8 +89,18 @@ const resolveMigrationConfig = (config?: Knex.MigratorConfig): Knex.MigratorConf
 	...(config ?? {}),
 })
 
-const normalizeDialect = (dialect: SimpleDialect): string => {
-	switch (dialect) {
+const getConfiguredClient = (config: SimpleDatabaseConfig): SupportedClient => {
+	const configuredClient = config.client ?? config.dialect
+	if (!configuredClient) {
+		throw new Error('Missing required field "client".')
+	}
+
+	return configuredClient
+}
+
+const normalizeClient = (client: SupportedClient): string => {
+	switch (client) {
+	case 'sqlite3':
 	case 'sqlite':
 		return 'sqlite3'
 	case 'mysql':
@@ -99,33 +112,38 @@ const normalizeDialect = (dialect: SimpleDialect): string => {
 	case 'oracle':
 		return 'oracledb'
 	default:
-		return dialect
+		return client
 	}
 }
 
-const requireField = (value: unknown, field: string, dialect: string): void => {
+const requireField = (value: unknown, field: string, client: string): void => {
 	if (value === undefined || value === null || value === '') {
-		throw new Error(`Missing required field "${field}" for dialect "${dialect}".`)
+		throw new Error(`Missing required field "${field}" for client "${client}".`)
 	}
 }
 
 const buildConnection = (config: SimpleDatabaseConfig): NonNullable<Knex.Config['connection']> => {
+	if (config.connection !== undefined) {
+		return config.connection
+	}
+
 	if (config.connectionString) {
 		return config.connectionString
 	}
 
-	const client = normalizeDialect(config.dialect)
+	const configuredClient = getConfiguredClient(config)
+	const client = normalizeClient(configuredClient)
 
 	if (client === 'sqlite3' || client === 'better-sqlite3') {
-		requireField(config.filename, 'filename', config.dialect)
+		requireField(config.filename, 'filename', configuredClient)
 		return { filename: config.filename as string }
 	}
 
 	if (client === 'mssql') {
 		const server = config.host
-		requireField(server, 'host', config.dialect)
-		requireField(config.user, 'user', config.dialect)
-		requireField(config.database, 'database', config.dialect)
+		requireField(server, 'host', configuredClient)
+		requireField(config.user, 'user', configuredClient)
+		requireField(config.database, 'database', configuredClient)
 		const connection: Record<string, unknown> = {
 			server: server as string,
 			user: config.user as string,
@@ -143,9 +161,9 @@ const buildConnection = (config: SimpleDatabaseConfig): NonNullable<Knex.Config[
 		return connection
 	}
 
-	requireField(config.host, 'host', config.dialect)
-	requireField(config.user, 'user', config.dialect)
-	requireField(config.database, 'database', config.dialect)
+	requireField(config.host, 'host', configuredClient)
+	requireField(config.user, 'user', configuredClient)
+	requireField(config.database, 'database', configuredClient)
 	const connection: Record<string, unknown> = {
 		host: config.host as string,
 		user: config.user as string,
@@ -163,9 +181,9 @@ const buildConnection = (config: SimpleDatabaseConfig): NonNullable<Knex.Config[
 	return connection
 }
 
-/** Builds a Knex config from a simplified, dialect-first configuration object. */
+/** Builds a Knex config from simple database options using documented `client`/`connection` keys. */
 const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
-	const client = normalizeDialect(config.dialect)
+	const client = normalizeClient(getConfiguredClient(config))
 	const base: Knex.Config = {
 		client,
 		connection: buildConnection(config),
@@ -184,7 +202,7 @@ const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
 	return base
 }
 
-/** Configures the ORM from simplified database options. */
+/** Configures the ORM from simple database options. */
 const configureDatabase = (config: SimpleDatabaseConfig): Knex => configure(createKnexConfig(config))
 
 /** Generates a migration file and returns its path. */

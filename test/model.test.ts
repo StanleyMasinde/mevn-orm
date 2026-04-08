@@ -5,6 +5,7 @@ import { faker } from '@faker-js/faker'
 import { describe, it, expect } from 'vitest'
 import {
 	Model,
+	createKnexConfig,
 	configureDatabase,
 	makeMigration,
 	migrateLatest,
@@ -16,8 +17,10 @@ import {
 } from '../index.js'
 
 configureDatabase({
-	dialect: 'sqlite',
-	filename: './dev.sqlite'
+	client: 'sqlite3',
+	connection: {
+		filename: './dev.sqlite'
+	}
 })
 
 class Profile extends Model {
@@ -51,8 +54,10 @@ describe('#Model tests', () => {
 		const directory = mkdtempSync(join(tmpdir(), 'mevn-orm-migrations-'))
 		const filenameDb = join(tmpdir(), `mevn-orm-${Date.now()}.sqlite`)
 		configureDatabase({
-			dialect: 'sqlite',
-			filename: filenameDb
+			client: 'sqlite3',
+			connection: {
+				filename: filenameDb
+			}
 		})
 		setMigrationConfig({ directory, extension: 'js' })
 		expect(getMigrationConfig()).toHaveProperty('directory', directory)
@@ -73,9 +78,35 @@ describe('#Model tests', () => {
 		expect(rollback.log).toContain(basename(filename))
 
 		configureDatabase({
+			client: 'sqlite3',
+			connection: {
+				filename: './dev.sqlite'
+			}
+		})
+	})
+
+	it('#createKnexConfig supports documented client/connection config', () => {
+		const config = createKnexConfig({
+			client: 'sqlite3',
+			connection: {
+				filename: './dev.sqlite'
+			}
+		})
+
+		expect(config.client).toBe('sqlite3')
+		expect(config.connection).toEqual({ filename: './dev.sqlite' })
+		expect(config.useNullAsDefault).toBe(true)
+	})
+
+	it('#createKnexConfig keeps deprecated dialect config working', () => {
+		const config = createKnexConfig({
 			dialect: 'sqlite',
 			filename: './dev.sqlite'
 		})
+
+		expect(config.client).toBe('sqlite3')
+		expect(config.connection).toEqual({ filename: './dev.sqlite' })
+		expect(config.useNullAsDefault).toBe(true)
 	})
 
 	it('#Model instance', async () => {

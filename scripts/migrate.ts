@@ -12,7 +12,10 @@ import {
 const [command = 'latest', name] = process.argv.slice(2)
 
 const databaseConfig: Parameters<typeof configureDatabase>[0] = {
-	dialect: (process.env.DB_DIALECT as
+	client: (process.env.DB_CLIENT ??
+		process.env.DB_DIALECT ??
+		'sqlite3') as
+		| 'sqlite3'
 		| 'sqlite'
 		| 'better-sqlite3'
 		| 'mysql'
@@ -25,7 +28,7 @@ const databaseConfig: Parameters<typeof configureDatabase>[0] = {
 		| 'redshift'
 		| 'mssql'
 		| 'oracledb'
-		| 'oracle') ?? 'sqlite',
+		| 'oracle',
 	filename: process.env.DB_FILENAME ?? './dev.sqlite',
 }
 
