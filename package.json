@@ -56,7 +56,7 @@
     "migrate:rollback": "node --import tsx scripts/migrate.ts rollback",
     "migrate:list": "node --import tsx scripts/migrate.ts list",
     "migrate:version": "node --import tsx scripts/migrate.ts version",
-    "lint": "eslint --ext .js,.ts ./",
+    "lint": "eslint .",
     "build": "tsc -p tsconfig.build.json",
     "prepack": "pnpm run build"
   },
@@ -64,15 +64,12 @@
     "pluralize": "^8.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.28.6",
-    "@babel/core": "^7.29.0",
-    "@babel/eslint-parser": "^7.28.6",
-    "@babel/eslint-plugin": "^7.27.1",
+    "@typescript-eslint/parser": "^8.46.1",
     "@faker-js/faker": "^10.4.0",
     "@types/node": "^25.5.2",
     "dotenv": "^17.4.1",
+    "eslint": "^9.39.2",
     "knex": "^3.2.9",
-    "mysql": "^2.18.1",
     "sqlite3": "^6.0.1",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
