@@ -1,6 +1,14 @@
 # Changelog
 
-Derived from Git tags only. Untagged and uncommitted changes are intentionally excluded.
+## v4.2.0
+
+- Restore support for the documented `client` and `connection` database config shape.
+- Keep deprecated `dialect` config working as a compatibility path.
+- Update migration script defaults to prefer `DB_CLIENT` while still accepting `DB_DIALECT`.
+- Add tests covering both the documented config shape and deprecated compatibility config.
+- Migrate linting to ESLint 9 flat config.
+- Remove unused Babel lint tooling and the unused `mysql` dependency.
+- Refresh the README and rebuild the changelog.
 
 ## v4.1.0 - 2026-03-27
 
