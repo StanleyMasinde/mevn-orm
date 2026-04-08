@@ -26,8 +26,8 @@ This project is in maintenance mode. Core functionality works, but new features 
 
 ```bash
 npm install mevn-orm knex
-npm install mysql2
-````
+npm install mysql2 # or your selected Knex driver
+```
 
 For SQLite development/testing:
 

@@ -1,135 +1,145 @@
-## [unreleased]
+# Changelog
 
-### 💼 Other
+Derived from Git tags only. Untagged and uncommitted changes are intentionally excluded.
 
-- Use Node 16 until I figure out what is going on
-## [3.2.0] - 2025-09-29
+## v4.1.0 - 2026-03-27
 
-### 🐛 Bug Fixes
+- Bump version from 4.0.7 to 4.1.0.
+- Upgrade dependencies.
+- Bump `@faker-js/faker` from `10.3.0` to `10.4.0`.
+- Bump `vitest` from `4.1.0` to `4.1.1`.
 
-- *(deps)* Bump actions/checkout from 4 to 5
-- *(deps)* Bump actions/setup-node from 4 to 5
+## v4.0.7 - 2026-03-21
 
-### 💼 Other
+- Bump version from 4.0.6 to 4.0.7.
+- Fix workflow permission code-scanning alerts.
+- Bump `sqlite3` from `5.1.7` to `6.0.1`.
+- Bump `pnpm/action-setup` from `4` to `5`.
 
-- Support the latest versions of node
-- Only use Node 20 for tests
+## v4.0.6 - 2026-03-17
 
-### ⚙️ Miscellaneous Tasks
+- Upgrade dependencies.
 
-- Upgrade deps
-## [3.0.0] - 2025-07-02
+## v4.0.5 - 2026-03-12
 
-### 🐛 Bug Fixes
+- Bump version from 4.0.4 to 4.0.5.
+- Bump `@types/node` from `25.3.3` to `25.4.0`.
 
-- *(deps)* Bump actions/checkout from 3 to 4
-- *(deps)* Bump actions/setup-node from 3 to 4
+## v4.0.4 - 2026-03-03
 
-### ⚙️ Miscellaneous Tasks
+- Bump package version.
+- Upgrade dependencies to address vulnerable packages.
 
-- Upgrade deps
-## [2.4.7-1] - 2023-03-08
+## v4.0.3 - 2026-03-03
 
-### ⚙️ Miscellaneous Tasks
+- Bump version from 4.0.2 to 4.0.3.
+- Change Dependabot schedule to weekly.
+- Fix PR assignee and reviewer usernames.
+- Bump `dotenv` from `17.2.4` to `17.3.1`.
+- Bump `@types/node` from `24.10.13` to `25.3.3`.
 
-- Update the default peer dep
-## [2.4.6] - 2023-03-08
+## v4.0.2 - 2026-02-11
 
-### ⚙️ Miscellaneous Tasks
+- Bump version from 4.0.1 to 4.0.2.
+- Revise README for clarity and updated client names.
 
-- Add auto publish to npm
-## [2.4.5] - 2023-03-06
+## v4.0.1 - 2026-02-11
 
-### 💼 Other
+- Stop publishing `.ts` files to npm.
 
-- Update npm dependencies
+## v4.0.0 - 2026-02-11
 
-### ⚙️ Miscellaneous Tasks
+- Bump version from 3.2.2 to 4.0.0.
+- Rewrite the package in TypeScript.
+- Switch tests to Vitest.
+- Add migration support.
+- Refactor relationships and database config.
+- Expand documentation, including Nuxt/Nitro and migration examples.
 
-- *(ci)* Drop support for node 14
-- *(version)* Release patch version  2.4.5
-## [2.4.4] - 2023-01-04
+## v3.2.2-2 - 2026-02-11
 
-### ⚙️ Miscellaneous Tasks
+- Pre-release for `v3.2.2`.
+- Fix CI database configuration.
+- Use the latest Node LTS in CI.
 
-- *(version)* Release patch version  2.4.4
-## [2.4.3] - 2023-01-04
+## v3.2.2-1 - 2026-02-10
 
-### ⚙️ Miscellaneous Tasks
+- Tag created with no additional non-merge commits beyond `v3.2.2`.
 
-- *(version)* Release patch version  2.4.3
-## [2.4.2] - 2023-01-03
+## v3.2.2 - 2026-02-11
 
-### 🐛 Bug Fixes
+- Fix pnpm publish flow.
+- Switch the package manager to pnpm.
+- Upgrade dependencies to address CVEs.
+- Fix multiple pnpm versions configured in CI.
+- Use the latest Node LTS in CI.
+- Bump several dev dependencies, including Babel, Faker, Chai, Mocha, `dotenv`, and `js-yaml`.
 
-- *(deps)* Bump actions/checkout from 2 to 3 (#60)
+## v3.2.1 - 2025-09-29
 
-### ⚙️ Miscellaneous Tasks
+- Add `changelog.md`.
+- Temporarily pin CI to Node 16.
 
-- *(version)* Release patch version  2.4.2
-## [2.4.1] - 2022-07-21
+## v3.2.0 - 2025-09-29
 
-### ⚙️ Miscellaneous Tasks
+- Use Node 20 for tests.
+- Support the latest Node versions in CI.
+- Upgrade dependencies.
+- Bump `actions/setup-node` from `4` to `5`.
+- Bump `actions/checkout` from `4` to `5`.
+- Remove `.babelrc`.
 
-- *(version)* Release patch  version  2.4.1
-## [2.4.0] - 2022-07-20
+## v3.1.0 - 2025-07-02
 
-### ⚙️ Miscellaneous Tasks
+- Release tag `v3.1.0`.
 
-- *(version)* Release minor version  2.4.0
-## [2.3.7] - 2022-07-20
+## v3.0.0 - 2025-07-02
 
-### 🐛 Bug Fixes
+- Release tag `v3.0.0`.
 
-- *(deps)* Bump actions/setup-node from 2 to 3 (#59)
-- *(dev)* Throwing error in the init db command that is used for setup
+## v2.6.0 - 2025-07-02
 
-### ⚙️ Miscellaneous Tasks
+- Upgrade dependencies.
+- Bump `@faker-js/faker` from `8.4.1` to `9.9.0`.
+- Bump `@babel/core` from `7.27.4` to `7.27.7`.
+- Bump `@babel/eslint-parser` from `7.27.1` to `7.27.5`.
+- Bump `dotenv` from `16.5.0` to `17.0.1`.
+- Bump `actions/setup-node` from `3` to `4`.
+- Bump `actions/checkout` from `3` to `4`.
+- Update the README.
 
-- *(dev)* The default database in .env.example is now mysql
-- *(dev)* Using sqlite 3 instead of @vscode/sqlite3
-- *(version)* Release patch  version  2.3.7
-## [2.3.6] - 2022-02-03
+## v2.5.0 - 2025-06-01
 
-### 🐛 Bug Fixes
+- Upgrade dependencies.
+- Update the README.
+- Bump `eslint` from `8.35.0` to `8.39.0`.
+- Bump `@babel/cli` from `7.21.0` to `7.21.5`.
+- Bump `@babel/core` from `7.21.0` to `7.21.5`.
+- Bump `@babel/eslint-parser` from `7.19.1` to `7.21.3`.
+- Bump `sqlite3` from `5.1.4` to `5.1.6`.
 
-- *(config)* Error when reolving config from the user defined config. file not found
-- *(knexfile)* The path of the knex file was still not updated to use either of the 2 .js or .cjs
+## Archive
 
-### ⚙️ Miscellaneous Tasks
-
-- *(version)* Release patch  version  2.3.2
-- *(version)* Release patch  version  2.3.3
-- *(version)* Release patch  version  2.3.4
-- *(version)* Release patch  version  2.3.5
-- *(version)* Release patch  version  2.3.6
-## [2.3.1] - 2022-02-01
-
-### ⚙️ Miscellaneous Tasks
-
-- *(version)* Release minor version  2.3.1
-## [2.3.0] - 2022-02-01
-
-### 🚀 Features
-
-- *(find)* Added the static find method
-- *(model)* Added the create method
-- *(update)* Added the instance update method
-- *(delete)* Added a delete method
-
-### 🐛 Bug Fixes
-
-- *(deps)* Bump knex from 0.21.17 to 0.95.11 (#12)
-- *(exports)* Breaking changes were pushed with the previous change. the changes has been fixed
-- *(tableName)* Not hiding the table by default
-- *(first)* Fixed the first method
-- *(knexfile)* Loading knexfile from the current working dir instead of the root of the package
-- *(deps)* The latest knex version removed as a peer dep.
-
-### ⚙️ Miscellaneous Tasks
-
-- *(package)* Updated package.json
-- *(es6)* Using .cjs for knexfile
-- *(version)* Release 2.2.13
-- *(version)* Release minor version  2.2.14
-- *(version)* Release minor version  2.3.0
+- `v2.4.7-1` - 2023-03-08
+- `v2.4.6` - 2023-03-08
+- `v2.4.5` - 2023-03-06
+- `v2.4.4` - 2023-01-04
+- `v2.4.3` - 2023-01-04
+- `v2.4.2` - 2023-01-03
+- `v2.4.1` - 2022-07-21
+- `v2.4.0` - 2022-07-20
+- `v2.3.7` - 2022-07-20
+- `2.3.6` - 2022-02-03
+- `v2.3.0` - 2022-02-01
+- `2.3.1` - 2022-02-01
+- `v2.2.1` - 2021-02-16
+- `v2.2.0` - 2021-02-16
+- `v2.1.5` - 2021-01-29
+- `v2.1.4` - 2021-01-29
+- `v2.1.3` - 2021-01-28
+- `v2.1.2` - 2021-01-13
+- `v2.1.0` - 2021-01-13
+- `v2.0.4` - 2021-01-02
+- `v2.0.3` - 2020-12-22
+- `v2.0.2` - 2020-12-17
+- `v2.0.1` - 2020-12-11
