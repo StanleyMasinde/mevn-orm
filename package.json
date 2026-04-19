@@ -73,6 +73,7 @@
     "sqlite3": "^6.0.1",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
+    "vite": "8",
     "vitest": "^4.1.4"
   },
   "peerDependencies": {
