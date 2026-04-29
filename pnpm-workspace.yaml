@@ -1,3 +1,6 @@
+allowBuilds:
+  esbuild: true
+  sqlite3: false
 onlyBuiltDependencies:
   - esbuild
   - sqlite3
