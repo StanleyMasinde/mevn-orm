@@ -7,6 +7,7 @@ settings:
 overrides:
   '@tootallnate/once@<3.0.1': '>=3.0.1'
   brace-expansion@<5.0.5: '>=5.0.5'
+  brace-expansion@>=5.0.0 <5.0.6: '>=5.0.6'
   diff@>=6.0.0 <8.0.3: '>=8.0.3'
   minimatch@<3.1.3: '>=3.1.3'
   minimatch@<3.1.4: '>=3.1.4'
@@ -48,7 +49,7 @@ importers:
         version: 10.2.1
       knex:
         specifier: ^3.2.9
-        version: 3.2.9(sqlite3@6.0.1)
+        version: 3.2.9(mysql2@3.22.3(@types/node@25.6.0))(sqlite3@6.0.1)
       sqlite3:
         specifier: ^6.0.1
         version: 6.0.1
@@ -528,8 +529,8 @@ packages:
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
 
-  brace-expansion@5.0.5:
-    resolution: {integrity: sha512-VZznLgtwhn+Mact9tfiwx64fA9erHH/MCXEUfB/0bX/6Fz6ny5EGTXYltMocqg4xFAQZtnO3DHWWXi8RiuN7cQ==}
+  brace-expansion@5.0.6:
+    resolution: {integrity: sha512-kLpxurY4Z4r9sgMsyG0Z9uzsBlgiU/EFKhj/h91/8yHu0edo7XuixOIH3VcJ8kkxs6/jPzoI6U9Vj3WqbMQ94g==}
     engines: {node: 18 || 20 || >=22}
 
   buffer@5.7.1:
@@ -1719,7 +1720,7 @@ snapshots:
       inherits: 2.0.4
       readable-stream: 3.6.2
 
-  brace-expansion@5.0.5:
+  brace-expansion@5.0.6:
     dependencies:
       balanced-match: 4.0.4
 
@@ -1992,7 +1993,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knex@3.2.9(sqlite3@6.0.1):
+  knex@3.2.9(mysql2@3.22.3(@types/node@25.6.0))(sqlite3@6.0.1):
     dependencies:
       colorette: 2.0.19
       commander: 10.0.1
@@ -2009,6 +2010,7 @@ snapshots:
       tarn: 3.0.2
       tildify: 2.0.0
     optionalDependencies:
+      mysql2: 3.22.3(@types/node@25.6.0)
       sqlite3: 6.0.1
     transitivePeerDependencies:
       - supports-color
@@ -2085,7 +2087,7 @@ snapshots:
 
   minimatch@10.2.5:
     dependencies:
-      brace-expansion: 5.0.5
+      brace-expansion: 5.0.6
 
   minimist@1.2.8: {}
 
