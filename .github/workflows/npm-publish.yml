@@ -4,6 +4,7 @@
 name: Node.js Package
 permissions:
   contents: read
+  id-token: write
 
 on:
   release:
@@ -35,6 +36,4 @@ jobs:
       - uses: pnpm/action-setup@v6
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
-      - run: pnpm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+      - run: npm publish
