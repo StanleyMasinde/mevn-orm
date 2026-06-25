@@ -6,21 +6,17 @@ interface RelationshipModel {
 	[key: string]: unknown
 	modelName: string
 	id?: number | string
-	stripColumns<T extends RelationshipModel>(model: T, keepInternalState?: boolean): T
+	stripColumns<T extends Record<string, unknown>>(model: T, keepInternalState?: boolean | undefined): T
 }
 
-interface RelatedModelInstance extends RelationshipModel {
-	table: string
-}
-
-type RelatedModelCtor = new (properties?: Row) => RelatedModelInstance
+type RelatedModelCtor<T extends RelationshipModel = RelationshipModel> = new (properties?: Row) => T
 
 /** Base relation wrapper that builds a lazy Knex query against a related model. */
-abstract class Relation<TResult> implements PromiseLike<TResult> {
-	protected readonly Related: RelatedModelCtor
+abstract class Relation<TResult, TRelated extends RelationshipModel = RelationshipModel> implements PromiseLike<TResult> {
+	protected readonly Related: RelatedModelCtor<TRelated>
 	protected readonly query: Knex.QueryBuilder<Row, Row[]> | null
 
-	constructor(Related: RelatedModelCtor, query: Knex.QueryBuilder<Row, Row[]> | null) {
+	constructor(Related: RelatedModelCtor<TRelated>, query: Knex.QueryBuilder<Row, Row[]> | null) {
 		this.Related = Related
 		this.query = query
 	}
@@ -32,7 +28,7 @@ abstract class Relation<TResult> implements PromiseLike<TResult> {
 	}
 
 	/** Executes the relation query and returns the first matching related model. */
-	async first(columns: string | string[] = '*'): Promise<RelationshipModel | null> {
+	async first(columns: string | string[] = '*'): Promise<TRelated | null> {
 		if (!this.query) {
 			return null
 		}
@@ -47,7 +43,7 @@ abstract class Relation<TResult> implements PromiseLike<TResult> {
 	}
 
 	/** Executes the relation query and returns all matching related models. */
-	async get(columns: string | string[] = '*'): Promise<RelationshipModel[]> {
+	async get(columns: string | string[] = '*'): Promise<TRelated[]> {
 		if (!this.query) {
 			return []
 		}
@@ -69,20 +65,20 @@ abstract class Relation<TResult> implements PromiseLike<TResult> {
 	protected abstract resolve(): Promise<TResult>
 }
 
-class HasOneRelation extends Relation<RelationshipModel | null> {
-	protected resolve(): Promise<RelationshipModel | null> {
+class HasOneRelation<T extends RelationshipModel = RelationshipModel> extends Relation<T | null, T> {
+	protected resolve(): Promise<T | null> {
 		return this.first()
 	}
 }
 
-class HasManyRelation extends Relation<RelationshipModel[]> {
-	protected resolve(): Promise<RelationshipModel[]> {
+class HasManyRelation<T extends RelationshipModel = RelationshipModel> extends Relation<T[], T> {
+	protected resolve(): Promise<T[]> {
 		return this.get()
 	}
 }
 
-class BelongsToRelation extends Relation<RelationshipModel | null> {
-	protected resolve(): Promise<RelationshipModel | null> {
+class BelongsToRelation<T extends RelationshipModel = RelationshipModel> extends Relation<T | null, T> {
+	protected resolve(): Promise<T | null> {
 		return this.first()
 	}
 }

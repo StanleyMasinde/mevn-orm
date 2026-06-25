@@ -30,4 +30,5 @@ jobs:
     - run: cp .env.example .env
     - run: pnpm install --frozen-lockfile
     - run: pnpm run --if-present build
+    - run: pnpm run typecheck
     - run: pnpm test
