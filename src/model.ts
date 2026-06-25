@@ -123,19 +123,19 @@ class Model {
 	}
 
 	/** Finds a single model by primary key. */
-	static async find(this: typeof Model, id: number | string, columns: string | string[] = '*'): Promise<Model | null> {
+	static async find<T extends typeof Model>(this: T, id: number | string, columns: string | string[] = '*'): Promise<InstanceType<T> | null> {
 		const table = pluralize(this.name.toLowerCase())
 
 		try {
 			const fields = await getDB()(table).where({ id }).first<Row>(columns as never)
-			return fields ? new this(fields) : null
+			return fields ? new this(fields) as InstanceType<T> : null
 		} catch (error) {
 			throw toError(error)
 		}
 	}
 
 	/** Finds a model by primary key or throws if it does not exist. */
-	static async findOrFail(this: typeof Model, id: number | string, columns: string | string[] = '*'): Promise<Model> {
+	static async findOrFail<T extends typeof Model>(this: T, id: number | string, columns: string | string[] = '*'): Promise<InstanceType<T>> {
 		const found = await this.find(id, columns)
 		if (!found) {
 			throw new Error(`${this.name} with id "${id}" not found`)
@@ -145,7 +145,7 @@ class Model {
 	}
 
 	/** Creates and returns a single model record. */
-	static async create(this: typeof Model, properties: Row): Promise<Model> {
+	static async create<T extends typeof Model>(this: T, properties: Row): Promise<InstanceType<T>> {
 		const table = pluralize(this.name.toLowerCase())
 
 		try {
@@ -158,7 +158,7 @@ class Model {
 				throw new Error(`Failed to load created record for table "${table}"`)
 			}
 
-			const model = new this(record)
+			const model = new this(record) as InstanceType<T>
 			return model.stripColumns(model)
 		} catch (error) {
 			throw toError(error)
@@ -166,13 +166,13 @@ class Model {
 	}
 
 	/** Creates multiple model records and returns created model instances. */
-	static async createMany(this: typeof Model, properties: Row[]): Promise<Model[]> {
+	static async createMany<T extends typeof Model>(this: T, properties: Row[]): Promise<InstanceType<T>[]> {
 		if (properties.length === 0) {
 			return []
 		}
 
 		try {
-			const records: Model[] = []
+			const records: InstanceType<T>[] = []
 			for (const property of properties) {
 				records.push(await this.create(property))
 			}
@@ -183,12 +183,12 @@ class Model {
 	}
 
 	/** Returns the first matching row or creates it with merged values when missing. */
-	static async firstOrCreate(this: typeof Model, attributes: Row, values: Row = {}): Promise<Model> {
+	static async firstOrCreate<T extends typeof Model>(this: T, attributes: Row, values: Row = {}): Promise<InstanceType<T>> {
 		const table = pluralize(this.name.toLowerCase())
 		try {
 			const record = await getDB()(table).where(attributes).first<Row>()
 			if (record) {
-				const model = new this(record)
+				const model = new this(record) as InstanceType<T>
 				return model.stripColumns(model)
 			}
 
@@ -199,19 +199,19 @@ class Model {
 	}
 
 	/** Applies a query scope used by chained static query methods. */
-	static where(this: typeof Model, conditions: Row = {}): typeof Model {
+	static where<T extends typeof Model>(this: T, conditions: Row = {}): T {
 		const table = pluralize(this.name.toLowerCase())
 		this.currentQuery = getDB()(table).where(conditions) as Knex.QueryBuilder<Row, Row[]>
 		return this
 	}
 
 	/** Returns the first model for the current scope (or table if unscoped). */
-	static async first(this: typeof Model, columns: string | string[] = '*'): Promise<Model | null> {
+	static async first<T extends typeof Model>(this: T, columns: string | string[] = '*'): Promise<InstanceType<T> | null> {
 		try {
 			const table = pluralize(this.name.toLowerCase())
 			const query = this.currentQuery ?? getDB()(table)
 			const rows = await query.first<Row>(columns as never)
-			return rows ? new this(rows) : null
+			return rows ? new this(rows) as InstanceType<T> : null
 		} catch (error) {
 			throw toError(error)
 		} finally {
@@ -220,12 +220,12 @@ class Model {
 	}
 
 	/** Returns all models for the current scope (or table if unscoped). */
-	static async all(this: typeof Model, columns: string | string[] = '*'): Promise<Model[]> {
+	static async all<T extends typeof Model>(this: T, columns: string | string[] = '*'): Promise<InstanceType<T>[]> {
 		try {
 			const table = pluralize(this.name.toLowerCase())
 			const query = this.currentQuery ?? getDB()(table)
 			const rows = await query.select<Row[]>(columns as never)
-			return rows.map((row) => new this(row))
+			return rows.map((row) => new this(row) as InstanceType<T>)
 		} catch (error) {
 			throw toError(error)
 		} finally {
