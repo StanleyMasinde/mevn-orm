@@ -10,6 +10,7 @@ import {
 	BelongsToRelation,
 	createKnexConfig,
 	configureDatabase,
+	getDB,
 	makeMigration,
 	migrateLatest,
 	migrateRollback,
@@ -50,6 +51,18 @@ class Farm extends Model {
 	farmer() {
 		return this.belongsTo(Farmer, 'farmer_id')
 	}
+}
+
+class User extends Model {
+	override fillable = ['email']
+
+	passwordResetToken() {
+		return this.hasOne(PasswordResetToken)
+	}
+}
+
+class PasswordResetToken extends Model {
+	override fillable = ['user_id', 'token']
 }
 
 describe('#Model tests', () => {
@@ -208,6 +221,28 @@ describe('#Model tests', () => {
 		expect(belongsToRelation).toBeInstanceOf(BelongsToRelation)
 		expect(typeof belongsToRelation.where).toBe('function')
 		expect(typeof belongsToRelation.first).toBe('function')
+	})
+
+	it('#camelCase model names resolve to snake_case table names', async () => {
+		const db = getDB()
+		await db.schema.dropTableIfExists('password_reset_tokens')
+		await db.schema.dropTableIfExists('users')
+		await db.schema.createTable('users', (table) => {
+			table.bigIncrements('id')
+			table.string('email')
+		})
+		await db.schema.createTable('password_reset_tokens', (table) => {
+			table.bigIncrements('id')
+			table.bigInteger('user_id')
+			table.string('token')
+		})
+
+		const user = await User.create({ email: `reset-${Date.now()}@mail.test` }) as User
+		await PasswordResetToken.create({ user_id: user.id, token: 'abc123' })
+
+		const token = await user.passwordResetToken()
+		expect(token).toHaveProperty('user_id', user.id)
+		expect(token).toHaveProperty('token', 'abc123')
 	})
 
 	it('#Has one relationship', async () => {
