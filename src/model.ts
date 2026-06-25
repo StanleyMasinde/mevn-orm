@@ -1,6 +1,6 @@
 import type { Knex } from 'knex'
-import pluralize from 'pluralize'
 import { getDB } from './config.js'
+import { getTableName, toSnakeCase } from './inflect.js'
 import { BelongsToRelation, HasManyRelation, HasOneRelation } from './relation.js'
 import { createRelationshipMethods } from './relationships.js'
 
@@ -19,7 +19,7 @@ class Model {
 
 	#private: string[]
 
-	static currentTable: string = pluralize(this.name.toLowerCase())
+	static currentTable: string = getTableName(this.name)
 	// `where()` stores a static scoped query consumed by `first()`.
 	static currentQuery: Knex.QueryBuilder<Row, Row[]> | undefined
 
@@ -34,8 +34,8 @@ class Model {
 		this.fillable = []
 		this.hidden = []
 		this.#private = ['fillable', 'hidden']
-		this.modelName = this.constructor.name.toLowerCase()
-		this.table = pluralize(this.constructor.name.toLowerCase())
+		this.modelName = toSnakeCase(this.constructor.name)
+		this.table = getTableName(this.constructor.name)
 	}
 
 	/** Inserts the current model using `fillable` attributes and reloads it from the database. */
@@ -100,7 +100,7 @@ class Model {
 	/** Updates rows in the model table, optionally scoped by `where()`. */
 	static async update(properties: Row): Promise<number | undefined> {
 		try {
-			const table = pluralize(this.name.toLowerCase())
+			const table = getTableName(this.name)
 			const query = this.currentQuery ?? getDB()(table)
 			return await query.update(properties)
 		} catch (error) {
@@ -113,7 +113,7 @@ class Model {
 	/** Deletes rows in the model table, optionally scoped by `where()`. */
 	static async destroy(): Promise<number | undefined> {
 		try {
-			const table = pluralize(this.name.toLowerCase())
+			const table = getTableName(this.name)
 			const query = this.currentQuery ?? getDB()(table)
 			return await query.delete()
 		} catch (error) {
@@ -125,7 +125,7 @@ class Model {
 
 	/** Finds a single model by primary key. */
 	static async find<T extends typeof Model>(this: T, id: number | string, columns: string | string[] = '*'): Promise<InstanceType<T> | null> {
-		const table = pluralize(this.name.toLowerCase())
+		const table = getTableName(this.name)
 
 		try {
 			const fields = await getDB()(table).where({ id }).first<Row>(columns as never)
@@ -147,7 +147,7 @@ class Model {
 
 	/** Creates and returns a single model record. */
 	static async create<T extends typeof Model>(this: T, properties: Row): Promise<InstanceType<T>> {
-		const table = pluralize(this.name.toLowerCase())
+		const table = getTableName(this.name)
 
 		try {
 			const inserted = await getDB()(table).insert(properties)
@@ -185,7 +185,7 @@ class Model {
 
 	/** Returns the first matching row or creates it with merged values when missing. */
 	static async firstOrCreate<T extends typeof Model>(this: T, attributes: Row, values: Row = {}): Promise<InstanceType<T>> {
-		const table = pluralize(this.name.toLowerCase())
+		const table = getTableName(this.name)
 		try {
 			const record = await getDB()(table).where(attributes).first<Row>()
 			if (record) {
@@ -201,7 +201,7 @@ class Model {
 
 	/** Applies a query scope used by chained static query methods. */
 	static where<T extends typeof Model>(this: T, conditions: Row = {}): T {
-		const table = pluralize(this.name.toLowerCase())
+		const table = getTableName(this.name)
 		this.currentQuery = getDB()(table).where(conditions) as Knex.QueryBuilder<Row, Row[]>
 		return this
 	}
@@ -209,7 +209,7 @@ class Model {
 	/** Returns the first model for the current scope (or table if unscoped). */
 	static async first<T extends typeof Model>(this: T, columns: string | string[] = '*'): Promise<InstanceType<T> | null> {
 		try {
-			const table = pluralize(this.name.toLowerCase())
+			const table = getTableName(this.name)
 			const query = this.currentQuery ?? getDB()(table)
 			const rows = await query.first<Row>(columns as never)
 			return rows ? new this(rows) as InstanceType<T> : null
@@ -223,7 +223,7 @@ class Model {
 	/** Returns all models for the current scope (or table if unscoped). */
 	static async all<T extends typeof Model>(this: T, columns: string | string[] = '*'): Promise<InstanceType<T>[]> {
 		try {
-			const table = pluralize(this.name.toLowerCase())
+			const table = getTableName(this.name)
 			const query = this.currentQuery ?? getDB()(table)
 			const rows = await query.select<Row[]>(columns as never)
 			return rows.map((row) => new this(row) as InstanceType<T>)
@@ -237,7 +237,7 @@ class Model {
 	/** Returns a row count for the current scope (or table if unscoped). */
 	static async count(this: typeof Model, column = '*'): Promise<number> {
 		try {
-			const table = pluralize(this.name.toLowerCase())
+			const table = getTableName(this.name)
 			const query = this.currentQuery ?? getDB()(table)
 			const result = await query.count<{ count: string | number }>({ count: column }).first()
 			if (!result) {
