@@ -1,16 +1,12 @@
 import type { Knex } from 'knex'
-
-type Row = Record<string, unknown>
-
-interface RelationshipModel {
-	[key: string]: unknown
-	table: string
-	modelName: string
-	id?: number | string
-	stripColumns<T extends RelationshipModel>(model: T, keepInternalState?: boolean): T
-}
-
-type RelatedModelCtor = new (properties?: Row) => RelationshipModel
+import {
+	BelongsToRelation,
+	HasManyRelation,
+	HasOneRelation,
+	type RelatedModelCtor,
+	type RelationshipModel,
+	type Row,
+} from './relation.js'
 
 interface RelationshipMethods {
 	hasOne(
@@ -18,75 +14,58 @@ interface RelationshipMethods {
 		Related: RelatedModelCtor,
 		localKey?: number | string,
 		foreignKey?: string,
-	): Promise<RelationshipModel | null>
+	): HasOneRelation
 	hasMany(
 		this: RelationshipModel,
 		Related: RelatedModelCtor,
 		localKey?: number | string,
 		foreignKey?: string,
-	): Promise<RelationshipModel[]>
+	): HasManyRelation
 	belongsTo(
 		this: RelationshipModel,
 		Related: RelatedModelCtor,
 		foreignKey?: string,
 		ownerKey?: string,
-	): Promise<RelationshipModel | null>
+	): BelongsToRelation
 }
 
 /** Builds relationship methods that run against the active Knex instance. */
 const createRelationshipMethods = (getDB: () => Knex): RelationshipMethods => ({
-	async hasOne(this: RelationshipModel, Related: RelatedModelCtor, localKey?: number | string, foreignKey?: string) {
-		const table = new Related().table
-		const relation: Row = {}
-		const keyValue = localKey ?? this.id
-		const relationKey = foreignKey ?? `${this.modelName}_id`
-
-		if (keyValue !== undefined) {
-			relation[relationKey] = keyValue
-			const result = await getDB()(table).where(relation).first<Row>()
-			if (result) {
-				const related = new Related(result)
-				return related.stripColumns(related)
-			}
-		}
-
-		return null
-	},
-	async hasMany(this: RelationshipModel, Related: RelatedModelCtor, localKey?: number | string, foreignKey?: string) {
-		const table = new Related().table
-		const relation: Row = {}
+	hasOne(this: RelationshipModel, Related: RelatedModelCtor, localKey?: number | string, foreignKey?: string) {
+		const table = new Related().table as string
 		const keyValue = localKey ?? this.id
 		const relationKey = foreignKey ?? `${this.modelName}_id`
 
 		if (keyValue === undefined) {
-			return []
+			return new HasOneRelation(Related, null)
 		}
 
-		relation[relationKey] = keyValue
-		const rows = await getDB()(table).where(relation).select<Row[]>('*')
-		return rows.map((row) => {
-			const related = new Related(row)
-			return related.stripColumns(related)
-		})
+		const query = getDB()(table).where({ [relationKey]: keyValue }) as Knex.QueryBuilder<Row, Row[]>
+		return new HasOneRelation(Related, query)
 	},
-	async belongsTo(this: RelationshipModel, Related: RelatedModelCtor, foreignKey?: string, ownerKey = 'id') {
-		const table = new Related().table
-		const relation: Row = {}
+	hasMany(this: RelationshipModel, Related: RelatedModelCtor, localKey?: number | string, foreignKey?: string) {
+		const table = new Related().table as string
+		const keyValue = localKey ?? this.id
+		const relationKey = foreignKey ?? `${this.modelName}_id`
+
+		if (keyValue === undefined) {
+			return new HasManyRelation(Related, null)
+		}
+
+		const query = getDB()(table).where({ [relationKey]: keyValue }) as Knex.QueryBuilder<Row, Row[]>
+		return new HasManyRelation(Related, query)
+	},
+	belongsTo(this: RelationshipModel, Related: RelatedModelCtor, foreignKey?: string, ownerKey = 'id') {
+		const table = new Related().table as string
 		const relationKey = foreignKey ?? `${new Related().modelName}_id`
 		const relationValue = this[relationKey]
 
 		if (relationValue === undefined || relationValue === null) {
-			return null
+			return new BelongsToRelation(Related, null)
 		}
 
-		relation[ownerKey] = relationValue
-		const row = await getDB()(table).where(relation).first<Row>()
-		if (!row) {
-			return null
-		}
-
-		const related = new Related(row)
-		return related.stripColumns(related)
+		const query = getDB()(table).where({ [ownerKey]: relationValue }) as Knex.QueryBuilder<Row, Row[]>
+		return new BelongsToRelation(Related, query)
 	},
 })
 

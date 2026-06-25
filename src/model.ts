@@ -1,6 +1,7 @@
 import type { Knex } from 'knex'
 import pluralize from 'pluralize'
 import { getDB } from './config.js'
+import { BelongsToRelation, HasManyRelation, HasOneRelation } from './relation.js'
 import { createRelationshipMethods } from './relationships.js'
 
 type Row = Record<string, unknown>
@@ -269,22 +270,23 @@ interface Model {
 		Related: typeof Model,
 		localKey?: number | string,
 		foreignKey?: string,
-	): Promise<Model | null>
+	): HasOneRelation
 	hasMany(
 		Related: typeof Model,
 		localKey?: number | string,
 		foreignKey?: string,
-	): Promise<Model[]>
+	): HasManyRelation
 	belongsTo(
 		Related: typeof Model,
 		foreignKey?: string,
 		ownerKey?: string,
-	): Promise<Model | null>
+	): BelongsToRelation
 }
 
 Object.assign(Model.prototype, createRelationshipMethods(getDB) as Pick<Model, 'hasOne' | 'hasMany' | 'belongsTo'>)
 
 export { Model }
+export { HasOneRelation, HasManyRelation, BelongsToRelation, Relation } from './relation.js'
 export {
 	DB,
 	getDB,
