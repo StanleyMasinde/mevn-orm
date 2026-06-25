@@ -5,6 +5,9 @@ import { faker } from '@faker-js/faker'
 import { describe, it, expect } from 'vitest'
 import {
 	Model,
+	HasOneRelation,
+	HasManyRelation,
+	BelongsToRelation,
 	createKnexConfig,
 	configureDatabase,
 	makeMigration,
@@ -32,11 +35,11 @@ class Farmer extends Model {
 	override fillable = ['name', 'email', 'password']
 	override hidden = ['password']
 
-	profile(): Promise<Model | null> {
+	profile() {
 		return this.hasOne(Profile)
 	}
 
-	farms(): Promise<Model[]> {
+	farms() {
 		return this.hasMany(Farm)
 	}
 }
@@ -44,7 +47,7 @@ class Farmer extends Model {
 class Farm extends Model {
 	override fillable = ['farmer_id', 'name']
 
-	farmer(): Promise<Model | null> {
+	farmer() {
 		return this.belongsTo(Farmer, 'farmer_id')
 	}
 }
@@ -183,6 +186,30 @@ describe('#Model tests', () => {
 		expect(await Farmer.find(1)).toBe(null)
 	})
 
+	it('#relationship methods return lazy relation instances', async () => {
+		const farmer = await Farmer.create({
+			name: faker.person.fullName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		}) as Farmer
+
+		const hasOneRelation = farmer.profile()
+		expect(hasOneRelation).toBeInstanceOf(HasOneRelation)
+		expect(typeof hasOneRelation.where).toBe('function')
+		expect(typeof hasOneRelation.first).toBe('function')
+
+		const hasManyRelation = farmer.farms()
+		expect(hasManyRelation).toBeInstanceOf(HasManyRelation)
+		expect(typeof hasManyRelation.where).toBe('function')
+		expect(typeof hasManyRelation.get).toBe('function')
+
+		const farm = await Farm.create({ farmer_id: farmer.id, name: 'Lazy Farm' }) as Farm
+		const belongsToRelation = farm.farmer()
+		expect(belongsToRelation).toBeInstanceOf(BelongsToRelation)
+		expect(typeof belongsToRelation.where).toBe('function')
+		expect(typeof belongsToRelation.first).toBe('function')
+	})
+
 	it('#Has one relationship', async () => {
 		const farmer = new Farmer({
 			name: faker.person.fullName(),
@@ -212,6 +239,36 @@ describe('#Model tests', () => {
 		const farms = await owner.farms()
 		expect(Array.isArray(farms)).toBe(true)
 		expect(farms.length).toBe(2)
+	})
+
+	it('#Has one relationship supports query chaining', async () => {
+		const farmer = await Farmer.create({
+			name: faker.person.fullName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		}) as Farmer
+		await new Profile({
+			farmer_id: farmer.id,
+			bio: faker.lorem.sentence()
+		}).save()
+
+		const farmerProfile = await farmer.profile().where({ farmer_id: farmer.id }).first()
+		expect(farmerProfile).toHaveProperty('farmer_id', farmer.id)
+		expect(farmerProfile).not.toHaveProperty('bio')
+	})
+
+	it('#Has many relationship supports query chaining', async () => {
+		const owner = await Farmer.create({
+			name: faker.person.fullName(),
+			email: faker.internet.email(),
+			password: faker.internet.password()
+		}) as Farmer
+		await Farm.create({ farmer_id: owner.id, name: 'Farm One' })
+		await Farm.create({ farmer_id: owner.id, name: 'Farm Two' })
+
+		const farms = await owner.farms().where({ name: 'Farm One' }).get()
+		expect(farms.length).toBe(1)
+		expect(farms[0]).toHaveProperty('name', 'Farm One')
 	})
 
 	it('#Belongs to relationship', async () => {

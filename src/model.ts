@@ -1,6 +1,7 @@
 import type { Knex } from 'knex'
 import pluralize from 'pluralize'
 import { getDB } from './config.js'
+import { BelongsToRelation, HasManyRelation, HasOneRelation } from './relation.js'
 import { createRelationshipMethods } from './relationships.js'
 
 type Row = Record<string, unknown>
@@ -252,7 +253,7 @@ class Model {
 	}
 
 	/** Removes internal and hidden fields from a model instance. */
-	stripColumns<T extends Model>(model: T, keepInternalState = false): T {
+	stripColumns<T extends Record<string, unknown>>(model: T, keepInternalState = false): T {
 		// Hide internal ORM fields and caller-defined hidden attributes.
 		const privateKeys = keepInternalState ? [] : this.#private
 		const hiddenKeys = Array.isArray(this.hidden) ? this.hidden : []
@@ -265,26 +266,27 @@ class Model {
 }
 
 interface Model {
-	hasOne(
-		Related: typeof Model,
+	hasOne<T extends typeof Model>(
+		Related: T,
 		localKey?: number | string,
 		foreignKey?: string,
-	): Promise<Model | null>
-	hasMany(
-		Related: typeof Model,
+	): HasOneRelation<InstanceType<T>>
+	hasMany<T extends typeof Model>(
+		Related: T,
 		localKey?: number | string,
 		foreignKey?: string,
-	): Promise<Model[]>
-	belongsTo(
-		Related: typeof Model,
+	): HasManyRelation<InstanceType<T>>
+	belongsTo<T extends typeof Model>(
+		Related: T,
 		foreignKey?: string,
 		ownerKey?: string,
-	): Promise<Model | null>
+	): BelongsToRelation<InstanceType<T>>
 }
 
 Object.assign(Model.prototype, createRelationshipMethods(getDB) as Pick<Model, 'hasOne' | 'hasMany' | 'belongsTo'>)
 
 export { Model }
+export { HasOneRelation, HasManyRelation, BelongsToRelation, Relation } from './relation.js'
 export {
 	DB,
 	getDB,

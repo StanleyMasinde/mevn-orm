@@ -1,5 +1,9 @@
 import {
 	Model,
+	HasOneRelation,
+	HasManyRelation,
+	BelongsToRelation,
+	Relation,
 	DB,
 	getDB,
 	configure,
@@ -16,6 +20,10 @@ import {
 
 export {
 	Model,
+	HasOneRelation,
+	HasManyRelation,
+	BelongsToRelation,
+	Relation,
 	DB,
 	getDB,
 	configure,
