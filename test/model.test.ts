@@ -433,6 +433,54 @@ describe('#Model tests', () => {
 		expect(await Farmer.find(second.id as number)).not.toBe(null)
 	})
 
+	it('#paginate returns paginated data and metadata', async () => {
+		const owner = await Farmer.create({
+			name: 'Paginate Owner',
+			email: `paginate-owner-${Date.now()}@mail.test`,
+			password: faker.internet.password()
+		}) as Farmer
+		await Farm.create({ farmer_id: owner.id, name: 'Farm 1' })
+		await Farm.create({ farmer_id: owner.id, name: 'Farm 2' })
+		await Farm.create({ farmer_id: owner.id, name: 'Farm 3' })
+
+		const pageOne = await Farm.where({ farmer_id: owner.id }).orderBy('name', 'asc').paginate(2, 1)
+		expect(pageOne.data).toHaveLength(2)
+		expect(pageOne.total).toBe(3)
+		expect(pageOne.per_page).toBe(2)
+		expect(pageOne.current_page).toBe(1)
+		expect(pageOne.last_page).toBe(2)
+		expect(pageOne.next_page).toBe(2)
+		expect(pageOne.prev_page).toBe(null)
+		expect(pageOne.data[0]).toHaveProperty('name', 'Farm 1')
+
+		const pageTwo = await Farm.where({ farmer_id: owner.id }).orderBy('name', 'asc').paginate(2, 2)
+		expect(pageTwo.data).toHaveLength(1)
+		expect(pageTwo.current_page).toBe(2)
+		expect(pageTwo.next_page).toBe(null)
+		expect(pageTwo.prev_page).toBe(1)
+		expect(pageTwo.data[0]).toHaveProperty('name', 'Farm 3')
+	})
+
+	it('#paginate defaults to 15 items per page and page 1', async () => {
+		const result = await Farmer.paginate()
+		expect(result.per_page).toBe(15)
+		expect(result.current_page).toBe(1)
+		expect(result.data.length).toBeLessThanOrEqual(15)
+		expect(result.total).toBeGreaterThan(0)
+	})
+
+	it('#paginate consumes where scope after execution', async () => {
+		const created = await Farmer.create({
+			name: faker.person.fullName(),
+			email: `paginate-scope-${Date.now()}@mail.test`,
+			password: faker.internet.password()
+		})
+
+		await Farmer.where({ id: created.id }).paginate(10)
+		const unscoped = await Farmer.first()
+		expect(unscoped).not.toBe(null)
+	})
+
 	it('#toArray serialises a model instance without internal or hidden fields', async () => {
 		const farmer = await Farmer.create({
 			name: faker.person.fullName(),
