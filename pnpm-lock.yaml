@@ -49,7 +49,7 @@ importers:
         version: 10.5.0
       knex:
         specifier: ^3.2.10
-        version: 3.2.10(mysql2@3.22.5(@types/node@25.9.4))(sqlite3@6.0.1)
+        version: 3.3.0(sqlite3@6.0.1)
       sqlite3:
         specifier: ^6.0.1
         version: 6.0.1
@@ -819,12 +819,13 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  knex@3.2.10:
-    resolution: {integrity: sha512-oypTHfrc9i72iyxaUQBKHOxhcr0xM65MPf6FpN02nimsftXwzXprIkLjfXdubvhbu4PMWLp023q8o8CYvHSuZw==}
+  knex@3.3.0:
+    resolution: {integrity: sha512-LgWl031hNuLv9Lhxdd9093zULa2aNcoP04Bk29e5NidgRcEr/T0rAr2WYi4BhjTiCDoQiRU56meUE5rppLKZzQ==}
     engines: {node: '>=16'}
     hasBin: true
     peerDependencies:
       better-sqlite3: '*'
+      mariadb: '*'
       mysql: '*'
       mysql2: '*'
       pg: '*'
@@ -834,6 +835,8 @@ packages:
       tedious: '*'
     peerDependenciesMeta:
       better-sqlite3:
+        optional: true
+      mariadb:
         optional: true
       mysql:
         optional: true
@@ -1178,8 +1181,8 @@ packages:
     resolution: {integrity: sha512-wPEBwzapC+2PaTYPH6e2L+cNOEE227S47wUYFqlegcs8zlLLmeb9Fcff1HVZY4Fwku/1Eyv38n7GYwB2aaS71g==}
     engines: {node: '>=18'}
 
-  tarn@3.0.2:
-    resolution: {integrity: sha512-51LAVKUSZSVfI05vjPESNc5vwqqZpbXCsU+/+wxlOrUjk2SnFTt97v9ZgQrD4YmxYW1Px6w2KjaDitCfkvgxMQ==}
+  tarn@3.1.0:
+    resolution: {integrity: sha512-QDihlHbXxQ4SnuQcRd1TPNBHUYo/hafDRDP82COYSVfRcx/3qnfGDkn1WFjozVl+AYr8ZyDKSQ/kIgHH1ri1yg==}
     engines: {node: '>=8.0.0'}
 
   tildify@2.0.0:
@@ -1984,7 +1987,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knex@3.2.10(mysql2@3.22.5(@types/node@25.9.4))(sqlite3@6.0.1):
+  knex@3.3.0(sqlite3@6.0.1):
     dependencies:
       colorette: 2.0.19
       commander: 10.0.1
@@ -1998,10 +2001,9 @@ snapshots:
       pg-connection-string: 2.6.2
       rechoir: 0.8.0
       resolve-from: 5.0.0
-      tarn: 3.0.2
+      tarn: 3.1.0
       tildify: 2.0.0
     optionalDependencies:
-      mysql2: 3.22.5(@types/node@25.9.4)
       sqlite3: 6.0.1
     transitivePeerDependencies:
       - supports-color
@@ -2330,7 +2332,7 @@ snapshots:
       minizlib: 3.1.0
       yallist: 5.0.0
 
-  tarn@3.0.2: {}
+  tarn@3.1.0: {}
 
   tildify@2.0.0: {}
 
