@@ -6,6 +6,18 @@ import { createRelationshipMethods } from './relationships.js'
 
 type Row = Record<string, unknown>
 
+interface PaginatedResult<T extends Model> {
+	data: ModelCollection<T>
+	total: number
+	per_page: number
+	current_page: number
+	next_page: number | null
+	prev_page: number | null
+	last_page: number
+}
+
+const DEFAULT_PER_PAGE = 15
+
 class ModelCollection<T extends Model> extends Array<T> {
 	/** Serialises each model in the collection to a plain object. */
 	toArray(): Row[] {
@@ -282,6 +294,44 @@ class Model {
 		}
 	}
 
+	/** Returns a paginated result set for the current scope (or table if unscoped). */
+	static async paginate<T extends typeof Model>(
+		this: T,
+		perPage = DEFAULT_PER_PAGE,
+		page = 1,
+		columns: string | string[] = '*',
+	): Promise<PaginatedResult<InstanceType<T>>> {
+		try {
+			const table = this.resolveTable()
+			const baseQuery = this.currentQuery ?? getDB()(table)
+			const countResult = await baseQuery.clone().count<{ count: string | number }>({ count: '*' }).first()
+			const total = countResult ? Number(countResult.count) : 0
+			const lastPage = Math.max(1, Math.ceil(total / perPage) || 1)
+			const currentPage = Math.min(Math.max(1, page), lastPage)
+			const offset = (currentPage - 1) * perPage
+			const rows = await baseQuery.clone().select<Row[]>(columns as never).limit(perPage).offset(offset)
+			const collection = new ModelCollection<InstanceType<T>>()
+
+			for (const row of rows) {
+				collection.push(new this(row) as InstanceType<T>)
+			}
+
+			return {
+				data: collection,
+				total,
+				per_page: perPage,
+				current_page: currentPage,
+				next_page: currentPage < lastPage ? currentPage + 1 : null,
+				prev_page: currentPage > 1 ? currentPage - 1 : null,
+				last_page: lastPage,
+			}
+		} catch (error) {
+			throw toError(error)
+		} finally {
+			this.currentQuery = undefined
+		}
+	}
+
 	/** Returns a row count for the current scope (or table if unscoped). */
 	static async count(this: typeof Model, column = '*'): Promise<number> {
 		try {
@@ -356,6 +406,7 @@ interface Model {
 Object.assign(Model.prototype, createRelationshipMethods(getDB) as Pick<Model, 'hasOne' | 'hasMany' | 'belongsTo'>)
 
 export { Model, ModelCollection }
+export type { PaginatedResult }
 export { HasOneRelation, HasManyRelation, BelongsToRelation, Relation } from './relation.js'
 export {
 	DB,

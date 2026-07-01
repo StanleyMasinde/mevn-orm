@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from 'vitest'
-import { Model, ModelCollection } from '../../index.js'
+import { Model, ModelCollection, type PaginatedResult } from '../../index.js'
 
 class User extends Model {
 	override fillable = ['name', 'email', 'password']
@@ -43,6 +43,10 @@ async function assertDerivedTypes() {
 
 	const chained = await User.where({ id: userId }).orderBy('name', 'desc').limit(10).all()
 	expectTypeOf(chained).toEqualTypeOf<ModelCollection<User>>()
+
+	const paginated = await User.paginate(10, 1)
+	expectTypeOf(paginated).toEqualTypeOf<PaginatedResult<User>>()
+	expectTypeOf(paginated.data).toEqualTypeOf<ModelCollection<User>>()
 }
 
 describe('Model static method return types', () => {

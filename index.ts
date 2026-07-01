@@ -20,6 +20,8 @@ import {
 } from './src/model.js'
 import { getTableName, toSnakeCase } from './src/inflect.js'
 
+export type { PaginatedResult } from './src/model.js'
+
 export {
 	Model,
 	ModelCollection,
