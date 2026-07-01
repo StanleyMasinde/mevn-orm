@@ -33,6 +33,12 @@ async function assertDerivedTypes() {
 	if (scoped) {
 		expectTypeOf(scoped).toEqualTypeOf<User>()
 	}
+
+	const ordered = User.orderBy('name', 'desc')
+	expectTypeOf(ordered).toEqualTypeOf<typeof User>()
+
+	const chained = await User.where({ id: userId }).orderBy('name', 'desc').limit(10).all()
+	expectTypeOf(chained).toEqualTypeOf<User[]>()
 }
 
 describe('Model static method return types', () => {

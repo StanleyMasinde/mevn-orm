@@ -350,6 +350,42 @@ describe('#Model tests', () => {
 		expect(parentFarmer).toHaveProperty('id', farm.farmer_id)
 	})
 
+	it('#orderBy sorts results at the database level', async () => {
+		const farmers = await Farmer.orderBy('name', 'asc').all()
+		const names = farmers.map((farmer) => farmer.name)
+		expect(names).toEqual([...names].sort())
+	})
+
+	it('#where and orderBy compose on the static query builder', async () => {
+		const owner = await Farmer.create({
+			name: 'Order Owner',
+			email: `order-owner-${Date.now()}@mail.test`,
+			password: faker.internet.password()
+		}) as Farmer
+		await Farm.create({ farmer_id: owner.id, name: 'Zebra Farm' })
+		await Farm.create({ farmer_id: owner.id, name: 'Alpha Farm' })
+
+		const farms = await Farm.where({ farmer_id: owner.id }).orderBy('name', 'asc').all()
+		expect(farms.map((farm) => farm.name)).toEqual(['Alpha Farm', 'Zebra Farm'])
+	})
+
+	it('#limit and offset restrict scoped results', async () => {
+		const owner = await Farmer.create({
+			name: 'Limit Owner',
+			email: `limit-owner-${Date.now()}@mail.test`,
+			password: faker.internet.password()
+		}) as Farmer
+		await Farm.create({ farmer_id: owner.id, name: 'Farm A' })
+		await Farm.create({ farmer_id: owner.id, name: 'Farm B' })
+		await Farm.create({ farmer_id: owner.id, name: 'Farm C' })
+
+		const limited = await Farm.where({ farmer_id: owner.id }).orderBy('name', 'asc').limit(2).all()
+		expect(limited.map((farm) => farm.name)).toEqual(['Farm A', 'Farm B'])
+
+		const offset = await Farm.where({ farmer_id: owner.id }).orderBy('name', 'asc').offset(1).limit(1).all()
+		expect(offset.map((farm) => farm.name)).toEqual(['Farm B'])
+	})
+
 	it('#where scope is consumed after first()', async () => {
 		const none = await Farmer.where({ id: 999999 }).first()
 		expect(none).toBe(null)
