@@ -31,6 +31,16 @@ class Model {
 		return new this().table
 	}
 
+	/** Returns the active scoped query, initialising one against the model table when absent. */
+	static ensureCurrentQuery(this: typeof Model): Knex.QueryBuilder<Row, Row[]> {
+		if (!this.currentQuery) {
+			const table = this.resolveTable()
+			this.currentQuery = getDB()(table) as Knex.QueryBuilder<Row, Row[]>
+		}
+
+		return this.currentQuery
+	}
+
 	fillable: string[]
 	hidden: string[]
 	modelName: string
@@ -211,6 +221,24 @@ class Model {
 	static where<T extends typeof Model>(this: T, conditions: Row = {}): T {
 		const table = this.resolveTable()
 		this.currentQuery = getDB()(table).where(conditions) as Knex.QueryBuilder<Row, Row[]>
+		return this
+	}
+
+	/** Appends an `orderBy` clause to the current scoped query. */
+	static orderBy<T extends typeof Model>(this: T, column: string, direction: 'asc' | 'desc' = 'asc'): T {
+		this.ensureCurrentQuery().orderBy(column, direction)
+		return this
+	}
+
+	/** Appends a `limit` clause to the current scoped query. */
+	static limit<T extends typeof Model>(this: T, count: number): T {
+		this.ensureCurrentQuery().limit(count)
+		return this
+	}
+
+	/** Appends an `offset` clause to the current scoped query. */
+	static offset<T extends typeof Model>(this: T, count: number): T {
+		this.ensureCurrentQuery().offset(count)
 		return this
 	}
 
