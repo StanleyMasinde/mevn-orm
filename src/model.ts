@@ -19,9 +19,17 @@ class Model {
 
 	#private: string[]
 
-	static currentTable: string = getTableName(this.name)
+	static get currentTable(): string {
+		return this.resolveTable()
+	}
+
 	// `where()` stores a static scoped query consumed by `first()`.
 	static currentQuery: Knex.QueryBuilder<Row, Row[]> | undefined
+
+	/** Resolves the table name for this model, honouring subclass `table` overrides. */
+	static resolveTable(this: typeof Model): string {
+		return new this().table
+	}
 
 	fillable: string[]
 	hidden: string[]
@@ -100,7 +108,7 @@ class Model {
 	/** Updates rows in the model table, optionally scoped by `where()`. */
 	static async update(properties: Row): Promise<number | undefined> {
 		try {
-			const table = getTableName(this.name)
+			const table = this.resolveTable()
 			const query = this.currentQuery ?? getDB()(table)
 			return await query.update(properties)
 		} catch (error) {
@@ -113,7 +121,7 @@ class Model {
 	/** Deletes rows in the model table, optionally scoped by `where()`. */
 	static async destroy(): Promise<number | undefined> {
 		try {
-			const table = getTableName(this.name)
+			const table = this.resolveTable()
 			const query = this.currentQuery ?? getDB()(table)
 			return await query.delete()
 		} catch (error) {
@@ -125,7 +133,7 @@ class Model {
 
 	/** Finds a single model by primary key. */
 	static async find<T extends typeof Model>(this: T, id: number | string, columns: string | string[] = '*'): Promise<InstanceType<T> | null> {
-		const table = getTableName(this.name)
+		const table = this.resolveTable()
 
 		try {
 			const fields = await getDB()(table).where({ id }).first<Row>(columns as never)
@@ -147,7 +155,7 @@ class Model {
 
 	/** Creates and returns a single model record. */
 	static async create<T extends typeof Model>(this: T, properties: Row): Promise<InstanceType<T>> {
-		const table = getTableName(this.name)
+		const table = this.resolveTable()
 
 		try {
 			const inserted = await getDB()(table).insert(properties)
@@ -185,7 +193,7 @@ class Model {
 
 	/** Returns the first matching row or creates it with merged values when missing. */
 	static async firstOrCreate<T extends typeof Model>(this: T, attributes: Row, values: Row = {}): Promise<InstanceType<T>> {
-		const table = getTableName(this.name)
+		const table = this.resolveTable()
 		try {
 			const record = await getDB()(table).where(attributes).first<Row>()
 			if (record) {
@@ -201,7 +209,7 @@ class Model {
 
 	/** Applies a query scope used by chained static query methods. */
 	static where<T extends typeof Model>(this: T, conditions: Row = {}): T {
-		const table = getTableName(this.name)
+		const table = this.resolveTable()
 		this.currentQuery = getDB()(table).where(conditions) as Knex.QueryBuilder<Row, Row[]>
 		return this
 	}
@@ -209,7 +217,7 @@ class Model {
 	/** Returns the first model for the current scope (or table if unscoped). */
 	static async first<T extends typeof Model>(this: T, columns: string | string[] = '*'): Promise<InstanceType<T> | null> {
 		try {
-			const table = getTableName(this.name)
+			const table = this.resolveTable()
 			const query = this.currentQuery ?? getDB()(table)
 			const rows = await query.first<Row>(columns as never)
 			return rows ? new this(rows) as InstanceType<T> : null
@@ -223,7 +231,7 @@ class Model {
 	/** Returns all models for the current scope (or table if unscoped). */
 	static async all<T extends typeof Model>(this: T, columns: string | string[] = '*'): Promise<InstanceType<T>[]> {
 		try {
-			const table = getTableName(this.name)
+			const table = this.resolveTable()
 			const query = this.currentQuery ?? getDB()(table)
 			const rows = await query.select<Row[]>(columns as never)
 			return rows.map((row) => new this(row) as InstanceType<T>)
@@ -237,7 +245,7 @@ class Model {
 	/** Returns a row count for the current scope (or table if unscoped). */
 	static async count(this: typeof Model, column = '*'): Promise<number> {
 		try {
-			const table = getTableName(this.name)
+			const table = this.resolveTable()
 			const query = this.currentQuery ?? getDB()(table)
 			const result = await query.count<{ count: string | number }>({ count: column }).first()
 			if (!result) {

@@ -9,7 +9,10 @@ describe('inflect', () => {
 	})
 
 	it('pluralizes snake_case table names', () => {
+		expect(getTableName('PasswordReset')).toBe('password_resets')
 		expect(getTableName('PasswordResetToken')).toBe('password_reset_tokens')
+		expect(getTableName('SystemEvent')).toBe('system_events')
+		expect(getTableName('SystemEventDeadLetter')).toBe('system_event_dead_letters')
 		expect(getTableName('User')).toBe('users')
 		expect(getTableName('Farmer')).toBe('farmers')
 	})

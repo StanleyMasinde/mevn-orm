@@ -17,6 +17,7 @@ import {
 	migrateCurrentVersion,
 	migrateList,
 } from './src/model.js'
+import { getTableName, toSnakeCase } from './src/inflect.js'
 
 export {
 	Model,
@@ -36,4 +37,6 @@ export {
 	migrateRollback,
 	migrateCurrentVersion,
 	migrateList,
+	getTableName,
+	toSnakeCase,
 }
