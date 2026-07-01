@@ -1,5 +1,6 @@
 import {
 	Model,
+	ModelCollection,
 	HasOneRelation,
 	HasManyRelation,
 	BelongsToRelation,
@@ -21,6 +22,7 @@ import { getTableName, toSnakeCase } from './src/inflect.js'
 
 export {
 	Model,
+	ModelCollection,
 	HasOneRelation,
 	HasManyRelation,
 	BelongsToRelation,

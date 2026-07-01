@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from 'vitest'
-import { Model } from '../../index.js'
+import { Model, ModelCollection } from '../../index.js'
 
 class User extends Model {
 	override fillable = ['name', 'email', 'password']
@@ -27,7 +27,11 @@ async function assertDerivedTypes() {
 	expectTypeOf(created).toEqualTypeOf<User>()
 
 	const users = await User.all()
-	expectTypeOf(users).toEqualTypeOf<User[]>()
+	expectTypeOf(users).toEqualTypeOf<ModelCollection<User>>()
+	expectTypeOf(users.toArray()).toEqualTypeOf<Record<string, unknown>[]>()
+
+	const serialized = (await User.findOrFail(userId)).toArray()
+	expectTypeOf(serialized).toEqualTypeOf<Record<string, unknown>>()
 
 	const scoped = await User.where({ id: userId }).first()
 	if (scoped) {
@@ -38,7 +42,7 @@ async function assertDerivedTypes() {
 	expectTypeOf(ordered).toEqualTypeOf<typeof User>()
 
 	const chained = await User.where({ id: userId }).orderBy('name', 'desc').limit(10).all()
-	expectTypeOf(chained).toEqualTypeOf<User[]>()
+	expectTypeOf(chained).toEqualTypeOf<ModelCollection<User>>()
 }
 
 describe('Model static method return types', () => {

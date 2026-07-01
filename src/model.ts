@@ -6,6 +6,13 @@ import { createRelationshipMethods } from './relationships.js'
 
 type Row = Record<string, unknown>
 
+class ModelCollection<T extends Model> extends Array<T> {
+	/** Serialises each model in the collection to a plain object. */
+	toArray(): Row[] {
+		return this.map((model) => model.toArray())
+	}
+}
+
 const toError = (error: unknown): Error => {
 	if (error instanceof Error) {
 		return error
@@ -257,12 +264,17 @@ class Model {
 	}
 
 	/** Returns all models for the current scope (or table if unscoped). */
-	static async all<T extends typeof Model>(this: T, columns: string | string[] = '*'): Promise<InstanceType<T>[]> {
+	static async all<T extends typeof Model>(this: T, columns: string | string[] = '*'): Promise<ModelCollection<InstanceType<T>>> {
 		try {
 			const table = this.resolveTable()
 			const query = this.currentQuery ?? getDB()(table)
 			const rows = await query.select<Row[]>(columns as never)
-			return rows.map((row) => new this(row) as InstanceType<T>)
+			const collection = new ModelCollection<InstanceType<T>>()
+			for (const row of rows) {
+				collection.push(new this(row) as InstanceType<T>)
+			}
+
+			return collection
 		} catch (error) {
 			throw toError(error)
 		} finally {
@@ -286,6 +298,28 @@ class Model {
 		} finally {
 			this.currentQuery = undefined
 		}
+	}
+
+	/** Serialises the model to a plain object, excluding internal ORM state and hidden attributes. */
+	toArray(): Row {
+		const data: Row = {}
+		const excluded = new Set([
+			'fillable',
+			'hidden',
+			'modelName',
+			'table',
+			...(Array.isArray(this.hidden) ? this.hidden : []),
+		])
+
+		for (const [key, value] of Object.entries(this)) {
+			if (excluded.has(key) || typeof value === 'function') {
+				continue
+			}
+
+			data[key] = value
+		}
+
+		return data
 	}
 
 	/** Removes internal and hidden fields from a model instance. */
@@ -321,7 +355,7 @@ interface Model {
 
 Object.assign(Model.prototype, createRelationshipMethods(getDB) as Pick<Model, 'hasOne' | 'hasMany' | 'belongsTo'>)
 
-export { Model }
+export { Model, ModelCollection }
 export { HasOneRelation, HasManyRelation, BelongsToRelation, Relation } from './relation.js'
 export {
 	DB,
