@@ -433,6 +433,39 @@ describe('#Model tests', () => {
 		expect(await Farmer.find(second.id as number)).not.toBe(null)
 	})
 
+	it('#toArray serialises a model instance without internal or hidden fields', async () => {
+		const farmer = await Farmer.create({
+			name: faker.person.fullName(),
+			email: `to-array-${Date.now()}@mail.test`,
+			password: 'secret-password'
+		}) as Farmer
+
+		const data = farmer.toArray()
+		expect(data).toHaveProperty('id', farmer.id)
+		expect(data).toHaveProperty('name', farmer.name)
+		expect(data).toHaveProperty('email', farmer.email)
+		expect(data).not.toHaveProperty('password')
+		expect(data).not.toHaveProperty('fillable')
+		expect(data).not.toHaveProperty('hidden')
+		expect(data).not.toHaveProperty('modelName')
+		expect(data).not.toHaveProperty('table')
+	})
+
+	it('#toArray serialises model collections returned by all()', async () => {
+		const created = await Farmer.create({
+			name: faker.person.fullName(),
+			email: `collection-${Date.now()}@mail.test`,
+			password: faker.internet.password()
+		})
+		const farmers = await Farmer.where({ id: created.id }).all()
+		const data = farmers.toArray()
+
+		expect(Array.isArray(data)).toBe(true)
+		expect(data.length).toBe(1)
+		expect(data[0]).toHaveProperty('id', created.id)
+		expect(data[0]).not.toHaveProperty('password')
+	})
+
 	it('#all returns models and consumes where scope', async () => {
 		const created = await Farmer.create({
 			name: faker.person.fullName(),
