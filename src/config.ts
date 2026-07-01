@@ -15,6 +15,7 @@ const toError = (error: unknown): Error => {
 	return new Error(String(error))
 }
 
+/** Active Knex instance. Available after calling {@link configure} or {@link configureDatabase}. */
 let DB: Knex | undefined
 let defaultMigrationConfig: Knex.MigratorConfig = {}
 
@@ -55,7 +56,12 @@ interface MigrationResult {
 	log: string[]
 }
 
-/** Returns the active Knex instance or throws if the ORM has not been configured. */
+/**
+ * Returns the active Knex instance.
+ *
+ * @returns Configured Knex client.
+ * @throws When {@link configure} or {@link configureDatabase} has not been called.
+ */
 const getDB = (): Knex => {
 	if (!DB) {
 		throw new Error('Mevn ORM is not configured. Call configure({ client, connection, ... }) before using Model.')
@@ -64,7 +70,12 @@ const getDB = (): Knex => {
 	return DB
 }
 
-/** Configures the ORM using a Knex config object or an existing Knex instance. */
+/**
+ * Initialises the ORM with a raw Knex config object or an existing Knex instance.
+ *
+ * @param config - Knex configuration or a pre-built Knex instance.
+ * @returns The active Knex client (also available as {@link DB}).
+ */
 const configure = (config: Knex.Config | Knex): Knex => {
 	if (typeof config === 'function') {
 		DB = config
@@ -75,13 +86,28 @@ const configure = (config: Knex.Config | Knex): Knex => {
 	return DB
 }
 
-/** Sets default migration options used by migration helpers. */
+/**
+ * Sets default migration options used by {@link makeMigration}, {@link migrateLatest},
+ * and other migration helpers.
+ *
+ * @param config - Knex migrator config (typically `directory` and `extension`).
+ * @returns A copy of the stored migration config.
+ *
+ * @example
+ * ```ts
+ * setMigrationConfig({ directory: './migrations', extension: 'ts' })
+ * ```
+ */
 const setMigrationConfig = (config: Knex.MigratorConfig): Knex.MigratorConfig => {
 	defaultMigrationConfig = { ...config }
 	return { ...defaultMigrationConfig }
 }
 
-/** Returns the currently configured default migration options. */
+/**
+ * Returns the currently configured default migration options.
+ *
+ * @returns Copy of the migration config set via {@link setMigrationConfig}.
+ */
 const getMigrationConfig = (): Knex.MigratorConfig => ({ ...defaultMigrationConfig })
 
 const resolveMigrationConfig = (config?: Knex.MigratorConfig): Knex.MigratorConfig => ({
@@ -181,7 +207,15 @@ const buildConnection = (config: SimpleDatabaseConfig): NonNullable<Knex.Config[
 	return connection
 }
 
-/** Builds a Knex config from simple database options using documented `client`/`connection` keys. */
+/**
+ * Builds a Knex config from simple database options.
+ *
+ * Prefer `client` over the deprecated `dialect` field. Connection details can be
+ * supplied as a `connection` object/string or as top-level `host`/`filename` fields.
+ *
+ * @param config - Simplified database configuration.
+ * @returns Knex config ready for {@link configure}.
+ */
 const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
 	const client = normalizeClient(getConfiguredClient(config))
 	const base: Knex.Config = {
@@ -202,10 +236,31 @@ const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
 	return base
 }
 
-/** Configures the ORM from simple database options. */
+/**
+ * Initialises the ORM from simple database options.
+ *
+ * This is the recommended entry point for most applications.
+ *
+ * @param config - Simplified database configuration with `client` and connection fields.
+ * @returns The active Knex client (also available as {@link DB}).
+ *
+ * @example
+ * ```ts
+ * configureDatabase({
+ *   client: 'sqlite3',
+ *   connection: { filename: './dev.sqlite' }
+ * })
+ * ```
+ */
 const configureDatabase = (config: SimpleDatabaseConfig): Knex => configure(createKnexConfig(config))
 
-/** Generates a migration file and returns its path. */
+/**
+ * Generates a Knex migration file and returns its absolute path.
+ *
+ * @param name - Migration name (e.g. `create_users_table`).
+ * @param config - Optional per-call migrator overrides.
+ * @returns Path to the created migration file.
+ */
 const makeMigration = async (name: string, config?: Knex.MigratorConfig): Promise<string> => {
 	try {
 		return await getDB().migrate.make(name, resolveMigrationConfig(config))
@@ -214,7 +269,12 @@ const makeMigration = async (name: string, config?: Knex.MigratorConfig): Promis
 	}
 }
 
-/** Runs pending migrations and returns the batch number and migration filenames. */
+/**
+ * Runs all pending migrations.
+ *
+ * @param config - Optional per-call migrator overrides.
+ * @returns Batch number and filenames of migrations executed in this run.
+ */
 const migrateLatest = async (config?: Knex.MigratorConfig): Promise<MigrationResult> => {
 	try {
 		const [batch, log] = await getDB().migrate.latest(resolveMigrationConfig(config))
@@ -224,7 +284,13 @@ const migrateLatest = async (config?: Knex.MigratorConfig): Promise<MigrationRes
 	}
 }
 
-/** Rolls back migrations. Set `all` to true to rollback all completed batches. */
+/**
+ * Rolls back the most recent migration batch.
+ *
+ * @param config - Optional per-call migrator overrides.
+ * @param all - When `true`, rolls back all completed batches.
+ * @returns Batch number and filenames of migrations rolled back.
+ */
 const migrateRollback = async (config?: Knex.MigratorConfig, all = false): Promise<MigrationResult> => {
 	try {
 		const [batch, log] = all
@@ -236,7 +302,12 @@ const migrateRollback = async (config?: Knex.MigratorConfig, all = false): Promi
 	}
 }
 
-/** Returns the current migration version recorded by Knex. */
+/**
+ * Returns the current migration version recorded by Knex.
+ *
+ * @param config - Optional per-call migrator overrides.
+ * @returns Latest applied migration name, or `'none'` when no migrations have run.
+ */
 const migrateCurrentVersion = async (config?: Knex.MigratorConfig): Promise<string> => {
 	try {
 		return await getDB().migrate.currentVersion(resolveMigrationConfig(config))
@@ -245,7 +316,12 @@ const migrateCurrentVersion = async (config?: Knex.MigratorConfig): Promise<stri
 	}
 }
 
-/** Returns completed and pending migration filenames. */
+/**
+ * Lists completed and pending migration filenames.
+ *
+ * @param config - Optional per-call migrator overrides.
+ * @returns Object with `completed` and `pending` migration filename arrays.
+ */
 const migrateList = async (config?: Knex.MigratorConfig): Promise<{ completed: string[]; pending: string[] }> => {
 	try {
 		const [completed, pending] = await getDB().migrate.list(resolveMigrationConfig(config))

@@ -1,3 +1,13 @@
+/**
+ * Mevn ORM — a small ActiveRecord-style ORM built on Knex.
+ *
+ * Configure the database once at startup, extend {@link Model} for your tables,
+ * then use static query methods, instance persistence, relationships, and
+ * migration helpers.
+ *
+ * @packageDocumentation
+ */
+
 import {
 	Model,
 	ModelCollection,
