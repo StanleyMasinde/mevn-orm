@@ -65,6 +65,11 @@ class PasswordResetToken extends Model {
 	override fillable = ['user_id', 'token']
 }
 
+class PasswordReset extends Model {
+	override table = 'password_reset_tokens'
+	override fillable = ['user_id', 'token']
+}
+
 describe('#Model tests', () => {
 	it('#migration api supports generation and execution', async () => {
 		const directory = mkdtempSync(join(tmpdir(), 'mevn-orm-migrations-'))
@@ -221,6 +226,30 @@ describe('#Model tests', () => {
 		expect(belongsToRelation).toBeInstanceOf(BelongsToRelation)
 		expect(typeof belongsToRelation.where).toBe('function')
 		expect(typeof belongsToRelation.first).toBe('function')
+	})
+
+	it('#static queries honour explicit table overrides', async () => {
+		const db = getDB()
+		await db.schema.dropTableIfExists('password_reset_tokens')
+		await db.schema.createTable('password_reset_tokens', (table) => {
+			table.bigIncrements('id')
+			table.bigInteger('user_id')
+			table.string('token')
+		})
+
+		const created = await PasswordReset.create({ user_id: 42, token: 'override-token' }) as PasswordReset
+		expect(created).toHaveProperty('id')
+		expect(created).toHaveProperty('token', 'override-token')
+
+		const found = await PasswordReset.find(created.id as number)
+		expect(found).toHaveProperty('user_id', 42)
+		expect(found).toHaveProperty('token', 'override-token')
+
+		const queried = await PasswordReset.where({ user_id: 42 }).first()
+		expect(queried).toHaveProperty('token', 'override-token')
+
+		expect(PasswordReset.resolveTable()).toBe('password_reset_tokens')
+		expect(PasswordReset.currentTable).toBe('password_reset_tokens')
 	})
 
 	it('#camelCase model names resolve to snake_case table names', async () => {
