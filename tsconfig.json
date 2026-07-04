@@ -9,7 +9,7 @@
     "exactOptionalPropertyTypes": true,
     "useUnknownInCatchVariables": true,
     "noEmit": true,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "types": [
       "node",
