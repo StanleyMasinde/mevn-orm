@@ -8,6 +8,11 @@ Models are ActiveRecord-style classes that map to a database table. Extend `Mode
 import { Model } from 'mevn-orm'
 
 class User extends Model {
+  /** Column types for the language server and typechecker (see below). */
+  declare name: string
+  declare email: string
+  declare password: string
+
   /** Columns allowed when calling instance `save()`. */
   override fillable = ['name', 'email', 'password']
 
@@ -25,6 +30,71 @@ class User extends Model {
 | `table` | Override the inferred database table name |
 | `id` | Primary key (set after insert / find) |
 | `modelName` | Snake_case singular name from the class name (used for default foreign keys) |
+
+### Typing attributes (LSP / TypeScript)
+
+Static helpers such as `User.find()` already return your **derived class** (`User | null`), not bare `Model`. The language server still needs to know which **columns** exist on that class.
+
+Database values are assigned at runtime (`Object.assign` / row load). They are not constructor field initializers, so declare columns with TypeScript **`declare` fields** — type-only, no emitted runtime code:
+
+```ts
+class User extends Model {
+  declare id?: number
+  declare name: string
+  declare email: string
+  declare password: string
+  declare role?: string
+
+  override fillable = ['name', 'email', 'password']
+  override hidden = ['password']
+}
+
+const user = await User.findOrFail(1)
+user.name          // string
+user.email.length  // number
+// user.nme        // still allowed via Model's index signature — declare columns you care about
+```
+
+**Why `declare`?** Prefer `declare name: string` over `name!: string` for ORM models. Attributes come from the database; `declare` documents that without emitting class-field initialization.
+
+#### Alternative: interface merging
+
+You can put column types on a merged interface instead of `declare` fields:
+
+```ts
+interface User {
+  name: string
+  email: string
+  password: string
+}
+
+class User extends Model {
+  override fillable = ['name', 'email', 'password']
+  override hidden = ['password']
+}
+```
+
+Instance members from the interface merge with the class, so `user.name` is still typed as `string`.
+
+#### What this does *not* type yet
+
+Declaring columns improves **reads** on instances (`user.name`). Payloads for `create`, `where`, and `update` remain loosely typed (`Record`-style) today. Until the library adds attribute generics, you can narrow writes in app code:
+
+```ts
+type UserCreate = Pick<User, 'name' | 'email' | 'password'>
+
+await User.create({
+  name: 'Jane',
+  email: 'jane@example.com',
+  password: hashedPassword,
+} satisfies UserCreate)
+```
+
+#### Notes
+
+- **`hidden` and types:** TypeScript does not drop `password` from the type after load just because it is in `hidden`. Runtime `toArray()` / stripping still apply; use `toArray()` for API responses when you need secrets omitted.
+- **Optional columns:** Use `declare role?: string` for nullable or not-always-selected fields.
+- **Primary key:** `id?: number` is already on `Model`; re-declaring it on the subclass is optional.
 
 ### Table name inference
 
@@ -134,6 +204,8 @@ Static methods preserve the **derived class type** in TypeScript:
 const u: User | null = await User.find(1)
 // not Model | null
 ```
+
+With [typed attributes](#typing-attributes-lsp--typescript) on `User`, `u.name` is also typed as `string` (not only `u` as `User`).
 
 ## Updating records
 

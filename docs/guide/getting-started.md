@@ -42,8 +42,12 @@ configureDatabase({
   }
 })
 
-// 2. Define a model
+// 2. Define a model (declare columns so the LSP types user.name as string)
 class User extends Model {
+  declare name: string
+  declare email: string
+  declare password: string
+
   override fillable = ['name', 'email', 'password']
   override hidden = ['password']
 }
@@ -112,6 +116,10 @@ import { Model } from 'mevn-orm'
 import type { Post } from './Post.js'
 
 export class User extends Model {
+  declare name: string
+  declare email: string
+  declare password: string
+
   override fillable = ['name', 'email', 'password']
   override hidden = ['password']
 

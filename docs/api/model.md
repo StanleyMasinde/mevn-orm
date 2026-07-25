@@ -6,10 +6,16 @@ ActiveRecord-style base class backed by Knex. Extend for each table.
 import { Model } from 'mevn-orm'
 
 class User extends Model {
+  declare name: string
+  declare email: string
+  declare password: string
+
   override fillable = ['name', 'email', 'password']
   override hidden = ['password']
 }
 ```
+
+Declare column types on the subclass so the language server types `user.name` as `string`. See [Typing attributes](/guide/models#typing-attributes-lsp--typescript) in the models guide.
 
 ## Instance properties
 
