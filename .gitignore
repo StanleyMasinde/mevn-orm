@@ -4,3 +4,5 @@ local_test
 *.sqlite
 dist
 .DS_Store
+docs/.vitepress/dist
+docs/.vitepress/cache

@@ -6,3 +6,6 @@ SECURITY.md export-ignore
 test export-ignore
 test.sh export-ignore
 initDb export-ignore
+
+# Exclude VitePress docs from GitHub language stats
+docs/** linguist-documentation
