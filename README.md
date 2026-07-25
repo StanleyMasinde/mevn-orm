@@ -16,6 +16,18 @@ It exports:
 - table-name helpers: `getTableName`, `toSnakeCase`
 - `DB`: initialised Knex instance (after `configure`)
 
+## Documentation
+
+**Site:** [https://stanleymasinde.github.io/mevn-orm/](https://stanleymasinde.github.io/mevn-orm/)
+
+Guides and API reference are built with VitePress (`docs/`). Deployed to GitHub Pages from `main` via [`.github/workflows/docs.yml`](./.github/workflows/docs.yml).
+
+```bash
+pnpm run docs:dev      # local docs site
+pnpm run docs:build    # static build to docs/.vitepress/dist
+pnpm run docs:preview  # preview the production build
+```
+
 ## Status
 
 This project is in maintenance mode. Core functionality is stable and actively maintained; large new features are limited.
