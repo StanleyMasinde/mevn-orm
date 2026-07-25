@@ -4,6 +4,12 @@ allowBuilds:
   sqlite3: false
 minimumReleaseAgeExclude:
   - eslint@10.8.0
+  - esbuild@0.24.3
+  - vite@6.4.2 || 6.4.3
 onlyBuiltDependencies:
   - esbuild
   - sqlite3
+overrides:
+  esbuild@<=0.24.2: ^0.24.3
+  vite@<=6.4.1: ^6.4.2
+  vite@<=6.4.2: ^6.4.3
