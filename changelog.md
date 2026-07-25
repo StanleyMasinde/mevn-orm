@@ -1,5 +1,21 @@
 # Changelog
 
+## v4.6.0
+
+### TypeScript 7 and tooling
+
+- Upgrade TypeScript from 6 to **7** (`typescript@^7.0.2`).
+- CI uses Node.js **25** for test/publish workflows.
+- Upgrade pnpm to **11**.
+- **Note:** Current `typescript-eslint` / `@typescript-eslint/*@8.x` still declare a peer range of `typescript: '>=4.8.4 <6.1.0'`. TypeScript 7 is outside that range. Lint may emit peer warnings or need a later typescript-eslint release (or a temporary TypeScript 6 compatibility install for the ESLint toolchain) until the ecosystem fully supports TS 7. `tsc` / project typecheck use TypeScript 7 directly.
+
+### SQLite: `better-sqlite3` by default
+
+- Development and tests use **`better-sqlite3`** instead of `sqlite3`.
+- `configureDatabase` / `createKnexConfig` map `client: 'sqlite3'` and `client: 'sqlite'` to the Knex **`better-sqlite3`** driver.
+- **`sqlite3` is discouraged** because it requires native compilation; install `better-sqlite3` for SQLite.
+- README and examples updated to recommend `client: 'better-sqlite3'`.
+
 ## v4.2.0
 
 - Restore support for the documented `client` and `connection` database config shape.

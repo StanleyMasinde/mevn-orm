@@ -23,7 +23,7 @@ This project is in maintenance mode. Core functionality is stable and actively m
 ## Requirements
 
 - Node.js 20+ (ESM runtime)
-- Database driver for your selected client (`mysql2`, `pg`, `sqlite3`, etc.)
+- Database driver for your selected client (`mysql2`, `pg`, `better-sqlite3`, etc.)
 
 ## Installation
 
@@ -32,13 +32,13 @@ npm install mevn-orm knex
 npm install mysql2 # or your selected Knex driver
 ```
 
-For SQLite development/testing:
+For SQLite, install **`better-sqlite3`** (the default / recommended driver):
 
 ```bash
-npm install sqlite3
-# or:
 npm install better-sqlite3
 ```
+
+`sqlite3` (the older node-sqlite3 package) is **discouraged** in this project because it requires native compilation and is harder to install in many environments. Mevn ORM maps `client: 'sqlite3'` and `client: 'sqlite'` to the Knex **`better-sqlite3`** driver, so you still install `better-sqlite3` even if you pass those client names for compatibility.
 
 ## Quick Start
 
@@ -48,16 +48,16 @@ npm install better-sqlite3
 import { configureDatabase } from 'mevn-orm'
 
 configureDatabase({
-  client: 'sqlite3',
+  client: 'better-sqlite3',
   connection: {
     filename: './dev.sqlite'
   }
 })
 ```
 
-Supported clients (canonical Knex client names):
+Supported clients (canonical Knex client names after normalization):
 
-* `sqlite3`, `better-sqlite3`
+* `better-sqlite3` (preferred SQLite driver; `sqlite3` / `sqlite` alias to this)
 * `mysql2`
 * `pg` (also used for CockroachDB/Redshift via the pg driver)
 * `mssql`
@@ -286,7 +286,7 @@ You can always drop down to Knex after configuration:
 import { configureDatabase, DB } from 'mevn-orm'
 
 configureDatabase({
-  client: 'sqlite3',
+  client: 'better-sqlite3',
   connection: {
     filename: './dev.sqlite'
   }
@@ -433,7 +433,7 @@ import {
 } from 'mevn-orm'
 
 configureDatabase({
-  client: 'sqlite3',
+  client: 'better-sqlite3',
   connection: { filename: './dev.sqlite' }
 })
 
