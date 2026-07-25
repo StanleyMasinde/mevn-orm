@@ -1,4 +1,10 @@
+import { createRequire } from 'node:module'
 import { defineConfig } from 'vitepress'
+
+const require = createRequire(import.meta.url)
+const { version } = require('../../package.json') as { version: string }
+
+const siteUrl = 'https://stanleymasinde.github.io/mevn-orm'
 
 export default defineConfig({
 	// Project site: https://stanleymasinde.github.io/mevn-orm/
@@ -8,22 +14,29 @@ export default defineConfig({
 	lang: 'en-GB',
 	cleanUrls: true,
 	lastUpdated: true,
+	appearance: 'force-auto',
+
+	sitemap: {
+		hostname: siteUrl,
+	},
 
 	head: [
 		['meta', { name: 'theme-color', content: '#3eaf7c' }],
 		['meta', { name: 'og:type', content: 'website' }],
 		['meta', { name: 'og:title', content: 'Mevn ORM' }],
 		['meta', { name: 'og:description', content: 'A small ActiveRecord-style ORM for Node.js, built on Knex' }],
+		['meta', { name: 'og:url', content: `${siteUrl}/` }],
+		['meta', { name: 'twitter:card', content: 'summary' }],
 	],
 
 	themeConfig: {
-		logo: undefined,
 		siteTitle: 'Mevn ORM',
+		externalLinkIcon: true,
 		nav: [
 			{ text: 'Guide', link: '/guide/getting-started', activeMatch: '/guide/' },
 			{ text: 'API', link: '/api/', activeMatch: '/api/' },
 			{
-				text: 'v4.6',
+				text: `v${version}`,
 				items: [
 					{ text: 'Changelog', link: 'https://github.com/StanleyMasinde/mevn-orm/blob/main/changelog.md' },
 					{ text: 'npm', link: 'https://www.npmjs.com/package/mevn-orm' },
