@@ -128,7 +128,7 @@ const normalizeClient = (client: SupportedClient): string => {
 	switch (client) {
 	case 'sqlite3':
 	case 'sqlite':
-		return 'sqlite3'
+		return 'better-sqlite3'
 	case 'mysql':
 		return 'mysql2'
 	case 'postgres':
@@ -229,7 +229,7 @@ const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
 		base.debug = config.debug
 	}
 
-	if (client === 'sqlite3') {
+	if (client === 'better-sqlite3') {
 		base.useNullAsDefault = true
 	}
 

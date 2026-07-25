@@ -1,4 +1,5 @@
 allowBuilds:
+  better-sqlite3: true
   esbuild: true
   sqlite3: false
 minimumReleaseAgeExclude:
@@ -6,4 +7,3 @@ minimumReleaseAgeExclude:
 onlyBuiltDependencies:
   - esbuild
   - sqlite3
-
