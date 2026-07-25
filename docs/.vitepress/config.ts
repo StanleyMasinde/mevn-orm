@@ -5,7 +5,7 @@ export default defineConfig({
 	base: '/mevn-orm/',
 	title: 'Mevn ORM',
 	description: 'A small ActiveRecord-style ORM for Node.js, built on Knex',
-	lang: 'en-US',
+	lang: 'en-GB',
 	cleanUrls: true,
 	lastUpdated: true,
 
