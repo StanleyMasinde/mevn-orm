@@ -126,9 +126,10 @@ const getConfiguredClient = (config: SimpleDatabaseConfig): SupportedClient => {
 
 const normalizeClient = (client: SupportedClient): string => {
 	switch (client) {
+	// Prefer better-sqlite3: the legacy sqlite3 package needs native builds.
 	case 'sqlite3':
 	case 'sqlite':
-		return 'sqlite3'
+		return 'better-sqlite3'
 	case 'mysql':
 		return 'mysql2'
 	case 'postgres':
@@ -229,7 +230,7 @@ const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
 		base.debug = config.debug
 	}
 
-	if (client === 'sqlite3') {
+	if (client === 'better-sqlite3') {
 		base.useNullAsDefault = true
 	}
 
@@ -247,10 +248,15 @@ const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
  * @example
  * ```ts
  * configureDatabase({
- *   client: 'sqlite3',
+ *   client: 'better-sqlite3',
  *   connection: { filename: './dev.sqlite' }
  * })
  * ```
+ *
+ * SQLite note: `client: 'sqlite3'` and `client: 'sqlite'` are accepted for
+ * compatibility but resolve to the Knex `better-sqlite3` driver. Prefer
+ * installing and configuring `better-sqlite3`; the older `sqlite3` package is
+ * discouraged because it requires native builds.
  */
 const configureDatabase = (config: SimpleDatabaseConfig): Knex => configure(createKnexConfig(config))
 

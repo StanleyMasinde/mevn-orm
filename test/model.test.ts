@@ -21,7 +21,7 @@ import {
 } from '../index.js'
 
 configureDatabase({
-	client: 'sqlite3',
+	client: 'better-sqlite3',
 	connection: {
 		filename: './dev.sqlite'
 	}
@@ -114,7 +114,7 @@ describe('#Model tests', () => {
 			}
 		})
 
-		expect(config.client).toBe('sqlite3')
+		expect(config.client).toBe('better-sqlite3')
 		expect(config.connection).toEqual({ filename: './dev.sqlite' })
 		expect(config.useNullAsDefault).toBe(true)
 	})
@@ -125,7 +125,7 @@ describe('#Model tests', () => {
 			filename: './dev.sqlite'
 		})
 
-		expect(config.client).toBe('sqlite3')
+		expect(config.client).toBe('better-sqlite3')
 		expect(config.connection).toEqual({ filename: './dev.sqlite' })
 		expect(config.useNullAsDefault).toBe(true)
 	})
