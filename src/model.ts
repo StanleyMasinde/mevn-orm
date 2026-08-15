@@ -580,6 +580,19 @@ class Model {
 	}
 
 	/**
+	 * Serialises this model to a single plain object (not an array).
+	 *
+	 * Same payload as {@link Model.toArray | toArray()} — internals and `hidden`
+	 * attributes omitted. Use this when you want one record; use
+	 * {@link ModelCollection.toArray | ModelCollection.toArray()} for a list.
+	 *
+	 * @returns Plain data object for this row.
+	 */
+	toJson(): Row {
+		return this.toArray()
+	}
+
+	/**
 	 * Removes internal and hidden fields from a model instance in place.
 	 *
 	 * @param model - Model object to strip.

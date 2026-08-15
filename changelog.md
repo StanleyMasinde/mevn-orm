@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Serialization
+
+- Add `Model.toJson()` — returns one plain object (same payload as instance `toArray()`), so a single record is not confused with `ModelCollection.toArray()`’s array.
+
 ### Docs
 
 - Correct SQLite driver guidance: prefer `better-sqlite3` because `configureDatabase` / `createKnexConfig` resolve `sqlite3` / `sqlite` to that Knex driver. Both packages are native addons; `configure()` does not remap `client: 'sqlite3'`.
