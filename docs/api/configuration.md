@@ -31,7 +31,7 @@ configureDatabase({
 
 | Input | Resolved Knex client |
 | --- | --- |
-| `sqlite3`, `sqlite` | `better-sqlite3` |
+| `sqlite3`, `sqlite` | `better-sqlite3` (install `better-sqlite3`; not remapped by `configure()`) |
 | `mysql` | `mysql2` |
 | `postgres`, `postgresql`, `pg` | `pg` |
 | `oracle` | `oracledb` |

@@ -20,7 +20,7 @@ configureDatabase({
 | Input `client` | Knex driver used |
 | --- | --- |
 | `better-sqlite3` | `better-sqlite3` (preferred SQLite) |
-| `sqlite3`, `sqlite` | `better-sqlite3` (aliases) |
+| `sqlite3`, `sqlite` | `better-sqlite3` (aliases on this helper only) |
 | `mysql2`, `mysql` | `mysql2` |
 | `pg`, `postgres`, `postgresql` | `pg` |
 | `pgnative`, `cockroachdb`, `redshift` | as named / via `pg` family |
@@ -28,6 +28,8 @@ configureDatabase({
 | `oracledb`, `oracle` | `oracledb` |
 
 A deprecated `dialect` field is still accepted for backwards compatibility. Prefer **`client`**.
+
+SQLite aliases (`sqlite3`, `sqlite`) only apply here and in `createKnexConfig`. They still require the **`better-sqlite3`** package. Passing `client: 'sqlite3'` to `configure()` is not remapped and uses Knex’s `sqlite3` driver instead.
 
 ### Connection styles
 

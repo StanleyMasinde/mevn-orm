@@ -126,7 +126,7 @@ const getConfiguredClient = (config: SimpleDatabaseConfig): SupportedClient => {
 
 const normalizeClient = (client: SupportedClient): string => {
 	switch (client) {
-	// Prefer better-sqlite3: the legacy sqlite3 package needs native builds.
+	// One SQLite driver: aliases resolve to Knex better-sqlite3 (not the sqlite3 package).
 	case 'sqlite3':
 	case 'sqlite':
 		return 'better-sqlite3'
@@ -254,9 +254,9 @@ const createKnexConfig = (config: SimpleDatabaseConfig): Knex.Config => {
  * ```
  *
  * SQLite note: `client: 'sqlite3'` and `client: 'sqlite'` are accepted for
- * compatibility but resolve to the Knex `better-sqlite3` driver. Prefer
- * installing and configuring `better-sqlite3`; the older `sqlite3` package is
- * discouraged because it requires native builds.
+ * compatibility but resolve to the Knex `better-sqlite3` driver. Install
+ * `better-sqlite3`. These aliases are not applied when you pass a raw Knex
+ * config to {@link configure}.
  */
 const configureDatabase = (config: SimpleDatabaseConfig): Knex => configure(createKnexConfig(config))
 

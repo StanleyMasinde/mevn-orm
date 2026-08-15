@@ -26,7 +26,9 @@ npm install better-sqlite3
 ```
 
 ::: tip SQLite driver
-Use **`better-sqlite3`**. The older `sqlite3` package is discouraged because it needs native compilation. Mevn ORM maps `client: 'sqlite3'` and `client: 'sqlite'` to the Knex **`better-sqlite3`** driver, so install `better-sqlite3` even if you pass those client names for compatibility.
+Use **`better-sqlite3`**. `configureDatabase` / `createKnexConfig` map `client: 'sqlite3'` and `client: 'sqlite'` to the Knex **`better-sqlite3`** driver, so install `better-sqlite3` even if you still pass those names. Both packages are native addons; the alias exists so this library has one SQLite driver, not to avoid compilation.
+
+A raw `configure({ client: 'sqlite3', ... })` is **not** remapped and still requires the `sqlite3` package.
 :::
 
 ## Minimal example

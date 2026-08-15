@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Docs
+
+- Correct SQLite driver guidance: prefer `better-sqlite3` because `configureDatabase` / `createKnexConfig` resolve `sqlite3` / `sqlite` to that Knex driver. Both packages are native addons; `configure()` does not remap `client: 'sqlite3'`.
+
 ## v4.7.0 - 2026-08-15
 
 ### Typed write payloads
