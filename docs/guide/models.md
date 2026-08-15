@@ -76,19 +76,41 @@ class User extends Model {
 
 Instance members from the interface merge with the class, so `user.name` is still typed as `string`.
 
-#### What this does *not* type yet
+#### Write payloads (`create` / `where` / `update`)
 
-Declaring columns improves **reads** on instances (`user.name`). Payloads for `create`, `where`, and `update` remain loosely typed (`Record`-style) today. Until the library adds attribute generics, you can narrow writes in app code:
+The same declared columns type **writes**. You do not pass a `Model<TAttrs>` type parameter — attributes are inferred from the subclass.
 
 ```ts
-type UserCreate = Pick<User, 'name' | 'email' | 'password'>
-
 await User.create({
   name: 'Jane',
   email: 'jane@example.com',
   password: hashedPassword,
-} satisfies UserCreate)
+})
+
+// User.create({ name: 'Jane' })           // error: email, password required
+// User.create({ nme: 'Jane', ... })       // error: unknown key
+await User.where({ email: 'jane@example.com' }).first()
+await user.update({ name: 'Jane Updated' })
 ```
+
+| Helper | Shape |
+| --- | --- |
+| `CreateAttributes<User>` | Declared columns **without** `id` (required fields stay required) |
+| `WhereAttributes<User>` / `UpdateAttributes<User>` | `Partial` of declared columns, including `id` |
+| `ModelAttributes<User>` | Declared columns including `id` |
+
+Models that declare **no** columns keep the previous loose `Record<string, unknown>` payloads, so existing untyped models keep compiling.
+
+**`id` and defaults:** `create` omits `id` (normally assigned by the database). Columns filled by the database (timestamps, defaults) should be optional:
+
+```ts
+declare created_at?: string
+declare updated_at?: string
+```
+
+**`fillable` / `hidden`:** These stay runtime-only. Types do not restrict `create` to `fillable` keys, and `hidden` fields are not removed from the TypeScript type after load.
+
+You can still narrow in app code with `satisfies` if you want a narrower subset than the model declares.
 
 #### Notes
 

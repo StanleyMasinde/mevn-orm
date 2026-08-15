@@ -1,6 +1,5 @@
 import type { Knex } from 'knex'
-
-type Row = Record<string, unknown>
+import type { Row, WhereAttributes } from './attributes.js'
 
 interface RelationshipModel {
 	[key: string]: unknown
@@ -30,9 +29,13 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 	/**
 	 * Appends a `where` constraint to the underlying Knex query.
 	 *
-	 * @param args - Knex `where` arguments (object or column/value pairs).
+	 * Object form is typed from the related model's declared columns.
+	 * Column/value forms stay available as a Knex escape hatch.
+	 *
 	 * @returns This relation instance for chaining.
 	 */
+	where(conditions: WhereAttributes<TRelated>): this
+	where(...args: unknown[]): this
 	where(...args: unknown[]): this {
 		this.query?.where(...(args as [never, ...never[]]))
 		return this

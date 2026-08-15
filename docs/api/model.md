@@ -15,7 +15,19 @@ class User extends Model {
 }
 ```
 
-Declare column types on the subclass so the language server types `user.name` as `string`. See [Typing attributes](/guide/models#typing-attributes-lsp--typescript) in the models guide.
+Declare column types on the subclass so the language server types `user.name` as `string` and types `create` / `where` / `update` payloads. See [Typing attributes](/guide/models#typing-attributes-lsp--typescript) in the models guide.
+
+### Attribute helper types
+
+Inferred from declared instance fields (or a merged interface). Untyped models fall back to `Record<string, unknown>`.
+
+| Type | Use |
+| --- | --- |
+| `ModelAttributes<T>` | Declared columns including `id` |
+| `CreateAttributes<T>` | `create` / `createMany` payload (`id` omitted) |
+| `WhereAttributes<T>` | `where` / `firstOrCreate` lookup object |
+| `UpdateAttributes<T>` | Instance and static `update` payload |
+| `AttributeColumn<T>` | Declared column name (`orderBy`) |
 
 ## Instance properties
 
@@ -87,7 +99,7 @@ await user.save()
 
 ### `update(properties): Promise<this>`
 
-Updates the row by `id`, reloads, returns a new instance of the same class. Throws if `id` is missing.
+Updates the row by `id`, reloads, returns a new instance of the same class. Throws if `id` is missing. `properties` is `UpdateAttributes<this>` when columns are declared.
 
 ```ts
 const updated = await user.update({ name: 'Jane Updated' })
@@ -134,7 +146,7 @@ Like `find`, but throws `Error: ${Name} with id "${id}" not found`.
 
 ### `static create(properties): Promise<InstanceType<T>>`
 
-Insert one row and return a model instance (hidden fields stripped).
+Insert one row and return a model instance (hidden fields stripped). `properties` is `CreateAttributes<Instance>` when the model declares columns.
 
 ```ts
 const user = await User.create({ name, email, password: hashed })
@@ -173,7 +185,7 @@ Chain scopes, then a terminal method. Scope resets after terminals.
 
 | Method | Signature | Notes |
 | --- | --- | --- |
-| `where` | `where(conditions?: Row): typeof Model` | Knex equality object |
+| `where` | `where(conditions?: WhereAttributes): typeof Model` | Knex equality object |
 | `orderBy` | `orderBy(column, direction?: 'asc' \| 'desc')` | Default `'asc'` |
 | `limit` | `limit(count: number)` | |
 | `offset` | `offset(count: number)` | |

@@ -30,7 +30,14 @@ import {
 } from './src/model.js'
 import { getTableName, toSnakeCase } from './src/inflect.js'
 
-export type { PaginatedResult } from './src/model.js'
+export type {
+	PaginatedResult,
+	ModelAttributes,
+	CreateAttributes,
+	WhereAttributes,
+	UpdateAttributes,
+	AttributeColumn,
+} from './src/model.js'
 
 export {
 	Model,
