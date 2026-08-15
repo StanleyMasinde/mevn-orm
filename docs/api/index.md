@@ -26,7 +26,14 @@ import {
   toSnakeCase,
 } from 'mevn-orm'
 
-import type { PaginatedResult } from 'mevn-orm'
+import type {
+  PaginatedResult,
+  ModelAttributes,
+  CreateAttributes,
+  WhereAttributes,
+  UpdateAttributes,
+  AttributeColumn,
+} from 'mevn-orm'
 ```
 
 ## Models & collections
@@ -36,6 +43,7 @@ import type { PaginatedResult } from 'mevn-orm'
 | [`Model`](/api/model) | ActiveRecord base class |
 | `ModelCollection` | `Array` subclass from `all()` / `paginate().data` with `toArray()` |
 | `PaginatedResult` | Type for pagination results |
+| `ModelAttributes` / `CreateAttributes` / `WhereAttributes` / `UpdateAttributes` | Inferred column payload types (see [Model](/api/model#attribute-helper-types)) |
 
 ## Configuration
 

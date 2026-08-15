@@ -26,6 +26,10 @@ configureDatabase({
 })
 
 class User extends Model {
+  declare name: string
+  declare email: string
+  declare password: string
+
   override fillable = ['name', 'email', 'password']
   override hidden = ['password']
 }

@@ -16,7 +16,7 @@ const leads = await Lead
 
 | Method | Description |
 | --- | --- |
-| `where(conditions)` | Equality conditions passed to Knex `where` |
+| `where(conditions)` | Equality conditions passed to Knex `where` (typed from declared columns) |
 | `orderBy(column, direction?)` | Sort (`'asc'` \| `'desc'`, default `'asc'`) |
 | `limit(count)` | Maximum rows |
 | `offset(count)` | Skip rows (often with `limit`) |

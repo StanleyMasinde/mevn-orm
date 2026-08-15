@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.7.0 - 2026-08-15
+
+### Typed write payloads
+
+- Infer `create`, `createMany`, `firstOrCreate`, `where`, `update`, and `orderBy` argument types from declared model columns (`declare name: string` or a merged interface).
+- No `Model<TAttrs>` type parameter — existing models without declared columns keep loose `Record<string, unknown>` payloads.
+- Export `ModelAttributes`, `CreateAttributes`, `WhereAttributes`, `UpdateAttributes`, and `AttributeColumn`.
+- Relation `where({ ... })` uses the same inferred where type; column/value Knex forms remain available.
+
 ## v4.6.0
 
 ### TypeScript 7 and tooling

@@ -68,6 +68,7 @@ All extend abstract `Relation` and implement `PromiseLike`.
 
 ```ts
 abstract class Relation<TResult, TRelated> implements PromiseLike<TResult> {
+  where(conditions: WhereAttributes<TRelated>): this
   where(...args: unknown[]): this
   first(columns?: string | string[]): Promise<TRelated | null>
   get(columns?: string | string[]): Promise<TRelated[]>
@@ -75,7 +76,9 @@ abstract class Relation<TResult, TRelated> implements PromiseLike<TResult> {
 }
 ```
 
-#### `where(...args)`
+#### `where(conditions)` / `where(...args)`
+
+Object form is typed from the related model's declared columns. Column/value Knex forms remain available.
 
 Forwards to Knex `where`. Supports object form and other Knex signatures:
 

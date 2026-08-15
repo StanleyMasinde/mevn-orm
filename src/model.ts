@@ -1,10 +1,9 @@
 import type { Knex } from 'knex'
+import type { AttributeColumn, CreateAttributes, Row, UpdateAttributes, WhereAttributes } from './attributes.js'
 import { getDB } from './config.js'
 import { getTableName, toSnakeCase } from './inflect.js'
 import { BelongsToRelation, HasManyRelation, HasOneRelation } from './relation.js'
 import { createRelationshipMethods } from './relationships.js'
-
-type Row = Record<string, unknown>
 
 /**
  * Paginated query result returned by {@link Model.paginate}.
@@ -187,7 +186,7 @@ class Model {
 	 * @returns Refreshed instance with updated attributes.
 	 * @throws When the instance has no `id`.
 	 */
-	async update(properties: Row): Promise<this> {
+	async update(properties: UpdateAttributes<this>): Promise<this> {
 		if (this.id === undefined) {
 			throw new Error('Cannot update model without id')
 		}
@@ -233,7 +232,7 @@ class Model {
 	 * @param properties - Columns and values to update.
 	 * @returns Number of rows updated.
 	 */
-	static async update(properties: Row): Promise<number | undefined> {
+	static async update<T extends typeof Model>(this: T, properties: UpdateAttributes<InstanceType<T>>): Promise<number | undefined> {
 		try {
 			const table = this.resolveTable()
 			const query = this.currentQuery ?? getDB()(table)
@@ -306,7 +305,7 @@ class Model {
 	 * @param properties - Column values to insert.
 	 * @returns Created model with `hidden` fields stripped. Preserves the derived class type.
 	 */
-	static async create<T extends typeof Model>(this: T, properties: Row): Promise<InstanceType<T>> {
+	static async create<T extends typeof Model>(this: T, properties: CreateAttributes<InstanceType<T>>): Promise<InstanceType<T>> {
 		const table = this.resolveTable()
 
 		try {
@@ -332,7 +331,7 @@ class Model {
 	 * @param properties - Array of column value objects to insert.
 	 * @returns Created model instances in insertion order.
 	 */
-	static async createMany<T extends typeof Model>(this: T, properties: Row[]): Promise<InstanceType<T>[]> {
+	static async createMany<T extends typeof Model>(this: T, properties: CreateAttributes<InstanceType<T>>[]): Promise<InstanceType<T>[]> {
 		if (properties.length === 0) {
 			return []
 		}
@@ -355,7 +354,11 @@ class Model {
 	 * @param values - Additional values used only when creating a new row.
 	 * @returns Existing or newly created model instance.
 	 */
-	static async firstOrCreate<T extends typeof Model>(this: T, attributes: Row, values: Row = {}): Promise<InstanceType<T>> {
+	static async firstOrCreate<T extends typeof Model>(
+		this: T,
+		attributes: WhereAttributes<InstanceType<T>>,
+		values: UpdateAttributes<InstanceType<T>> = {},
+	): Promise<InstanceType<T>> {
 		const table = this.resolveTable()
 		try {
 			const record = await getDB()(table).where(attributes).first<Row>()
@@ -364,7 +367,7 @@ class Model {
 				return model.stripColumns(model)
 			}
 
-			return this.create({ ...attributes, ...values })
+			return this.create({ ...attributes, ...values } as CreateAttributes<InstanceType<T>>)
 		} catch (error) {
 			throw toError(error)
 		}
@@ -379,7 +382,7 @@ class Model {
 	 * @param conditions - Equality conditions passed to Knex `where`.
 	 * @returns Model constructor for chaining.
 	 */
-	static where<T extends typeof Model>(this: T, conditions: Row = {}): T {
+	static where<T extends typeof Model>(this: T, conditions: WhereAttributes<InstanceType<T>> = {}): T {
 		const table = this.resolveTable()
 		this.currentQuery = getDB()(table).where(conditions) as Knex.QueryBuilder<Row, Row[]>
 		return this
@@ -392,7 +395,7 @@ class Model {
 	 * @param direction - Sort direction (`'asc'` or `'desc'`). Defaults to `'asc'`.
 	 * @returns Model constructor for chaining.
 	 */
-	static orderBy<T extends typeof Model>(this: T, column: string, direction: 'asc' | 'desc' = 'asc'): T {
+	static orderBy<T extends typeof Model>(this: T, column: AttributeColumn<InstanceType<T>>, direction: 'asc' | 'desc' = 'asc'): T {
 		this.ensureCurrentQuery().orderBy(column, direction)
 		return this
 	}
@@ -659,6 +662,7 @@ Object.assign(Model.prototype, createRelationshipMethods(getDB) as Pick<Model, '
 
 export { Model, ModelCollection }
 export type { PaginatedResult }
+export type { ModelAttributes, CreateAttributes, WhereAttributes, UpdateAttributes, AttributeColumn } from './attributes.js'
 export { HasOneRelation, HasManyRelation, BelongsToRelation, Relation } from './relation.js'
 export {
 	DB,
