@@ -41,6 +41,7 @@ The project is in **maintenance mode**. Core functionality is stable and activel
 **Consider alternatives when you need:**
 
 - Full graph loading / N+1 prevention strategies
+- Decorator-driven models (`@Table`, `@Column`, `@HasMany`) — use TypeORM or MikroORM
 - Complex multi-tenant schema tooling
 - Database-agnostic query builders beyond what Knex already provides
 

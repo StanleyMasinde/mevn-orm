@@ -57,6 +57,17 @@ user.email.length  // number
 
 **Why `declare`?** Prefer `declare name: string` over `name!: string` for ORM models. Attributes come from the database; `declare` documents that without emitting class-field initialization.
 
+#### Why no `@Table` / `@Fillable` decorators?
+
+Mevn ORM does **not** ship model decorators. Configure models with `override fillable`, `override hidden`, `override table`, and relation methods (`hasMany`, …).
+
+- There is no runtime target for `@Fillable() declare name: string` — `declare` fields are type-only and erased at emit.
+- Decorators would be a second source of truth next to the arrays and methods the runtime already uses.
+- Consumers would need extra `tsconfig` decorator settings; Stage 3 and legacy `experimentalDecorators` are not interchangeable.
+- Relation properties (`posts!: HasManyRelation<Post>`) would not match today’s method chaining (`posts().where(…).get()`).
+
+Use TypeORM or MikroORM if you want a decorator-first schema. This library stays explicit and small.
+
 #### Alternative: interface merging
 
 You can put column types on a merged interface instead of `declare` fields:
