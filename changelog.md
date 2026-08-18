@@ -1,3 +1,8 @@
+## What's Changed in 4.8.0
+* chore: add git-cliff
+
+**Full Changelog**: https://github.com/StanleyMasinde/mevn-orm/compare/v4.7.0...4.8.0
+
 ## What's Changed in 4.7.0
 * Add v4.7.0 release notes to changelog by @StanleyMasinde
 * docs: no model decorators (closes #301) by @StanleyMasinde in [#304](https://github.com/StanleyMasinde/mevn-orm/pull/304)
