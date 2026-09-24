@@ -1,71 +1,19 @@
 {
-  "name": "mevn-orm",
-  "version": "4.7.0",
-  "private": false,
-  "description": "simple ORM for express js",
-  "keywords": [
-    "ORM",
-    "express",
-    "Mysql",
-    "mevn",
-    "database",
-    "orm",
-    "orm-express",
-    "orm-mysql"
-  ],
-  "homepage": "https://stanleymasinde.github.io/mevn-orm/",
-  "bugs": {
-    "url": "https://github.com/StanleyMasinde/mevn-orm/issues",
-    "email": "stanleymasinde1@gmail.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/StanleyMasinde/mevn-orm.git"
-  },
-  "license": "MIT",
   "author": "Stanley Masinde <hello@stanleymasinde.com> (https://stanleymasinde.github.io)",
+  "bugs": {
+    "email": "stanleymasinde1@gmail.com",
+    "url": "https://github.com/StanleyMasinde/mevn-orm/issues"
+  },
   "contributors": [
     {
-      "name": "Stanley Masinde",
-      "email": "hello@stanleymasinde.com"
+      "email": "hello@stanleymasinde.com",
+      "name": "Stanley Masinde"
     }
   ],
-  "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    }
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "directories": {
-    "test": "test"
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "pretest": "node --import tsx initDb.ts",
-    "test": "vitest run",
-    "init:db": "node --import tsx initDb.ts",
-    "typecheck": "tsc --noEmit",
-    "migrate": "node --import tsx scripts/migrate.ts latest",
-    "migrate:make": "node --import tsx scripts/migrate.ts make",
-    "migrate:rollback": "node --import tsx scripts/migrate.ts rollback",
-    "migrate:list": "node --import tsx scripts/migrate.ts list",
-    "migrate:version": "node --import tsx scripts/migrate.ts version",
-    "lint": "eslint .",
-    "build": "tsc -p tsconfig.build.json",
-    "prepack": "pnpm run build",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
-  },
   "dependencies": {
     "pluralize": "^8.0.0"
   },
+  "description": "simple ORM for express js",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@faker-js/faker": "^10.6.0",
@@ -82,6 +30,34 @@
     "vitepress": "^1.6.4",
     "vitest": "^4.1.11"
   },
+  "directories": {
+    "test": "test"
+  },
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://stanleymasinde.github.io/mevn-orm/",
+  "keywords": [
+    "ORM",
+    "express",
+    "Mysql",
+    "mevn",
+    "database",
+    "orm",
+    "orm-express",
+    "orm-mysql"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "name": "mevn-orm",
+  "packageManager": "pnpm@11.17.0+sha512.cca3cea332ad254bb84145f966d19f4879615210346fc92c79a047f23a0d7b3cca3c3792f0076ba1f1831d277efbcf0a9119b31a9a60eca7fb3d6231f331ef72",
   "peerDependencies": {
     "knex": "^3.0.0",
     "mysql2": "^3.9.3"
@@ -91,5 +67,29 @@
       "optional": false
     }
   },
-  "packageManager": "pnpm@11.17.0+sha512.cca3cea332ad254bb84145f966d19f4879615210346fc92c79a047f23a0d7b3cca3c3792f0076ba1f1831d277efbcf0a9119b31a9a60eca7fb3d6231f331ef72"
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StanleyMasinde/mevn-orm.git"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "docs:build": "vitepress build docs",
+    "docs:dev": "vitepress dev docs",
+    "docs:preview": "vitepress preview docs",
+    "init:db": "node --import tsx initDb.ts",
+    "lint": "eslint .",
+    "migrate": "node --import tsx scripts/migrate.ts latest",
+    "migrate:list": "node --import tsx scripts/migrate.ts list",
+    "migrate:make": "node --import tsx scripts/migrate.ts make",
+    "migrate:rollback": "node --import tsx scripts/migrate.ts rollback",
+    "migrate:version": "node --import tsx scripts/migrate.ts version",
+    "prepack": "pnpm run build",
+    "pretest": "node --import tsx initDb.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "version": "4.8.0"
 }
