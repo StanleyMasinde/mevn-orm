@@ -6,6 +6,8 @@ minimumReleaseAgeExclude:
   - eslint@10.8.0
   - esbuild@0.24.3
   - vite@6.4.2 || 6.4.3
+  - vitest@4.1.11
+  - '@vitest/mocker@4.1.11'
 onlyBuiltDependencies:
   - esbuild
   - sqlite3
