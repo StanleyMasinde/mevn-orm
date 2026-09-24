@@ -1,3 +1,14 @@
+## What's Changed in 4.7.0
+* Add v4.7.0 release notes to changelog by @StanleyMasinde
+* docs: no model decorators (closes #301) by @StanleyMasinde in [#304](https://github.com/StanleyMasinde/mevn-orm/pull/304)
+* docs: reject model decorators and document the rationale by @StanleyMasinde
+* docs: correct SQLite driver guidance by @StanleyMasinde in [#303](https://github.com/StanleyMasinde/mevn-orm/pull/303)
+* docs: correct SQLite driver guidance by @StanleyMasinde
+* feat: typed write payloads for create/where/update by @StanleyMasinde in [#302](https://github.com/StanleyMasinde/mevn-orm/pull/302)
+* feat: type create/where/update payloads from declared columns by @StanleyMasinde
+
+**Full Changelog**: https://github.com/StanleyMasinde/mevn-orm/compare/v4.6.2...v4.7.0
+
 ## What's Changed in 4.8.0
 * chore: add git-cliff
 
