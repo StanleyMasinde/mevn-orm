@@ -69,6 +69,15 @@ All extend abstract `Relation` and implement `PromiseLike`.
 ```ts
 abstract class Relation<TResult, TRelated> implements PromiseLike<TResult> {
   where(conditions: WhereAttributes<TRelated>): this
+  where(column: AttributeColumn<TRelated>, operator: ComparisonOperator, value: unknown): this
+  where(group: (query: FilterGroup<TRelated>) => void): this
+  whereIn(column, values): this
+  whereNotIn(column, values): this
+  whereBetween(column, bounds): this
+  whereNull(column): this
+  whereNotNull(column): this
+  whereLike(column, pattern): this
+  whereILike(column, pattern): this
   orderBy(column: AttributeColumn<TRelated>, direction?: 'asc' | 'desc'): this
   limit(count: number): this
   offset(count: number): this
@@ -90,6 +99,19 @@ Adds equality conditions to the relation query:
 relation.where({ active: true })
 relation.where({ region: 'west' })
 ```
+
+Comparisons, membership, ranges, NULL checks, and LIKE filters use the same typed methods as model queries. For the callback form of `.where()`, the ORM supplies a temporary filter builder as the callback argument. Its conditions form one parenthesized group, so OR methods remain constrained by the relation's parent key:
+
+```ts
+const matching = await farmer.farms()
+  .where((filters) => {
+    filters.whereLike('name', '%orchard%')
+    filters.orWhereLike('name', '%meadow%')
+  })
+  .get()
+```
+
+The callback may contain nested groups. See [Queries](/guide/queries) for bound-value, Date, empty-list, and wildcard rules.
 
 #### `first(columns?)`
 

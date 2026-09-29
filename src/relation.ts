@@ -1,5 +1,6 @@
-import type { AttributeColumn, Row, WhereAttributes } from './attributes.js'
+import type { AttributeColumn, Row } from './attributes.js'
 import type { TableQuery } from './backend.js'
+import { FilterBuilder, type FilterNode } from './filters.js'
 
 interface RelationshipModel {
 	[key: string]: unknown
@@ -28,11 +29,12 @@ interface RelationPaginatedResult<T extends RelationshipModel> {
  * `await farmer.profile()` auto-executes the query. Chain `where()` before awaiting
  * to refine the query, or call `first()` / `get()` explicitly.
  */
-abstract class Relation<TResult, TRelated extends RelationshipModel = RelationshipModel> implements PromiseLike<TResult> {
+abstract class Relation<TResult, TRelated extends RelationshipModel = RelationshipModel> extends FilterBuilder<TRelated> implements PromiseLike<TResult> {
 	protected readonly Related: RelatedModelCtor<TRelated>
 	protected readonly query: TableQuery | null
 
 	constructor(Related: RelatedModelCtor<TRelated>, query: TableQuery | null) {
+		super()
 		this.Related = Related
 		this.query = query
 	}
@@ -44,10 +46,14 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 	 *
 	 * @returns This relation instance for chaining.
 	 */
-	where(conditions: WhereAttributes<TRelated>): this
-	where(conditions: WhereAttributes<TRelated>): this {
-		this.query?.where(conditions)
-		return this
+	protected addFilter(node: FilterNode): void {
+		if (!this.query) return
+		if (node.kind === 'object') {
+			this.query.where(node.conditions)
+			return
+		}
+		if (!this.query.filter) throw new Error('This backend does not support extended filters')
+		this.query.filter(node)
 	}
 
 	/** Orders related rows while retaining the parent key constraint. */

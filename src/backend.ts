@@ -1,7 +1,10 @@
 import type { Row } from './attributes.js'
+import type { FilterNode } from './filters.js'
 
 export interface TableQuery {
 	where(conditions: Row): this
+	/** Optional extended predicates; existing backend implementations remain valid. */
+	filter?(predicate: FilterNode): this
 	orderBy(column: string, direction: 'asc' | 'desc'): this
 	limit(count: number): this
 	offset(count: number): this

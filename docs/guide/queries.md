@@ -17,6 +17,12 @@ const leads = await Lead
 | Method | Description |
 | --- | --- |
 | `where(conditions)` | Equality conditions (typed from declared columns) |
+| `where(column, operator, value)` | Bound comparison on a query or relation |
+| `where(callback)` | The ORM passes a temporary filter builder to create a parenthesized group |
+| `whereIn` / `whereNotIn` | Membership, including empty and `null` lists |
+| `whereBetween` | Inclusive range |
+| `whereNull` / `whereNotNull` | SQL NULL checks |
+| `whereLike` / `whereILike` | SQL LIKE pattern; `whereILike` folds ASCII case |
 | `orderBy(column, direction?)` | Sort (`'asc'` \| `'desc'`, default `'asc'`) |
 | `limit(count)` | Maximum rows |
 | `offset(count)` | Skip rows (often with `limit`) |
@@ -42,6 +48,36 @@ const base = Post.where({ published: true })
 const recent = base.clone().orderBy('created_at', 'desc').limit(10)
 const featured = base.clone().where({ featured: true })
 ```
+
+## Extended filters
+
+`Model.where(object)` keeps its existing equality signature. Start with an equality object (or `{}` for an unscoped query), then chain comparison and other filters on the returned query. Relation queries support the same filters.
+
+```ts
+import { escapeLike } from 'mevn-orm'
+
+const search = await Item.where({})
+  .where('price', '>=', 100)
+  .whereIn('status', ['available', 'reserved'])
+  .where((group) => group
+    .whereILike('title', `%${escapeLike('desk')}%`)
+    .orWhereILike('description', `%${escapeLike('desk')}%`))
+  .all()
+
+const expiring = await Token.where({})
+  .where('expires_at', '<', new Date())
+  .all()
+```
+
+Comparison operators are `=`, `!=`, `<>`, `<`, `<=`, `>`, and `>=`. Column names are checked as SQL identifiers; values are bound. Declared model fields determine allowed columns and value types. Models without declared fields retain loose column and value types. Use `whereNull` or `whereNotNull` for SQL NULL rather than a comparison operator.
+
+`whereIn(column, [])` matches no rows; `whereNotIn(column, [])` matches every row in the existing scope. Lists containing `null` include or exclude SQL NULL as expected. `whereBetween` includes both endpoints and requires two non-null values. For `where((group) => ...)`, the ORM creates `group` and passes it to your callback. The callback adds conditions to one parenthesized group; nested groups are allowed. OR methods are available only inside a group, so an OR on a relation cannot bypass its parent key constraint.
+
+`whereLike` follows the database's native collation. `whereILike` uses `LOWER()` on both sides for consistent ASCII case folding on SQLite and MySQL; Unicode case behavior remains database dependent. `%` and `_` are wildcards. To search for them literally, call `escapeLike(text)` and wrap it in `%` if you want a contains search. The helper escapes `%`, `_`, and the `!` escape character.
+
+Date values in extended filters are converted to UTC text in `YYYY-MM-DD HH:mm:ss.SSS` format before binding. Store timestamp values in UTC using that representation, or use UTC database sessions for native date columns. Invalid `Date` values fail before execution. Existing equality objects keep their previous encoding behavior.
+
+The Knex backend and db0's supported SQLite and MySQL connectors support these filters. Third-party backends can opt in through the optional `TableQuery.filter` capability; equality queries continue to work without it. An extended filter on a backend without that capability throws before changing its query. No migration is needed.
 
 ## Terminal methods
 

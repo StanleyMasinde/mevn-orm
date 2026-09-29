@@ -3,6 +3,7 @@ import type { Database, Primitive } from 'db0'
 import type { Row } from './attributes.js'
 import type { Backend, TableQuery } from './backend.js'
 import { setBackend } from './backend.js'
+import { applyFilter, type FilterNode } from './filters.js'
 
 type Dialect = 'sqlite' | 'mysql'
 
@@ -54,6 +55,10 @@ class Db0TableQuery implements TableQuery {
 	where(conditions: Row): this {
 		for (const column of Object.keys(conditions)) identifier(column)
 		this.query.where(conditions)
+		return this
+	}
+	filter(predicate: FilterNode): this {
+		applyFilter(this.query, predicate)
 		return this
 	}
 	orderBy(column: string, direction: 'asc' | 'desc'): this {

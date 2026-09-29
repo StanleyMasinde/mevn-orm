@@ -103,9 +103,18 @@ const page = await farmer.farms().orderBy('name').paginate(20, 1)
 // page.data is Farm[]; page.total counts every matching farm
 
 const nextFarm = await farmer.farms().orderBy('name').offset(1).limit(1)
+
+const matching = await farmer.farms()
+  .where((filters) => {
+    filters.whereLike('name', '%orchard%')
+    filters.orWhereLike('name', '%meadow%')
+  })
+  .get()
 ```
 
 Ordering and paging retain the parent key filter. A direct `await` still returns a single model or an array according to the relation type. `count()` ignores order, limit, and offset, as model counts do. Pagination defaults to 15 rows on page 1, clamps a page past the end, and returns `total`, `per_page`, `current_page`, `next_page`, `prev_page`, and `last_page`. An unsaved parent yields zero rows and a valid empty page. Related models still have hidden fields stripped.
+
+Comparisons, membership, ranges, NULL checks, and text filters can also be chained on relations. In the example, `.where()` creates a temporary filter builder and passes it to the callback as `filters`. The two conditions become one parenthesized group: `farmer_id = ? AND (name LIKE ? OR name LIKE ?)`. The OR therefore stays within this farmer's farms. See [Queries](/guide/queries) for filter values and backend behavior.
 
 ### Behaviour by relation type
 
