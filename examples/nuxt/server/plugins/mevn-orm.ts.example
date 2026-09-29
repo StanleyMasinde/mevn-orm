@@ -1,0 +1,48 @@
+// Copy to server/plugins/mevn-orm.ts in a Nuxt app using a Node server preset.
+// Configure Nitro's default MySQL connection with the same URI.
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { configureDatabase, getDB, migrateLatest, setMigrationConfig } from 'mevn-orm'
+import { configureDb0 } from 'mevn-orm/db0'
+
+function migrationDirectory(): string {
+  const directory = resolve(
+    process.env.MEVN_MIGRATIONS_DIR
+      ?? (process.env.NODE_ENV === 'production'
+        ? '.output/server/assets/migrations'
+        : 'server/assets/migrations')
+  )
+
+  if (!existsSync(directory)) {
+    throw new Error(`Migration directory does not exist: ${directory}`)
+  }
+
+  return directory
+}
+
+export default defineNitroPlugin(async (nitroApp) => {
+  const { databaseConnection } = useRuntimeConfig()
+  if (!databaseConnection) throw new Error('databaseConnection is not configured')
+
+  // Knex is used for migrations; Nitro's db0 connection handles model queries.
+  configureDatabase({ client: 'mysql2', connection: databaseConnection })
+  setMigrationConfig({
+    directory: migrationDirectory(),
+    extension: 'ts',
+    loadExtensions: ['.ts']
+  })
+
+  try {
+    await migrateLatest()
+  } catch (error) {
+    await getDB().destroy()
+    throw error
+  }
+
+  // configureDatabase selected the Knex backend. Select db0 after migrating.
+  configureDb0(useDatabase())
+
+  nitroApp.hooks.hook('close', async () => {
+    await getDB().destroy()
+  })
+})

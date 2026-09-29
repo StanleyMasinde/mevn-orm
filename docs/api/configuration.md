@@ -1,5 +1,22 @@
 # Configuration API
 
+## `configureDb0(db): Database`
+
+Use a db0 SQLite or MySQL connection. Import from `mevn-orm/db0`; Knex compiles the queries and db0 executes them:
+
+```ts
+import { Model, configureDb0 } from 'mevn-orm/db0'
+
+configureDb0(useDatabase()) // Nitro server code
+class User extends Model {}
+```
+
+The connection may also come from standalone db0 `createDatabase(...)`. The `db0` package is an optional peer dependency. See the [Nuxt / Nitro guide](/guide/nuxt).
+
+The db0 `sqlite3` connector is unsupported because its mutation results omit insert IDs and change counts. Use db0's `node-sqlite` or `better-sqlite3` connector for SQLite. PlanetScale's MySQL connector is supported.
+
+---
+
 ## `configureDatabase(config): Knex`
 
 Initialises the ORM from simple options. Recommended for most applications.

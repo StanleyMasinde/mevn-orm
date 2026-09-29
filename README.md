@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/github/license/stanleymasinde/mevn-orm?style=for-the-badge)](https://github.com/StanleyMasinde/mevn-orm/blob/master/LICENSE)
 ![GitHub issues](https://img.shields.io/github/issues/stanleymasinde/mevn-orm?style=for-the-badge)
 
-A small ActiveRecord-style ORM for Node.js, built on [Knex](https://knexjs.org/). Define models, query with a fluent API, and use MySQL, PostgreSQL, SQLite, and other Knex-supported databases.
+A small ActiveRecord-style ORM for Node.js. Use [Knex](https://knexjs.org/) or an existing [db0](https://db0.unjs.io/) connection (SQLite and MySQL), including Nitro's `useDatabase()`.
 
 **Documentation:** [https://stanleymasinde.github.io/mevn-orm/](https://stanleymasinde.github.io/mevn-orm/)
 
@@ -14,6 +14,17 @@ A small ActiveRecord-style ORM for Node.js, built on [Knex](https://knexjs.org/)
 npm install mevn-orm knex
 npm install better-sqlite3   # or mysql2, pg, etc.
 ```
+
+For Nitro or another db0 application, install `mevn-orm knex db0` (and `mysql2` for MySQL), then import from `mevn-orm/db0`. Knex builds the queries; db0 executes them:
+
+```ts
+import { Model, configureDb0 } from 'mevn-orm/db0'
+
+configureDb0(useDatabase()) // Nitro server code
+class User extends Model {}
+```
+
+See the [Nuxt / Nitro guide](https://stanleymasinde.github.io/mevn-orm/guide/nuxt) for Nitro configuration, model queries, and migrations on boot. The [migration guide](https://stanleymasinde.github.io/mevn-orm/guide/db0-migrations) also covers the standalone CLI for development and CI.
 
 ## Example
 

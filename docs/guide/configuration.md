@@ -1,8 +1,20 @@
 # Configuration
 
-Mevn ORM must be configured **once** before any `Model` method runs. Prefer `configureDatabase` for most apps; use `configure` when you already have a Knex config or instance.
+Mevn ORM must be configured **once** before any `Model` method runs. Use `configureDb0(useDatabase())` for Nitro's existing db0 connection. Use `configureDatabase` for a direct Knex connection, or `configure` when you already have a Knex config or instance.
 
-## `configureDatabase` (recommended)
+## Nitro db0 connection
+
+```ts
+import { configureDb0 } from 'mevn-orm/db0'
+
+export default defineNitroPlugin(() => {
+  configureDb0(useDatabase())
+})
+```
+
+Configure the connection with Nitro's `database` option. Mevn ORM supports db0 SQLite and MySQL here; Knex builds the queries while db0 executes them. See [Nuxt / Nitro](/guide/nuxt) for the connection and migration examples.
+
+## `configureDatabase` (direct Knex)
 
 ```ts
 import { configureDatabase } from 'mevn-orm'
@@ -243,3 +255,4 @@ DB_NAME=app_db
 - [Models](/guide/models)
 - [Migrations](/guide/migrations)
 - [Raw Knex](/guide/raw-knex)
+- [Nuxt / Nitro](/guide/nuxt)
