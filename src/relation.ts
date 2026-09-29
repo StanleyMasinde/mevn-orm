@@ -1,5 +1,5 @@
-import type { Knex } from 'knex'
 import type { Row, WhereAttributes } from './attributes.js'
+import type { TableQuery } from './backend.js'
 
 interface RelationshipModel {
 	[key: string]: unknown
@@ -11,7 +11,7 @@ interface RelationshipModel {
 type RelatedModelCtor<T extends RelationshipModel = RelationshipModel> = new (properties?: Row) => T
 
 /**
- * Lazy relation query wrapper backed by Knex.
+ * Lazy relation query wrapper backed by the configured database.
  *
  * Relation instances are {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise | Promise-like}:
  * `await farmer.profile()` auto-executes the query. Chain `where()` before awaiting
@@ -19,25 +19,23 @@ type RelatedModelCtor<T extends RelationshipModel = RelationshipModel> = new (pr
  */
 abstract class Relation<TResult, TRelated extends RelationshipModel = RelationshipModel> implements PromiseLike<TResult> {
 	protected readonly Related: RelatedModelCtor<TRelated>
-	protected readonly query: Knex.QueryBuilder<Row, Row[]> | null
+	protected readonly query: TableQuery | null
 
-	constructor(Related: RelatedModelCtor<TRelated>, query: Knex.QueryBuilder<Row, Row[]> | null) {
+	constructor(Related: RelatedModelCtor<TRelated>, query: TableQuery | null) {
 		this.Related = Related
 		this.query = query
 	}
 
 	/**
-	 * Appends a `where` constraint to the underlying Knex query.
+	 * Appends equality conditions to the relation query.
 	 *
 	 * Object form is typed from the related model's declared columns.
-	 * Column/value forms stay available as a Knex escape hatch.
 	 *
 	 * @returns This relation instance for chaining.
 	 */
 	where(conditions: WhereAttributes<TRelated>): this
-	where(...args: unknown[]): this
-	where(...args: unknown[]): this {
-		this.query?.where(...(args as [never, ...never[]]))
+	where(conditions: WhereAttributes<TRelated>): this {
+		this.query?.where(conditions)
 		return this
 	}
 
@@ -52,7 +50,7 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 			return null
 		}
 
-		const row = await this.query.first<Row>(columns as never)
+		const row = await this.query.first(columns)
 		if (!row) {
 			return null
 		}
@@ -72,7 +70,7 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 			return []
 		}
 
-		const rows = await this.query.select<Row[]>(columns as never)
+		const rows = await this.query.select(columns)
 		return rows.map((row) => {
 			const related = new this.Related(row)
 			return related.stripColumns(related)

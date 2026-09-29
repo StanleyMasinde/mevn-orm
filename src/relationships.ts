@@ -1,4 +1,4 @@
-import type { Knex } from 'knex'
+import type { Backend } from './backend.js'
 import {
 	BelongsToRelation,
 	HasManyRelation,
@@ -29,8 +29,8 @@ interface RelationshipMethods {
 	): BelongsToRelation<T>
 }
 
-/** Builds relationship methods that run against the active Knex instance. */
-const createRelationshipMethods = (getDB: () => Knex): RelationshipMethods => ({
+/** Builds relationship methods that run against the active backend. */
+const createRelationshipMethods = (getDB: () => Backend): RelationshipMethods => ({
 	hasOne<T extends RelationshipModel>(
 		this: RelationshipModel,
 		Related: RelatedModelCtor<T>,
@@ -45,7 +45,7 @@ const createRelationshipMethods = (getDB: () => Knex): RelationshipMethods => ({
 			return new HasOneRelation<T>(Related, null)
 		}
 
-		const query = getDB()(table).where({ [relationKey]: keyValue }) as Knex.QueryBuilder<Row, Row[]>
+		const query = getDB().query(table).where({ [relationKey]: keyValue })
 		return new HasOneRelation<T>(Related, query)
 	},
 	hasMany<T extends RelationshipModel>(
@@ -62,7 +62,7 @@ const createRelationshipMethods = (getDB: () => Knex): RelationshipMethods => ({
 			return new HasManyRelation<T>(Related, null)
 		}
 
-		const query = getDB()(table).where({ [relationKey]: keyValue }) as Knex.QueryBuilder<Row, Row[]>
+		const query = getDB().query(table).where({ [relationKey]: keyValue })
 		return new HasManyRelation<T>(Related, query)
 	},
 	belongsTo<T extends RelationshipModel>(
@@ -79,7 +79,7 @@ const createRelationshipMethods = (getDB: () => Knex): RelationshipMethods => ({
 			return new BelongsToRelation<T>(Related, null)
 		}
 
-		const query = getDB()(table).where({ [ownerKey]: relationValue }) as Knex.QueryBuilder<Row, Row[]>
+		const query = getDB().query(table).where({ [ownerKey]: relationValue })
 		return new BelongsToRelation<T>(Related, query)
 	},
 })
