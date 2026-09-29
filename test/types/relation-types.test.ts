@@ -30,6 +30,11 @@ class Farm extends Model {
 	}
 }
 
+class TypedFarm extends Model {
+	declare name: string
+	declare farmer_id?: number
+}
+
 declare const farmer: Farmer
 declare const farm: Farm
 
@@ -55,6 +60,14 @@ async function assertRelationTypes() {
 
 	const chainedHasMany = farmer.farms().where({ name: 'Farm One' })
 	expectTypeOf(chainedHasMany).toEqualTypeOf<HasManyRelation<Farm>>()
+	expectTypeOf(farmer.farms().orderBy('name').limit(2).offset(1)).toEqualTypeOf<HasManyRelation<Farm>>()
+	expectTypeOf(await farmer.farms().count()).toEqualTypeOf<number>()
+	const relationPage = await farmer.farms().paginate(10, 1)
+	expectTypeOf(relationPage.data).toEqualTypeOf<Farm[]>()
+	expectTypeOf(relationPage.total).toEqualTypeOf<number>()
+	farmer.hasMany(TypedFarm).orderBy('name')
+	// @ts-expect-error related model has no such column
+	farmer.hasMany(TypedFarm).orderBy('unknown_column')
 
 	const farms = await farmer.farms()
 	expectTypeOf(farms).toEqualTypeOf<Farm[]>()

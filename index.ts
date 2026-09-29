@@ -26,6 +26,7 @@ import { getTableName, toSnakeCase } from './src/inflect.js'
 
 export type {
 	PaginatedResult,
+	RelationPaginatedResult,
 	ModelAttributes,
 	CreateAttributes,
 	WhereAttributes,

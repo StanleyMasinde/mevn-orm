@@ -185,6 +185,7 @@ Chain scopes on an independent `ModelQuery`, then call a terminal method. The qu
 | `orderBy` | `orderBy(column, direction?: 'asc' \| 'desc')` | Default `'asc'` |
 | `limit` | `limit(count: number)` | |
 | `offset` | `offset(count: number)` | |
+| `clone` | `clone(): ModelQuery<T>` | Independent copy of the current scope |
 
 ```ts
 User.where({ active: true }).orderBy('name').limit(10).all()
@@ -195,12 +196,18 @@ User.where({ active: true }).orderBy('name').limit(10).all()
 | Method | Returns |
 | --- | --- |
 | `first(columns?)` | `InstanceType<T> \| null` |
+| `firstOrFail(columns?)` | `InstanceType<T>`; throws when missing |
 | `all(columns?)` | `ModelCollection<InstanceType<T>>` |
+| `exists()` | `boolean`; respects limit and offset |
+| `value(column)` | Column value or `undefined` when missing |
+| `pluck(column)` | Array of column values |
 | `count(column?)` | `number` (default column `*`) |
 | `paginate(perPage?, page?, columns?)` | `PaginatedResult<InstanceType<T>>` |
 | `update` / `destroy` | row counts |
 
 Default `perPage` for `paginate` is **15**; default `page` is **1**.
+
+`value()` distinguishes a missing row (`undefined`) from a SQL `NULL` (`null`). `pluck()` returns `[]` for no matches. Scalar helpers select raw column values without model hydration, so explicitly selecting a `hidden` column returns its value. Terminal reads do not mutate reusable queries. `exists()` returns `false` for `limit(0)` and respects `offset()`; `count()` ignores both.
 
 ### `PaginatedResult<T>`
 

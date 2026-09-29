@@ -69,9 +69,13 @@ All extend abstract `Relation` and implement `PromiseLike`.
 ```ts
 abstract class Relation<TResult, TRelated> implements PromiseLike<TResult> {
   where(conditions: WhereAttributes<TRelated>): this
-  where(...args: unknown[]): this
+  orderBy(column: AttributeColumn<TRelated>, direction?: 'asc' | 'desc'): this
+  limit(count: number): this
+  offset(count: number): this
   first(columns?: string | string[]): Promise<TRelated | null>
   get(columns?: string | string[]): Promise<TRelated[]>
+  count(column?: string): Promise<number>
+  paginate(perPage?: number, page?: number, columns?: string | string[]): Promise<RelationPaginatedResult<TRelated>>
   then(...) // enables await relation
 }
 ```
@@ -95,6 +99,14 @@ Executes and returns one related model or `null`.
 
 Executes and returns an array of related models (empty if none).
 
+#### `orderBy(column, direction?)`, `limit(count)`, `offset(count)`
+
+Apply ordering and bounds to the relation query while keeping the parent key filter. Direct `await relation` still uses the relation's original return shape.
+
+#### `count(column?)`, `paginate(perPage?, page?, columns?)`
+
+`count()` counts all filtered related rows, ignoring order, limit, and offset. `paginate()` defaults to 15 rows on page 1 and returns page metadata matching model pagination, with `data: TRelated[]`. It uses a cloned data query, so the relation remains reusable. Hidden fields are stripped from the returned models.
+
 #### `await relation`
 
 Calls the subclass `resolve()`:
@@ -111,6 +123,8 @@ If the parent lacks a key needed to build the query (e.g. no `id`), the internal
 
 - `first()` → `null`
 - `get()` → `[]`
+- `count()` → `0`
+- `paginate()` → an empty page with `total: 0`, `current_page: 1`, and `last_page: 1`
 
 ---
 
