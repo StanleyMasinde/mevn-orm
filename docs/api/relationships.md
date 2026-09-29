@@ -2,13 +2,13 @@
 
 Relation helpers live on `Model` instances. They return Promise-like wrappers you can `await` or chain.
 
-## Model methods
+## Model Methods
 
 ### `hasOne(Related, localKey?, foreignKey?): HasOneRelation`
 
 One-to-one from this model to `Related`.
 
-| Param | Default |
+| Parameter | Default |
 | --- | --- |
 | `localKey` | parent primary key (`id`) |
 | `foreignKey` | `{this.modelName}_id` |
@@ -43,9 +43,9 @@ const active = await farmer.farms().where({ active: true }).get()
 
 Inverse relation.
 
-| Param | Default |
+| Parameter | Default |
 | --- | --- |
-| `foreignKey` | required for correct SQL in practice |
+| `foreignKey` | Required for correct SQL in practice |
 | `ownerKey` | `id` on the related table |
 
 ```ts
@@ -60,7 +60,7 @@ const owner = await farm.farmer() // Farmer | null
 
 ---
 
-## Relation classes
+## Relation Classes
 
 All extend abstract `Relation` and implement `PromiseLike`.
 
@@ -76,15 +76,15 @@ abstract class Relation<TResult, TRelated> implements PromiseLike<TResult> {
 }
 ```
 
-#### `where(conditions)` / `where(...args)`
+#### `where(conditions)`
 
-Object form is typed from the related model's declared columns. Column/value Knex forms remain available.
+Object form is typed from the related model's declared columns.
 
-Forwards to Knex `where`. Supports object form and other Knex signatures:
+Adds equality conditions to the relation query:
 
 ```ts
 relation.where({ active: true })
-relation.where('region', 'west')
+relation.where({ region: 'west' })
 ```
 
 #### `first(columns?)`
@@ -105,7 +105,7 @@ Calls the subclass `resolve()`:
 | `HasManyRelation` | `get()` → `T[]` |
 | `BelongsToRelation` | `first()` → `T \| null` |
 
-### Null query guards
+### Null Query Guards
 
 If the parent lacks a key needed to build the query (e.g. no `id`), the internal query may be `null`. Then:
 
