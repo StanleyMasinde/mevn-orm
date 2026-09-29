@@ -66,17 +66,13 @@ return {
 
 ## Hidden fields after reads
 
-After `create`, `find` (via strip paths), and similar operations, **hidden** attributes are also removed from the in-memory instance so accidental logging is less likely. Prefer treating models as internal and always serialising at the edge.
+`create()` strips hidden attributes from the returned instance. `find()`, `first()`, `all()`, and `paginate()` retain any hidden attributes selected by the query. Serialisation with `toArray()` or `toJson()` omits hidden attributes without changing the model. Always serialise models before returning them from an API or logging their data.
 
 ```ts
-const user = await User.create({
-  name: 'Jane',
-  email: 'jane@example.com',
-  password: hashed
-})
+const user = await User.findOrFail(userId)
 
-// password may already be stripped from the instance
-console.log(user.toArray()) // never includes password
+// The model can still hold user.password.
+console.log(user.toArray()) // password is omitted from the plain object
 ```
 
 ## Nesting related data

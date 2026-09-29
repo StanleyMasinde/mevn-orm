@@ -1,6 +1,6 @@
 # API Overview
 
-All public exports from `mevn-orm`.
+All public exports from the main `mevn-orm` entry point are listed below. Import `configureDb0` from `mevn-orm/db0` when using a db0 connection.
 
 ```ts
 import {
@@ -25,6 +25,7 @@ import {
   migrateList,
   getTableName,
   toSnakeCase,
+  escapeLike,
   transaction,
   TransactionContext,
   TransactionModel,
@@ -32,11 +33,13 @@ import {
 
 import type {
   PaginatedResult,
+  RelationPaginatedResult,
   ModelAttributes,
   CreateAttributes,
   WhereAttributes,
   UpdateAttributes,
   AttributeColumn,
+  ComparisonOperator,
 } from 'mevn-orm'
 ```
 
@@ -49,6 +52,8 @@ import type {
 | `ModelQuery` | Independent fluent query returned by `where`, `orderBy`, `limit`, or `offset` |
 | `PaginatedResult` | Type for pagination results |
 | `ModelAttributes` / `CreateAttributes` / `WhereAttributes` / `UpdateAttributes` | Inferred column payload types (see [Model](/api/model#attribute-helper-types)) |
+| `AttributeColumn` | Declared model column names used by query methods |
+| `ComparisonOperator` | Operators accepted by comparison filters (see [Queries](/guide/queries#extended-filters)) |
 
 ## Configuration
 
@@ -69,6 +74,7 @@ import type {
 | [`HasManyRelation`](/api/relationships) | One-to-many lazy relation |
 | [`BelongsToRelation`](/api/relationships) | Belongs-to lazy relation |
 | `Relation` | Abstract base (Promise-like) |
+| `RelationPaginatedResult` | Type for relation pagination results (see [Relationships](/api/relationships#countcolumn-paginateperpage-page-columns)) |
 
 ## Transactions
 
@@ -96,6 +102,7 @@ import type {
 | --- | --- |
 | [`getTableName`](/api/helpers) | Pluralised snake_case table name from a class name |
 | [`toSnakeCase`](/api/helpers) | PascalCase / camelCase → snake_case |
+| [`escapeLike`](/api/helpers#escapelikevalue-string-string) | Escape literal text in a SQL LIKE pattern |
 
 ## Guides
 

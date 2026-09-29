@@ -28,6 +28,8 @@ See the [Nuxt / Nitro guide](https://stanleymasinde.github.io/mevn-orm/guide/nux
 
 ## Example
 
+After creating a `users` table with `id`, `name`, `email`, and `password` columns, you can create and query records:
+
 ```ts
 import { configureDatabase, Model } from 'mevn-orm'
 
@@ -54,12 +56,20 @@ const user = await User.create({
 const found = await User.find(user.id as number)
 const users = await User.where({ name: 'Jane Doe' }).all()
 
-return users.toArray() // plain objects for API responses
+console.log(found?.toArray()) // one plain object, or undefined
+console.log(users.toArray())  // plain objects for API responses
 ```
 
 ## Relationships
 
+With `farmers`, `profiles`, and `farms` tables and a farmer whose ID is `1`, define and query relations like this:
+
 ```ts
+import { Model } from 'mevn-orm'
+
+class Profile extends Model {}
+class Farm extends Model {}
+
 class Farmer extends Model {
   profile() {
     return this.hasOne(Profile)
@@ -70,7 +80,7 @@ class Farmer extends Model {
   }
 }
 
-const farmer = await Farmer.find(1)
+const farmer = await Farmer.findOrFail(1)
 const profile = await farmer.profile()
 const active = await farmer.farms().where({ active: true }).get()
 ```
