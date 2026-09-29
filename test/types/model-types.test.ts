@@ -33,6 +33,10 @@ async function assertDerivedTypes() {
 	const serialized = (await User.findOrFail(userId)).toArray()
 	expectTypeOf(serialized).toEqualTypeOf<Record<string, unknown>>()
 
+	const json = (await User.findOrFail(userId)).toJson()
+	expectTypeOf(json).toEqualTypeOf<Record<string, unknown>>()
+	expectTypeOf(json).not.toEqualTypeOf<Record<string, unknown>[]>()
+
 	const scoped = await User.where({ id: userId }).first()
 	if (scoped) {
 		expectTypeOf(scoped).toEqualTypeOf<User>()

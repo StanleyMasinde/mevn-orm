@@ -109,6 +109,14 @@ Deletes by `id`. Throws if `id` is missing.
 
 Plain object for API responses. Omits `fillable`, `hidden`, `modelName`, `table`, function values, and all `hidden` attributes.
 
+On a **collection**, `toArray()` is an **array** of those objects. On a **model**, it is one object.
+
+### `toJson(): Record<string, unknown>`
+
+One record as a plain object with the same payload as instance `toArray()`.
+
+Call this helper explicitly. It returns an object rather than a JSON string and is distinct from JavaScript's automatic `toJSON()` hook. Use `JSON.stringify(model.toJson())` to encode the filtered object as a string.
+
 ### `stripColumns(model, keepInternalState?): T`
 
 Removes private / hidden keys from a model object in place. Used internally after loads.

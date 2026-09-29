@@ -1,3 +1,9 @@
+## Unreleased
+
+### Serialization
+
+- Add `Model.toJson()` for one plain object with hidden fields and ORM internals omitted. Call it explicitly; JavaScript's automatic `toJSON()` hook is unchanged.
+
 ## What's Changed
 * docs: update the changelog
 * chore: upgrade deps to the latest versions

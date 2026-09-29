@@ -1,8 +1,20 @@
 # Serialization
 
-Use `toArray()` when returning data from HTTP handlers so clients receive plain objects without ORM internals or sensitive columns.
+Use `toJson()` for **one** model and `toArray()` on a **collection**. Both omit ORM internals and `hidden` columns.
 
-## Model `toArray()`
+| Method | On | Returns |
+| --- | --- | --- |
+| `model.toJson()` | `Model` | One plain object |
+| `model.toArray()` | `Model` | Same payload as `toJson()` |
+| `collection.toArray()` | `ModelCollection` | Array of plain objects |
+
+`toJson()` returns a plain object, not a JSON string. It is an explicit helper,
+and its spelling differs from JavaScript's automatic `toJSON()` hook.
+`JSON.stringify(model)` does not call `toJson()`. Use
+`JSON.stringify(model.toJson())` for a JSON string with hidden fields omitted,
+or `res.json(model.toJson())` in an HTTP handler.
+
+## Model `toJson()` / `toArray()`
 
 ```ts
 class User extends Model {
@@ -11,7 +23,7 @@ class User extends Model {
 }
 
 const user = await User.findOrFail(userId)
-return user.toArray()
+return user.toJson()
 // {
 //   id: 1,
 //   name: 'Jane Doe',
