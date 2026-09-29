@@ -45,18 +45,20 @@ Inverse relation.
 
 | Parameter | Default |
 | --- | --- |
-| `foreignKey` | Required for correct SQL in practice |
+| `foreignKey` | Related model name in snake_case plus `_id` (for `Farmer`, `farmer_id`) |
 | `ownerKey` | `id` on the related table |
 
 ```ts
 class Farm extends Model {
   farmer() {
-    return this.belongsTo(Farmer, 'farmer_id')
+    return this.belongsTo(Farmer)
   }
 }
 
 const owner = await farm.farmer() // Farmer | null
 ```
+
+Pass `foreignKey` when your column does not follow the default naming convention, such as `this.belongsTo(Farmer, 'owner_id')`.
 
 ---
 
@@ -128,6 +130,20 @@ Apply ordering and bounds to the relation query while keeping the parent key fil
 #### `count(column?)`, `paginate(perPage?, page?, columns?)`
 
 `count()` counts all filtered related rows, ignoring order, limit, and offset. `paginate()` defaults to 15 rows on page 1 and returns page metadata matching model pagination, with `data: TRelated[]`. It uses a cloned data query, so the relation remains reusable. Hidden fields are stripped from the returned models.
+
+The result has this shape:
+
+```ts
+interface RelationPaginatedResult<TRelated> {
+  data: TRelated[]
+  total: number
+  per_page: number
+  current_page: number
+  next_page: number | null
+  prev_page: number | null
+  last_page: number
+}
+```
 
 #### `await relation`
 
