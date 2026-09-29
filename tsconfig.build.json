@@ -12,6 +12,7 @@
   },
   "include": [
     "index.ts",
+    "db0.ts",
     "src/**/*.ts",
     "types/**/*.d.ts"
   ],

@@ -13,9 +13,6 @@ importers:
 
   .:
     dependencies:
-      mysql2:
-        specifier: ^3.9.3
-        version: 3.24.4(@types/node@25.9.8)
       pluralize:
         specifier: ^8.0.0
         version: 8.0.0
@@ -35,6 +32,9 @@ importers:
       better-sqlite3:
         specifier: ^13.0.3
         version: 13.0.3
+      db0:
+        specifier: ^0.4.1
+        version: 0.4.1
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -44,6 +44,9 @@ importers:
       knex:
         specifier: ^3.3.0
         version: 3.3.0(better-sqlite3@13.0.3)(mysql2@3.24.4(@types/node@25.9.8))(sqlite3@6.0.1)
+      mysql2:
+        specifier: ^3.24.4
+        version: 3.24.4(@types/node@25.9.8)
       tsx:
         specifier: ^4.23.15
         version: 4.23.15
@@ -1303,6 +1306,9 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  db0@0.4.1:
+    resolution: {integrity: sha512-6RBY/bSn42UrqATwsiULj2uYFyEykB3XeA/NLIVQeHNXlYV6D4Idxx3/aa6k5Y45Dwzx7sygeLotnqHWSeURYA==}
 
   debug@4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
@@ -3328,6 +3334,8 @@ snapshots:
       which: 2.0.2
 
   csstype@3.2.3: {}
+
+  db0@0.4.1: {}
 
   debug@4.3.4:
     dependencies:

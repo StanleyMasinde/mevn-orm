@@ -15,7 +15,8 @@ Mevn ORM is a small **ActiveRecord-style** ORM for Node.js, built on top of [Kne
 | --- | --- |
 | `Model` | Base class for your tables |
 | `ModelCollection` | Array subclass from `all()` / `paginate()`, with `toArray()` |
-| `configureDatabase` / `configure` | Database initialisation |
+| `configureDatabase` / `configure` | Initialise a direct Knex connection |
+| `configureDb0` from `mevn-orm/db0` | Use an existing db0 connection, including Nitro's `useDatabase()` |
 | `HasOneRelation`, `HasManyRelation`, `BelongsToRelation` | Relationship wrappers |
 | Migration helpers | `makeMigration`, `migrateLatest`, `migrateRollback`, … |
 | `DB` / `getDB()` | Active Knex instance |
@@ -34,7 +35,7 @@ The project is in **maintenance mode**. Core functionality is stable and activel
 
 **Good fit when you want:**
 
-- Lightweight models over Knex in an Express or Nuxt backend
+- Lightweight models over Knex in Express or over Nitro's db0 connection in Nuxt
 - Familiar ActiveRecord patterns (`User.create`, `user.update`, `hasMany`)
 - Programmatic migrations without a heavyweight schema DSL
 
@@ -48,5 +49,6 @@ The project is in **maintenance mode**. Core functionality is stable and activel
 ## Next steps
 
 - [Getting Started](/guide/getting-started) — install, configure, first model
+- [Nuxt / Nitro](/guide/nuxt) — connect db0 and run migrations on boot
 - [Configuration](/guide/configuration) — clients, connection styles, advanced Knex config
 - [API Overview](/api/) — full export reference

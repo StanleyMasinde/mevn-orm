@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from 'vitest'
-import { Model, ModelCollection, type PaginatedResult } from '../../index.js'
+import { Model, ModelCollection, ModelQuery, type PaginatedResult } from '../../index.js'
 
 class User extends Model {
 	override fillable = ['name', 'email', 'password']
@@ -39,7 +39,7 @@ async function assertDerivedTypes() {
 	}
 
 	const ordered = User.orderBy('name', 'desc')
-	expectTypeOf(ordered).toEqualTypeOf<typeof User>()
+	expectTypeOf(ordered).toEqualTypeOf<ModelQuery<User>>()
 
 	const chained = await User.where({ id: userId }).orderBy('name', 'desc').limit(10).all()
 	expectTypeOf(chained).toEqualTypeOf<ModelCollection<User>>()

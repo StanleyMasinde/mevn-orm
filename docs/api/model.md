@@ -1,6 +1,6 @@
 # Model
 
-ActiveRecord-style base class backed by Knex. Extend for each table.
+ActiveRecord-style base class backed by the configured Knex or db0 connection. Extend for each table.
 
 ```ts
 import { Model } from 'mevn-orm'
@@ -17,7 +17,7 @@ class User extends Model {
 
 Declare column types on the subclass so the language server types `user.name` as `string` and types `create` / `where` / `update` payloads. See [Typing attributes](/guide/models#typing-attributes-lsp--typescript) in the models guide.
 
-### Attribute helper types
+### Attribute Helper Types
 
 Inferred from declared instance fields (or a merged interface). Untyped models fall back to `Record<string, unknown>`.
 
@@ -69,13 +69,9 @@ Resolved table name for the class (honours `override table`).
 
 Same resolution as `currentTable`.
 
-### `static currentQuery`
-
-Internal scoped Knex builder. Set by chain methods; cleared by terminal methods. Prefer not to touch this directly.
-
 ### `static ensureCurrentQuery()`
 
-Returns `currentQuery`, creating `getDB()(table)` when absent. Used by `orderBy` / `limit` / `offset` without a prior `where`.
+Returns a new independent `ModelQuery` for the model table. `currentQuery` is deprecated and always `undefined`.
 
 ---
 
@@ -167,25 +163,25 @@ const user = await User.firstOrCreate(
 )
 ```
 
-### `static update(properties): Promise<number | undefined>`
+### `static update(properties): Promise<number>`
 
-Bulk update. Uses the current scope if set via `where()`, otherwise the whole table. Resets scope afterwards.
+Bulk update across the whole table. Use `User.where(...).update(...)` for a scoped update.
 
-### `static destroy(): Promise<number | undefined>`
+### `static destroy(): Promise<number>`
 
-Bulk delete. Same scoping rules as `update`.
+Bulk delete across the whole table. Use `User.where(...).destroy()` for a scoped delete.
 
 ---
 
 ## Static query builder
 
-Chain scopes, then a terminal method. Scope resets after terminals.
+Chain scopes on an independent `ModelQuery`, then call a terminal method. The query may be reused; other requests cannot change its scope.
 
 ### Scopes
 
 | Method | Signature | Notes |
 | --- | --- | --- |
-| `where` | `where(conditions?: WhereAttributes): typeof Model` | Knex equality object |
+| `where` | `where(conditions?: WhereAttributes): ModelQuery<T>` | Equality object |
 | `orderBy` | `orderBy(column, direction?: 'asc' \| 'desc')` | Default `'asc'` |
 | `limit` | `limit(count: number)` | |
 | `offset` | `offset(count: number)` | |

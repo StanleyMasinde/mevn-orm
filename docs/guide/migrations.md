@@ -2,6 +2,8 @@
 
 Migrations are programmatic and use Knex’s migration API under the hood. Configure a directory once, then generate and run migrations from code or npm scripts.
 
+For Nuxt/Nitro with a db0 runtime connection, use the same helpers in a [standalone Knex CLI or a Node startup plugin](/guide/db0-migrations) pointed at the same database.
+
 ## Setup
 
 ```ts
@@ -146,13 +148,41 @@ export async function down(knex: Knex): Promise<void> {
 
 This package ships npm scripts that wrap the helpers (no `knexfile` required when env/config is set):
 
-```bash
+::: code-group
+
+```sh [npm]
+npm run migrate
+npm run migrate:make -- create_users_table
+npm run migrate:rollback
+npm run migrate:list
+npm run migrate:version
+```
+
+```sh [pnpm]
 pnpm run migrate
-pnpm run migrate:make -- create_users_table
+pnpm migrate:make create_users_table
 pnpm run migrate:rollback
 pnpm run migrate:list
 pnpm run migrate:version
 ```
+
+```sh [yarn]
+yarn migrate
+yarn migrate:make create_users_table
+yarn migrate:rollback
+yarn migrate:list
+yarn migrate:version
+```
+
+```sh [bun]
+bun run migrate
+bun run migrate:make create_users_table
+bun run migrate:rollback
+bun run migrate:list
+bun run migrate:version
+```
+
+:::
 
 Typical `package.json` entries in an app:
 
@@ -168,15 +198,10 @@ Typical `package.json` entries in an app:
 
 ## Boot-time migrations (apps)
 
-Running `migrateLatest()` at process start is fine if you treat “already migrated” as success (Knex returns an empty log). See [Nuxt / Nitro](/guide/nuxt) for a production-oriented pattern that copies migration files into the build output.
+Running `migrateLatest()` at process start is fine: Knex returns an empty log when no migrations are pending. See [Nuxt / Nitro migrations](/guide/db0-migrations#migrate-when-a-node-server-boots) for a startup plugin and a build step that copies migration files into `.output`.
 
 ```ts
-try {
-  await migrateLatest()
-} catch (error) {
-  // filter ignorable "already exists" style errors if you need idempotent boots
-  throw error
-}
+await migrateLatest()
 ```
 
 ## Next steps

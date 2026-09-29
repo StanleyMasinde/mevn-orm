@@ -1,0 +1,27 @@
+// Copy the relevant options into your Nuxt app's nuxt.config.ts.
+import { cp } from 'node:fs/promises'
+import { resolve } from 'node:path'
+
+export default defineNuxtConfig({
+  runtimeConfig: {
+    databaseConnection: ''
+  },
+  nitro: {
+    experimental: { database: true },
+    database: {
+      default: {
+        connector: 'mysql2',
+        options: { uri: process.env.NUXT_DATABASE_CONNECTION }
+      }
+    },
+    hooks: {
+      compiled: async (nitro) => {
+        await cp(
+          resolve('server/assets/migrations'),
+          resolve(nitro.options.output.serverDir, 'assets/migrations'),
+          { recursive: true }
+        )
+      }
+    }
+  }
+})

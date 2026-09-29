@@ -1,6 +1,5 @@
-import type { Knex } from 'knex'
 import type { AttributeColumn, CreateAttributes, Row, UpdateAttributes, WhereAttributes } from './attributes.js'
-import { getDB } from './config.js'
+import { getBackend, type TableQuery } from './backend.js'
 import { getTableName, toSnakeCase } from './inflect.js'
 import { BelongsToRelation, HasManyRelation, HasOneRelation } from './relation.js'
 import { createRelationshipMethods } from './relationships.js'
@@ -57,7 +56,7 @@ const toError = (error: unknown): Error => {
 }
 
 /**
- * ActiveRecord-style base model backed by Knex.
+ * ActiveRecord-style base model backed by the configured database.
  *
  * Extend this class for each database table. Table names are inferred from the
  * class name unless overridden via `override table`. Use static methods for
@@ -89,11 +88,10 @@ class Model {
 	}
 
 	/**
-	 * Active scoped Knex query built by `where()`, `orderBy()`, and other chain methods.
-	 *
-	 * Consumed and reset by terminal methods such as `first()`, `all()`, and `paginate()`.
+	 * @deprecated Query chains now have independent state. This property remains
+	 * temporarily for source compatibility and is always undefined.
 	 */
-	static currentQuery: Knex.QueryBuilder<Row, Row[]> | undefined
+	static currentQuery: undefined
 
 	/**
 	 * Resolves the database table name for this model class.
@@ -108,17 +106,10 @@ class Model {
 	}
 
 	/**
-	 * Returns the active scoped query, initialising one against the model table when absent.
-	 *
-	 * Used internally by chain methods like `orderBy()` when called without a prior `where()`.
+	 * Starts an independent query against the model table.
 	 */
-	static ensureCurrentQuery(this: typeof Model): Knex.QueryBuilder<Row, Row[]> {
-		if (!this.currentQuery) {
-			const table = this.resolveTable()
-			this.currentQuery = getDB()(table) as Knex.QueryBuilder<Row, Row[]>
-		}
-
-		return this.currentQuery
+	static ensureCurrentQuery<T extends typeof Model>(this: T): ModelQuery<InstanceType<T>> {
+		return new ModelQuery(this as unknown as new (properties?: Row) => InstanceType<T>, getBackend().query(this.resolveTable()))
 	}
 
 	/** Attributes allowed through {@link Model.save | save()} mass assignment. */
@@ -162,10 +153,8 @@ class Model {
 				rows[field] = this[field]
 			}
 
-			const inserted = await getDB()(this.table).insert(rows)
-			const idValue = Array.isArray(inserted) ? inserted[0] : inserted
-			const id = typeof idValue === 'bigint' ? Number(idValue) : Number(idValue)
-			const fields = await getDB()(this.table).where({ id }).first<Row>()
+			const id = await getBackend().query(this.table).insert(rows)
+			const fields = await getBackend().query(this.table).where({ id }).first()
 
 			if (!fields) {
 				throw new Error(`Failed to load inserted record for table "${this.table}"`)
@@ -192,8 +181,8 @@ class Model {
 		}
 
 		try {
-			await getDB()(this.table).where({ id: this.id }).update(properties)
-			const fields = await getDB()(this.table).where({ id: this.id }).first<Row>()
+			await getBackend().query(this.table).where({ id: this.id }).update(properties)
+			const fields = await getBackend().query(this.table).where({ id: this.id }).first()
 
 			if (!fields) {
 				throw new Error(`Failed to load updated record for table "${this.table}"`)
@@ -217,7 +206,7 @@ class Model {
 		}
 
 		try {
-			await getDB()(this.table).where({ id: this.id }).del()
+			await getBackend().query(this.table).where({ id: this.id }).delete()
 		} catch (error) {
 			throw toError(error)
 		}
@@ -226,41 +215,31 @@ class Model {
 	/**
 	 * Bulk-updates rows in the model table.
 	 *
-	 * When preceded by {@link Model.where | where()}, only scoped rows are updated.
-	 * The query scope is reset after execution.
+	 * Updates all rows. Call `Model.where(...).update(...)` for a scoped update.
 	 *
 	 * @param properties - Columns and values to update.
 	 * @returns Number of rows updated.
 	 */
-	static async update<T extends typeof Model>(this: T, properties: UpdateAttributes<InstanceType<T>>): Promise<number | undefined> {
+	static async update<T extends typeof Model>(this: T, properties: UpdateAttributes<InstanceType<T>>): Promise<number> {
 		try {
-			const table = this.resolveTable()
-			const query = this.currentQuery ?? getDB()(table)
-			return await query.update(properties)
+			return await getBackend().query(this.resolveTable()).update(properties)
 		} catch (error) {
 			throw toError(error)
-		} finally {
-			this.currentQuery = undefined
 		}
 	}
 
 	/**
 	 * Bulk-deletes rows in the model table.
 	 *
-	 * When preceded by {@link Model.where | where()}, only scoped rows are deleted.
-	 * The query scope is reset after execution.
+	 * Deletes all rows. Call `Model.where(...).destroy()` for a scoped delete.
 	 *
 	 * @returns Number of rows deleted.
 	 */
-	static async destroy(): Promise<number | undefined> {
+	static async destroy(): Promise<number> {
 		try {
-			const table = this.resolveTable()
-			const query = this.currentQuery ?? getDB()(table)
-			return await query.delete()
+			return await getBackend().query(this.resolveTable()).delete()
 		} catch (error) {
 			throw toError(error)
-		} finally {
-			this.currentQuery = undefined
 		}
 	}
 
@@ -275,7 +254,7 @@ class Model {
 		const table = this.resolveTable()
 
 		try {
-			const fields = await getDB()(table).where({ id }).first<Row>(columns as never)
+			const fields = await getBackend().query(table).where({ id }).first(columns)
 			return fields ? new this(fields) as InstanceType<T> : null
 		} catch (error) {
 			throw toError(error)
@@ -309,10 +288,8 @@ class Model {
 		const table = this.resolveTable()
 
 		try {
-			const inserted = await getDB()(table).insert(properties)
-			const idValue = Array.isArray(inserted) ? inserted[0] : inserted
-			const id = typeof idValue === 'bigint' ? Number(idValue) : Number(idValue)
-			const record = await getDB()(table).where({ id }).first<Row>()
+			const id = await getBackend().query(table).insert(properties)
+			const record = await getBackend().query(table).where({ id }).first()
 
 			if (!record) {
 				throw new Error(`Failed to load created record for table "${table}"`)
@@ -361,7 +338,7 @@ class Model {
 	): Promise<InstanceType<T>> {
 		const table = this.resolveTable()
 		try {
-			const record = await getDB()(table).where(attributes).first<Row>()
+			const record = await getBackend().query(table).where(attributes).first()
 			if (record) {
 				const model = new this(record) as InstanceType<T>
 				return model.stripColumns(model)
@@ -379,13 +356,11 @@ class Model {
 	 * Chain further constraints (`orderBy`, `limit`, …) then call a terminal method
 	 * (`first`, `all`, `paginate`, `count`, `update`, `destroy`).
 	 *
-	 * @param conditions - Equality conditions passed to Knex `where`.
-	 * @returns Model constructor for chaining.
+	 * @param conditions - Equality conditions for the query.
+	 * @returns Independent query for chaining.
 	 */
-	static where<T extends typeof Model>(this: T, conditions: WhereAttributes<InstanceType<T>> = {}): T {
-		const table = this.resolveTable()
-		this.currentQuery = getDB()(table).where(conditions) as Knex.QueryBuilder<Row, Row[]>
-		return this
+	static where<T extends typeof Model>(this: T, conditions: WhereAttributes<InstanceType<T>> = {}): ModelQuery<InstanceType<T>> {
+		return new ModelQuery(this as unknown as new (properties?: Row) => InstanceType<T>, getBackend().query(this.resolveTable()).where(conditions))
 	}
 
 	/**
@@ -393,89 +368,60 @@ class Model {
 	 *
 	 * @param column - Column to sort by.
 	 * @param direction - Sort direction (`'asc'` or `'desc'`). Defaults to `'asc'`.
-	 * @returns Model constructor for chaining.
+	 * @returns Independent query for chaining.
 	 */
-	static orderBy<T extends typeof Model>(this: T, column: AttributeColumn<InstanceType<T>>, direction: 'asc' | 'desc' = 'asc'): T {
-		this.ensureCurrentQuery().orderBy(column, direction)
-		return this
+	static orderBy<T extends typeof Model>(this: T, column: AttributeColumn<InstanceType<T>>, direction: 'asc' | 'desc' = 'asc'): ModelQuery<InstanceType<T>> {
+		return this.ensureCurrentQuery().orderBy(column, direction)
 	}
 
 	/**
 	 * Appends a `limit` clause to the current scoped query.
 	 *
 	 * @param count - Maximum number of rows to return.
-	 * @returns Model constructor for chaining.
+	 * @returns Independent query for chaining.
 	 */
-	static limit<T extends typeof Model>(this: T, count: number): T {
-		this.ensureCurrentQuery().limit(count)
-		return this
+	static limit<T extends typeof Model>(this: T, count: number): ModelQuery<InstanceType<T>> {
+		return this.ensureCurrentQuery().limit(count)
 	}
 
 	/**
 	 * Appends an `offset` clause to the current scoped query.
 	 *
 	 * @param count - Number of rows to skip (commonly paired with {@link Model.limit | limit()}).
-	 * @returns Model constructor for chaining.
+	 * @returns Independent query for chaining.
 	 */
-	static offset<T extends typeof Model>(this: T, count: number): T {
-		this.ensureCurrentQuery().offset(count)
-		return this
+	static offset<T extends typeof Model>(this: T, count: number): ModelQuery<InstanceType<T>> {
+		return this.ensureCurrentQuery().offset(count)
 	}
 
 	/**
 	 * Returns the first model matching the current scope.
 	 *
 	 * When no scope is active, returns the first row in the table.
-	 * The query scope is reset after execution.
 	 *
 	 * @param columns - Columns to select (default `'*'`).
 	 * @returns First matching model, or `null` when none found.
 	 */
 	static async first<T extends typeof Model>(this: T, columns: string | string[] = '*'): Promise<InstanceType<T> | null> {
-		try {
-			const table = this.resolveTable()
-			const query = this.currentQuery ?? getDB()(table)
-			const rows = await query.first<Row>(columns as never)
-			return rows ? new this(rows) as InstanceType<T> : null
-		} catch (error) {
-			throw toError(error)
-		} finally {
-			this.currentQuery = undefined
-		}
+		return this.ensureCurrentQuery().first(columns)
 	}
 
 	/**
 	 * Returns all models matching the current scope.
 	 *
 	 * When no scope is active, returns every row in the table.
-	 * The query scope is reset after execution.
 	 *
 	 * @param columns - Columns to select (default `'*'`).
 	 * @returns {@link ModelCollection} of matching models.
 	 */
 	static async all<T extends typeof Model>(this: T, columns: string | string[] = '*'): Promise<ModelCollection<InstanceType<T>>> {
-		try {
-			const table = this.resolveTable()
-			const query = this.currentQuery ?? getDB()(table)
-			const rows = await query.select<Row[]>(columns as never)
-			const collection = new ModelCollection<InstanceType<T>>()
-			for (const row of rows) {
-				collection.push(new this(row) as InstanceType<T>)
-			}
-
-			return collection
-		} catch (error) {
-			throw toError(error)
-		} finally {
-			this.currentQuery = undefined
-		}
+		return this.ensureCurrentQuery().all(columns)
 	}
 
 	/**
 	 * Returns a paginated result set for the current scope.
 	 *
 	 * Runs a count query and a data query against the scoped builder.
-	 * The query scope is reset after execution.
 	 *
 	 * @param perPage - Items per page (default `15`).
 	 * @param page - Page number, 1-based (default `1`).
@@ -493,61 +439,19 @@ class Model {
 		page = 1,
 		columns: string | string[] = '*',
 	): Promise<PaginatedResult<InstanceType<T>>> {
-		try {
-			const table = this.resolveTable()
-			const baseQuery = this.currentQuery ?? getDB()(table)
-			const countResult = await baseQuery.clone().count<{ count: string | number }>({ count: '*' }).first()
-			const total = countResult ? Number(countResult.count) : 0
-			const lastPage = Math.max(1, Math.ceil(total / perPage) || 1)
-			const currentPage = Math.min(Math.max(1, page), lastPage)
-			const offset = (currentPage - 1) * perPage
-			const rows = await baseQuery.clone().select<Row[]>(columns as never).limit(perPage).offset(offset)
-			const collection = new ModelCollection<InstanceType<T>>()
-
-			for (const row of rows) {
-				collection.push(new this(row) as InstanceType<T>)
-			}
-
-			return {
-				data: collection,
-				total,
-				per_page: perPage,
-				current_page: currentPage,
-				next_page: currentPage < lastPage ? currentPage + 1 : null,
-				prev_page: currentPage > 1 ? currentPage - 1 : null,
-				last_page: lastPage,
-			}
-		} catch (error) {
-			throw toError(error)
-		} finally {
-			this.currentQuery = undefined
-		}
+		return this.ensureCurrentQuery().paginate(perPage, page, columns)
 	}
 
 	/**
 	 * Returns a row count for the current scope.
 	 *
 	 * When no scope is active, counts all rows in the table.
-	 * The query scope is reset after execution.
 	 *
 	 * @param column - Column to count (default `'*'` for all rows).
 	 * @returns Matching row count.
 	 */
 	static async count(this: typeof Model, column = '*'): Promise<number> {
-		try {
-			const table = this.resolveTable()
-			const query = this.currentQuery ?? getDB()(table)
-			const result = await query.count<{ count: string | number }>({ count: column }).first()
-			if (!result) {
-				return 0
-			}
-
-			return Number(result.count)
-		} catch (error) {
-			throw toError(error)
-		} finally {
-			this.currentQuery = undefined
-		}
+		return this.ensureCurrentQuery().count(column)
 	}
 
 	/**
@@ -594,6 +498,66 @@ class Model {
 		}
 
 		return model
+	}
+}
+
+/** An independent model query; safe to keep or run alongside other queries. */
+class ModelQuery<T extends Model> {
+	constructor(private readonly ModelClass: new (properties?: Row) => T, private readonly query: TableQuery) {}
+
+	where(conditions: WhereAttributes<T>): this {
+		this.query.where(conditions)
+		return this
+	}
+	orderBy(column: AttributeColumn<T>, direction: 'asc' | 'desc' = 'asc'): this {
+		this.query.orderBy(column, direction)
+		return this
+	}
+	limit(count: number): this {
+		this.query.limit(count)
+		return this
+	}
+	offset(count: number): this {
+		this.query.offset(count)
+		return this
+	}
+	async first(columns: string | string[] = '*'): Promise<T | null> {
+		const row = await this.query.first(columns)
+		return row ? new this.ModelClass(row) : null
+	}
+	async all(columns: string | string[] = '*'): Promise<ModelCollection<T>> {
+		const rows = await this.query.select(columns)
+		const collection = new ModelCollection<T>()
+		for (const row of rows) collection.push(new this.ModelClass(row))
+		return collection
+	}
+	async count(column = '*'): Promise<number> {
+		return this.query.count(column)
+	}
+	async update(properties: UpdateAttributes<T>): Promise<number> {
+		return this.query.update(properties)
+	}
+	async destroy(): Promise<number> {
+		return this.query.delete()
+	}
+	async paginate(perPage = DEFAULT_PER_PAGE, page = 1, columns: string | string[] = '*'): Promise<PaginatedResult<T>> {
+		if (!Number.isSafeInteger(perPage) || perPage <= 0) throw new RangeError('perPage must be a positive integer')
+		if (!Number.isSafeInteger(page) || page <= 0) throw new RangeError('page must be a positive integer')
+		const total = await this.query.clone().count()
+		const lastPage = Math.max(1, Math.ceil(total / perPage))
+		const currentPage = Math.min(page, lastPage)
+		const rows = await this.query.clone().limit(perPage).offset((currentPage - 1) * perPage).select(columns)
+		const data = new ModelCollection<T>()
+		for (const row of rows) data.push(new this.ModelClass(row))
+		return {
+			data,
+			total,
+			per_page: perPage,
+			current_page: currentPage,
+			next_page: currentPage < lastPage ? currentPage + 1 : null,
+			prev_page: currentPage > 1 ? currentPage - 1 : null,
+			last_page: lastPage,
+		}
 	}
 }
 
@@ -658,23 +622,9 @@ interface Model {
 	): BelongsToRelation<InstanceType<T>>
 }
 
-Object.assign(Model.prototype, createRelationshipMethods(getDB) as Pick<Model, 'hasOne' | 'hasMany' | 'belongsTo'>)
+Object.assign(Model.prototype, createRelationshipMethods(getBackend) as Pick<Model, 'hasOne' | 'hasMany' | 'belongsTo'>)
 
-export { Model, ModelCollection }
+export { Model, ModelCollection, ModelQuery }
 export type { PaginatedResult }
 export type { ModelAttributes, CreateAttributes, WhereAttributes, UpdateAttributes, AttributeColumn } from './attributes.js'
 export { HasOneRelation, HasManyRelation, BelongsToRelation, Relation } from './relation.js'
-export {
-	DB,
-	getDB,
-	configure,
-	createKnexConfig,
-	configureDatabase,
-	setMigrationConfig,
-	getMigrationConfig,
-	makeMigration,
-	migrateLatest,
-	migrateRollback,
-	migrateCurrentVersion,
-	migrateList,
-} from './config.js'

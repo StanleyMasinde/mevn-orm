@@ -6,6 +6,7 @@ All public exports from `mevn-orm`.
 import {
   Model,
   ModelCollection,
+  ModelQuery,
   HasOneRelation,
   HasManyRelation,
   BelongsToRelation,
@@ -42,6 +43,7 @@ import type {
 | --- | --- |
 | [`Model`](/api/model) | ActiveRecord base class |
 | `ModelCollection` | `Array` subclass from `all()` / `paginate().data` with `toArray()` |
+| `ModelQuery` | Independent fluent query returned by `where`, `orderBy`, `limit`, or `offset` |
 | `PaginatedResult` | Type for pagination results |
 | `ModelAttributes` / `CreateAttributes` / `WhereAttributes` / `UpdateAttributes` | Inferred column payload types (see [Model](/api/model#attribute-helper-types)) |
 
@@ -54,6 +56,7 @@ import type {
 | [`configure`](/api/configuration#configure) | Initialise from Knex config or instance |
 | [`getDB`](/api/configuration#getdb) | Active Knex instance (throws if unconfigured) |
 | `DB` | Knex instance export (available after configure) |
+| [`configureDb0`](/api/configuration#configuredb0) | Use an existing db0 SQLite or MySQL connection from `mevn-orm/db0` |
 
 ## Relationships
 

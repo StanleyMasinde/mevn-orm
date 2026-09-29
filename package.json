@@ -20,9 +20,11 @@
     "@types/node": "^25.9.8",
     "@typescript-eslint/parser": "^8.70.1",
     "better-sqlite3": "^13.0.3",
+    "db0": "^0.4.1",
     "dotenv": "^17.4.2",
     "eslint": "^10.11.0",
     "knex": "^3.3.0",
+    "mysql2": "^3.24.4",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "typescript-eslint": "^8.70.1",
@@ -35,9 +37,14 @@
   },
   "exports": {
     ".": {
-      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/index.js"
+    },
+    "./db0": {
+      "types": "./dist/db0.d.ts",
+      "import": "./dist/db0.js",
+      "default": "./dist/db0.js"
     }
   },
   "files": [
@@ -59,12 +66,16 @@
   "name": "mevn-orm",
   "packageManager": "pnpm@11.17.0+sha512.cca3cea332ad254bb84145f966d19f4879615210346fc92c79a047f23a0d7b3cca3c3792f0076ba1f1831d277efbcf0a9119b31a9a60eca7fb3d6231f331ef72",
   "peerDependencies": {
+    "db0": "^0.4.0",
     "knex": "^3.0.0",
     "mysql2": "^3.9.3"
   },
   "peerDependenciesMeta": {
-    "knex": {
-      "optional": false
+    "db0": {
+      "optional": true
+    },
+    "mysql2": {
+      "optional": true
     }
   },
   "private": false,

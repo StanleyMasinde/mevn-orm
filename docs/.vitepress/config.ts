@@ -10,7 +10,7 @@ export default defineConfig({
 	// Project site: https://stanleymasinde.github.io/mevn-orm/
 	base: '/mevn-orm/',
 	title: 'Mevn ORM',
-	description: 'A small ActiveRecord-style ORM for Node.js, built on Knex',
+	description: 'A small ActiveRecord-style ORM for Node.js, with Knex and db0 backends',
 	lang: 'en-GB',
 	cleanUrls: true,
 	lastUpdated: true,
@@ -24,7 +24,7 @@ export default defineConfig({
 		['meta', { name: 'theme-color', content: '#3eaf7c' }],
 		['meta', { name: 'og:type', content: 'website' }],
 		['meta', { name: 'og:title', content: 'Mevn ORM' }],
-		['meta', { name: 'og:description', content: 'A small ActiveRecord-style ORM for Node.js, built on Knex' }],
+		['meta', { name: 'og:description', content: 'A small ActiveRecord-style ORM for Node.js, with Knex and db0 backends' }],
 		['meta', { name: 'og:url', content: `${siteUrl}/` }],
 		['meta', { name: 'twitter:card', content: 'summary' }],
 	],
@@ -69,6 +69,7 @@ export default defineConfig({
 					items: [
 						{ text: 'Express', link: '/guide/express' },
 						{ text: 'Nuxt / Nitro', link: '/guide/nuxt' },
+						{ text: 'db0 Migrations', link: '/guide/db0-migrations' },
 						{ text: 'Raw Knex (DB)', link: '/guide/raw-knex' },
 						{ text: 'Security', link: '/guide/security' },
 					],
