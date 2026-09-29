@@ -1,5 +1,6 @@
 import type { Row } from './attributes.js'
 import type { FilterNode } from './filters.js'
+import type { JoinPlan } from './join-sql.js'
 import { currentContext, modelContext } from './execution-context.js'
 
 export interface TableQuery {
@@ -22,6 +23,8 @@ export interface TableQuery {
 
 export interface Backend {
 	query(table: string): TableQuery
+	/** Optional read-only join execution; older backends remain valid. */
+	joinedRows?(plan: JoinPlan, count: boolean): Promise<Row[] | number>
 	/** Optional transaction capability; existing backends remain valid. */
 	transaction?<T>(callback: (backend: Backend) => Promise<T>): Promise<T>
 }

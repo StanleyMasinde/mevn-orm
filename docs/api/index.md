@@ -29,6 +29,8 @@ import {
   transaction,
   TransactionContext,
   TransactionModel,
+  joinRows,
+  JoinQuery,
 } from 'mevn-orm'
 
 import type {
@@ -54,6 +56,8 @@ import type {
 | `ModelAttributes` / `CreateAttributes` / `WhereAttributes` / `UpdateAttributes` | Inferred column payload types (see [Model](/api/model#attribute-helper-types)) |
 | `AttributeColumn` | Declared model column names used by query methods |
 | `ComparisonOperator` | Operators accepted by comparison filters (see [Queries](/guide/queries#extended-filters)) |
+| [`joinRows`](/api/joins) | Start a read-only join query returning projected plain rows |
+| [`JoinQuery`](/api/joins) | Fluent builder for joined-row filters, sorting, projection, count, and pagination |
 
 ## Configuration
 
