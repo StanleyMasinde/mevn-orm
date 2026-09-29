@@ -1,39 +1,48 @@
-# This workflow runs tests and publishes to npm when a release is created.
-# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
-
-name: Node.js Package
-permissions:
-  contents: read
-  id-token: write
+name: Release
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  id-token: write
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 25.x
-      - uses: pnpm/action-setup@v6
-      - run: cp .env.example .env
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build
-      - run: pnpm test
 
-  publish-npm:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 25.x
           registry-url: https://registry.npmjs.org/
+
       - uses: pnpm/action-setup@v6
+
+      - name: Verify tag matches package version
+        run: test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
+
+      - run: cp .env.example .env
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
-      - run: npm publish
+      - run: pnpm run typecheck
+      - run: pnpm test
+
+      - name: Publish to npm
+        run: |
+          package="$(node -p 'require("./package.json").name + "@" + require("./package.json").version')"
+          if npm view "$package" version >/dev/null 2>&1; then
+            echo "$package is already published"
+          else
+            npm publish
+          fi
+
+      - name: Create GitHub release
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
+            gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

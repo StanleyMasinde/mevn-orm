@@ -1,25 +1,32 @@
-# Nuxt / Nitro
+# Nuxt / Nitro with db0
 
-Initialise Mevn ORM in a Nitro server plugin so every server route shares one configured client. Copy migration files into the build output so production boots can run migrations.
+Mevn ORM uses the db0 connection returned by Nitro's `useDatabase()`. Configure the connection in Nitro as usual; Mevn ORM does not replace or change `useDatabase()`. The db0 backend supports SQLite and MySQL. Install `mevn-orm`, `knex`, and `db0`; install `mysql2` when using MySQL. Knex builds SQL and bindings without opening a connection; db0 executes the compiled queries.
 
-## Why a plugin?
+## Configure Nitro's database
 
-Nitro starts a single server process. A `server/plugins/*.ts` file runs at startup — ideal for `configureDatabase` and optional `migrateLatest`.
-
-## `nuxt.config.ts` — ship migrations
-
-Because Nitro bundles server code, migration **files** must be copied into `.output`:
+For a MySQL app using boot migrations, configure Nitro's default connection with the same URI used by the Knex migration connection:
 
 ```ts
 import { cp } from 'node:fs/promises'
+import { resolve } from 'node:path'
 
 export default defineNuxtConfig({
+  runtimeConfig: {
+    databaseConnection: '' // overridden by NUXT_DATABASE_CONNECTION at runtime
+  },
   nitro: {
+    experimental: { database: true },
+    database: {
+      default: {
+        connector: 'mysql2',
+        options: { uri: process.env.NUXT_DATABASE_CONNECTION }
+      }
+    },
     hooks: {
-      compiled: async () => {
+      compiled: async (nitro) => {
         await cp(
-          'server/assets/migrations',
-          '.output/server/assets/migrations',
+          resolve('server/assets/migrations'),
+          resolve(nitro.options.output.serverDir, 'assets/migrations'),
           { recursive: true }
         )
       }
@@ -28,77 +35,40 @@ export default defineNuxtConfig({
 })
 ```
 
-Put Knex migrations under `server/assets/migrations/`.
+The `compiled` hook copies migrations into Nitro's actual server output directory after each build. Set `NUXT_DATABASE_CONNECTION` when building and running this example. Nitro resolves its `database` options from `nuxt.config.ts` during the build, while the migration plugin reads the URI from runtime config when the server starts. Changing the runtime variable alone does not change the database connection compiled into an existing `.output` build. Both must target the same database. Nitro's database feature and connection configuration vary by major version; follow the [Nitro database guide](https://v2.nitro.build/guide/database) for Nitro 2 or the [current Nitro guide](https://nitro.build/docs/database) for Nitro 3.
 
-## Server plugin
+## Connect Mevn ORM
+
+Configure the backend in a server plugin:
 
 ```ts
 // server/plugins/mevn-orm.ts
-import { defineNitroPlugin } from 'nitropack/runtime'
-import { existsSync } from 'node:fs'
-import {
-  configureDatabase,
-  setMigrationConfig,
-  migrateLatest,
-  migrateRollback
-} from 'mevn-orm'
+import { configureDb0 } from 'mevn-orm/db0'
 
-const isIgnorableMigrationError = (error: unknown): boolean => {
-  const message =
-    error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase()
-
-  return (
-    message.includes('already exists') ||
-    message.includes('duplicate') ||
-    message.includes('does not exist') ||
-    message.includes('no such table') ||
-    message.includes('the migration directory is corrupt')
-  )
-}
-
-export default defineNitroPlugin(async () => {
-  configureDatabase({
-    client: 'pg',
-    connection: process.env.DATABASE_URL
-  })
-
-  // Nitro runtime path differs in dev vs built server.
-  const migrationDirectory = existsSync('./.output/server/assets/migrations')
-    ? './.output/server/assets/migrations'
-    : './server/assets/migrations'
-
-  setMigrationConfig({
-    directory: migrationDirectory,
-    extension: 'ts'
-  })
-
-  // Idempotent at boot: if already migrated, Knex returns empty log.
-  try {
-    await migrateLatest()
-  } catch (error) {
-    if (!isIgnorableMigrationError(error)) throw error
-  }
-
-  // Optional rollback at boot (usually only for dev/preview).
-  if (process.env.NITRO_ROLLBACK_ON_BOOT === 'true') {
-    try {
-      await migrateRollback(undefined, false)
-    } catch (error) {
-      if (!isIgnorableMigrationError(error)) throw error
-    }
-  }
+export default defineNitroPlugin(() => {
+  configureDb0(useDatabase())
 })
 ```
 
-## Models and API routes
+The database is created and cached by Nitro. For a named connection, pass `useDatabase('name')` to `configureDb0`; that argument is a **connection name**, not a table name. A standalone db0 application can pass its `createDatabase(...)` result to `configureDb0` in the same way.
+
+```ts
+import { createDatabase } from 'db0'
+import sqlite from 'db0/connectors/node-sqlite'
+import { configureDb0 } from 'mevn-orm/db0'
+
+const db = createDatabase(sqlite({ name: 'app' }))
+configureDb0(db)
+```
+
+Keep models under `server/` so client code does not import the ORM:
 
 ```ts
 // server/models/User.ts
-import { Model } from 'mevn-orm'
+import { Model } from 'mevn-orm/db0'
 
 export class User extends Model {
-  override fillable = ['name', 'email', 'password']
-  override hidden = ['password']
+  override fillable = ['name', 'email']
 }
 ```
 
@@ -106,82 +76,28 @@ export class User extends Model {
 // server/api/users/index.get.ts
 import { User } from '../../models/User'
 
-export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
-  const page = Number(query.page ?? 1)
-  const perPage = Number(query.perPage ?? 15)
-
-  const result = await User.orderBy('id', 'desc').paginate(perPage, page)
-
-  return {
-    data: result.data.toArray(),
-    meta: {
-      total: result.total,
-      per_page: result.per_page,
-      current_page: result.current_page,
-      next_page: result.next_page,
-      prev_page: result.prev_page,
-      last_page: result.last_page
-    }
-  }
+export default defineEventHandler(async () => {
+  const page = await User.orderBy('id', 'desc').paginate(15)
+  return { users: page.data.toArray(), total: page.total }
 })
 ```
+
+Queries hold their own state. Two requests can build `User.where(...)` chains without changing each other's filters.
+
+The Mevn ORM query API is the same after configuration:
 
 ```ts
-// server/api/users/[id].get.ts
-import { User } from '../../models/User'
-
-export default defineEventHandler(async (event) => {
-  const id = Number(getRouterParam(event, 'id'))
-  const user = await User.find(id)
-
-  if (!user) {
-    throw createError({ statusCode: 404, statusMessage: 'User not found' })
-  }
-
-  return user.toArray()
-})
+const user = await User.where({ email: 'jane@example.com' }).first()
 ```
 
-```ts
-// server/api/users/index.post.ts
-import { User } from '../../models/User'
-// import { hash } from '...' your preferred hasher
+For db0, column names must be simple SQL identifiers (`name`, `users.id`, or `*`). Values are bound as parameters. Scoped `update()` and `destroy()` support equality filters; sorting and pagination modifiers are not supported on those writes.
 
-export default defineEventHandler(async (event) => {
-  const body = await readBody<{ name: string; email: string; password: string }>(event)
+## Schema migrations
 
-  if (!body?.name || !body?.email || !body?.password) {
-    throw createError({ statusCode: 400, statusMessage: 'Missing fields' })
-  }
+Mevn ORM's migration helpers remain available from `mevn-orm`. You can run them from a separate Knex CLI in development or CI, or run them when a persistent Node server boots. Both approaches use the same database as Nitro's db0 connection. See [Migrations for Nuxt / Nitro](/guide/db0-migrations) for the boot plugin, CLI, build output, and Cloudflare Workers instructions.
 
-  const user = await User.create({
-    name: body.name,
-    email: body.email,
-    password: body.password // hash before create in real apps
-  })
+The db0 backend assumes integer auto-generated `id` columns. SQLite can use `id INTEGER PRIMARY KEY`; MySQL can use `id BIGINT AUTO_INCREMENT PRIMARY KEY`. Model writes return the inserted row by that ID. Use the Knex backend for other database dialects or schemas needing a different primary key strategy.
 
-  setResponseStatus(event, 201)
-  return user.toArray()
-})
-```
+## Knex compatibility
 
-## Environment
-
-```bash
-DATABASE_URL=postgres://user:pass@localhost:5432/app
-# optional:
-NITRO_ROLLBACK_ON_BOOT=false
-```
-
-## Tips
-
-- Keep models under `server/` so they are not shipped to the client bundle.
-- Prefer connection strings in production (`DATABASE_URL`).
-- For SQLite in local Nuxt dev, use `better-sqlite3` and a file path outside `node_modules`.
-- If migrations fail only in production, confirm the `compiled` hook copied files into `.output/server/assets/migrations`.
-
-## Next steps
-
-- [Migrations](/guide/migrations)
-- [Security](/guide/security)
+Existing `mevn-orm` imports continue to use a Knex connection directly, including `getDB()` and migration helpers. Use one backend per server process. The `mevn-orm/db0` entry point also loads Knex for query compilation, but executes through the configured db0 connection.

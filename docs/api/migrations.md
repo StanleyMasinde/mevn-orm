@@ -2,6 +2,8 @@
 
 Thin wrappers around Knex’s migrator. Configure the database first, then set default migrator options.
 
+Nuxt applications using db0 at runtime can call these helpers from a separate Knex CLI or a Node startup plugin against the same database. See [Migrations for Nuxt / Nitro](/guide/db0-migrations).
+
 ## `setMigrationConfig(config): Knex.MigratorConfig`
 
 Stores default options (typically `directory` and `extension`).

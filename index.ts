@@ -15,19 +15,13 @@ import {
 	HasManyRelation,
 	BelongsToRelation,
 	Relation,
-	DB,
-	getDB,
-	configure,
-	createKnexConfig,
-	configureDatabase,
-	setMigrationConfig,
-	getMigrationConfig,
-	makeMigration,
-	migrateLatest,
-	migrateRollback,
-	migrateCurrentVersion,
-	migrateList,
+	ModelQuery,
 } from './src/model.js'
+import {
+	DB, getDB, configure, createKnexConfig, configureDatabase,
+	setMigrationConfig, getMigrationConfig, makeMigration, migrateLatest,
+	migrateRollback, migrateCurrentVersion, migrateList,
+} from './src/config.js'
 import { getTableName, toSnakeCase } from './src/inflect.js'
 
 export type {
@@ -46,6 +40,7 @@ export {
 	HasManyRelation,
 	BelongsToRelation,
 	Relation,
+	ModelQuery,
 	DB,
 	getDB,
 	configure,

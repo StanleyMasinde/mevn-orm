@@ -1,8 +1,56 @@
 {
-  "name": "mevn-orm",
-  "version": "4.7.0",
-  "private": false,
+  "author": "Stanley Masinde <hello@stanleymasinde.com> (https://stanleymasinde.github.io)",
+  "bugs": {
+    "email": "stanleymasinde1@gmail.com",
+    "url": "https://github.com/StanleyMasinde/mevn-orm/issues"
+  },
+  "contributors": [
+    {
+      "email": "hello@stanleymasinde.com",
+      "name": "Stanley Masinde"
+    }
+  ],
+  "dependencies": {
+    "pluralize": "^8.0.0"
+  },
   "description": "simple ORM for express js",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@faker-js/faker": "^10.6.0",
+    "@types/node": "^25.9.8",
+    "@typescript-eslint/parser": "^8.70.1",
+    "better-sqlite3": "^13.0.3",
+    "db0": "^0.4.1",
+    "dotenv": "^17.4.2",
+    "eslint": "^10.11.0",
+    "knex": "^3.3.0",
+    "mysql2": "^3.24.4",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "typescript-eslint": "^8.70.1",
+    "vite": "^8.3.1",
+    "vitepress": "^1.6.4",
+    "vitest": "^4.1.11"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./db0": {
+      "default": "./dist/db0.js",
+      "import": "./dist/db0.js",
+      "types": "./dist/db0.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://stanleymasinde.github.io/mevn-orm/",
   "keywords": [
     "ORM",
     "express",
@@ -13,83 +61,46 @@
     "orm-express",
     "orm-mysql"
   ],
-  "homepage": "https://stanleymasinde.github.io/mevn-orm/",
-  "bugs": {
-    "url": "https://github.com/StanleyMasinde/mevn-orm/issues",
-    "email": "stanleymasinde1@gmail.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/StanleyMasinde/mevn-orm.git"
-  },
   "license": "MIT",
-  "author": "Stanley Masinde <hello@stanleymasinde.com> (https://stanleymasinde.github.io)",
-  "contributors": [
-    {
-      "name": "Stanley Masinde",
-      "email": "hello@stanleymasinde.com"
-    }
-  ],
-  "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    }
-  },
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "directories": {
-    "test": "test"
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "pretest": "node --import tsx initDb.ts",
-    "test": "vitest run",
-    "init:db": "node --import tsx initDb.ts",
-    "typecheck": "tsc --noEmit",
-    "migrate": "node --import tsx scripts/migrate.ts latest",
-    "migrate:make": "node --import tsx scripts/migrate.ts make",
-    "migrate:rollback": "node --import tsx scripts/migrate.ts rollback",
-    "migrate:list": "node --import tsx scripts/migrate.ts list",
-    "migrate:version": "node --import tsx scripts/migrate.ts version",
-    "lint": "eslint .",
-    "build": "tsc -p tsconfig.build.json",
-    "prepack": "pnpm run build",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
-  },
-  "dependencies": {
-    "pluralize": "^8.0.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@faker-js/faker": "^10.5.0",
-    "@types/node": "^25.9.5",
-    "@typescript-eslint/parser": "^8.67.0",
-    "better-sqlite3": "^13.0.3",
-    "dotenv": "^17.4.2",
-    "eslint": "^10.8.1",
-    "knex": "^3.3.0",
-    "tsx": "^4.23.12",
-    "typescript": "^7.0.2",
-    "typescript-eslint": "^8.67.0",
-    "vite": "^8.2.1",
-    "vitepress": "^1.6.4",
-    "vitest": "^4.1.10"
-  },
+  "name": "mevn-orm",
+  "packageManager": "pnpm@12.6.0",
   "peerDependencies": {
+    "db0": "^0.4.0",
     "knex": "^3.0.0",
     "mysql2": "^3.9.3"
   },
   "peerDependenciesMeta": {
-    "knex": {
-      "optional": false
+    "db0": {
+      "optional": true
+    },
+    "mysql2": {
+      "optional": true
     }
   },
-  "packageManager": "pnpm@11.17.0+sha512.cca3cea332ad254bb84145f966d19f4879615210346fc92c79a047f23a0d7b3cca3c3792f0076ba1f1831d277efbcf0a9119b31a9a60eca7fb3d6231f331ef72"
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StanleyMasinde/mevn-orm.git"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "docs:build": "vitepress build docs",
+    "docs:dev": "vitepress dev docs",
+    "docs:preview": "vitepress preview docs",
+    "init:db": "node --import tsx initDb.ts",
+    "lint": "eslint .",
+    "migrate": "node --import tsx scripts/migrate.ts latest",
+    "migrate:list": "node --import tsx scripts/migrate.ts list",
+    "migrate:make": "node --import tsx scripts/migrate.ts make",
+    "migrate:rollback": "node --import tsx scripts/migrate.ts rollback",
+    "migrate:version": "node --import tsx scripts/migrate.ts version",
+    "prepack": "pnpm run build",
+    "pretest": "node --import tsx initDb.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "version": "4.9.0"
 }

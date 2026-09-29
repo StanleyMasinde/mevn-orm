@@ -1,5 +1,7 @@
 import type { Knex } from 'knex'
 import knexModule from 'knex'
+import { setBackend } from './backend.js'
+import { knexBackend } from './knex-backend.js'
 
 type KnexFactory = (config: Knex.Config) => Knex
 
@@ -79,10 +81,12 @@ const getDB = (): Knex => {
 const configure = (config: Knex.Config | Knex): Knex => {
 	if (typeof config === 'function') {
 		DB = config
+		setBackend(knexBackend(DB))
 		return DB
 	}
 
 	DB = knexFactory(config)
+	setBackend(knexBackend(DB))
 	return DB
 }
 

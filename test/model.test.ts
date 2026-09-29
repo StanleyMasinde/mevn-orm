@@ -481,24 +481,22 @@ describe('#Model tests', () => {
 		expect(unscoped).not.toBe(null)
 	})
 
-	it('#toJson serialises a single model instance without internal or hidden fields', async () => {
-		const farmer = await Farmer.create({
-			name: faker.person.fullName(),
-			email: `to-json-${Date.now()}@mail.test`,
+	it('#toJson serialises a single model without mutating hidden or internal fields', () => {
+		const farmer = new Farmer({
+			id: 42,
+			name: 'Jane Doe',
+			email: 'jane@mail.test',
 			password: 'secret-password'
-		}) as Farmer
+		})
 
 		const data = farmer.toJson()
 		expect(Array.isArray(data)).toBe(false)
+		expect(data).toEqual({ id: 42, name: 'Jane Doe', email: 'jane@mail.test' })
 		expect(data).toEqual(farmer.toArray())
-		expect(data).toHaveProperty('id', farmer.id)
-		expect(data).toHaveProperty('name', farmer.name)
-		expect(data).toHaveProperty('email', farmer.email)
-		expect(data).not.toHaveProperty('password')
-		expect(data).not.toHaveProperty('fillable')
-		expect(data).not.toHaveProperty('hidden')
-		expect(data).not.toHaveProperty('modelName')
-		expect(data).not.toHaveProperty('table')
+		expect(farmer.password).toBe('secret-password')
+		expect(farmer.hidden).toEqual(['password'])
+		expect(farmer.fillable).toEqual(['name', 'email', 'password'])
+		expect(JSON.parse(JSON.stringify(data))).toEqual(data)
 	})
 
 	it('#toArray serialises a model instance without internal or hidden fields', async () => {

@@ -5,8 +5,14 @@ Use `toJson()` for **one** model and `toArray()` on a **collection**. Both omit 
 | Method | On | Returns |
 | --- | --- | --- |
 | `model.toJson()` | `Model` | One plain object |
-| `model.toArray()` | `Model` | Same object as `toJson()` |
+| `model.toArray()` | `Model` | Same payload as `toJson()` |
 | `collection.toArray()` | `ModelCollection` | Array of plain objects |
+
+`toJson()` returns a plain object, not a JSON string. It is an explicit helper,
+and its spelling differs from JavaScript's automatic `toJSON()` hook.
+`JSON.stringify(model)` does not call `toJson()`. Use
+`JSON.stringify(model.toJson())` for a JSON string with hidden fields omitted,
+or `res.json(model.toJson())` in an HTTP handler.
 
 ## Model `toJson()` / `toArray()`
 

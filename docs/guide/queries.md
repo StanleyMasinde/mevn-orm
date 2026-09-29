@@ -1,6 +1,6 @@
 # Queries
 
-Chain scope methods on the model class, then call a **terminal** method. The scope is reset after each terminal call so queries do not leak into the next operation.
+Start a query with a model's scope method, then call a **terminal** method. Each chain has independent scope, so concurrent requests cannot change each other's filters.
 
 ## Anatomy of a query
 
@@ -16,7 +16,7 @@ const leads = await Lead
 
 | Method | Description |
 | --- | --- |
-| `where(conditions)` | Equality conditions passed to Knex `where` (typed from declared columns) |
+| `where(conditions)` | Equality conditions (typed from declared columns) |
 | `orderBy(column, direction?)` | Sort (`'asc'` \| `'desc'`, default `'asc'`) |
 | `limit(count)` | Maximum rows |
 | `offset(count)` | Skip rows (often with `limit`) |
@@ -146,7 +146,7 @@ export async function listPosts(req: { query: { page?: string; perPage?: string 
 
 - Page numbers are clamped into a valid range (never less than 1, never past `last_page`).
 - Empty tables still return a valid structure with `total: 0` and `last_page: 1`.
-- The scope is reset after `paginate()`, same as other terminals.
+- The query object can be reused after `paginate()`; other chains are independent.
 
 ## ModelCollection
 
@@ -182,7 +182,7 @@ PasswordReset.resolveTable() // same
 ## Query hygiene tips
 
 1. **Always end with a terminal** — scopes alone do not run a query.
-2. **Do not reuse partial chains across awaits** — scope is shared on the class via `currentQuery` and cleared after terminals.
+2. **Keep query chains local to the request** — `User.where(...)` returns a query object with its own filters.
 3. **Prefer scoped updates/deletes** — bare `User.update(...)` / `User.destroy()` affect the whole table.
 4. **Use `toArray()` at the boundary** — keep models inside the service layer; send plain objects to clients.
 
