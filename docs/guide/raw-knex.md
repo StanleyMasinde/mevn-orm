@@ -1,6 +1,6 @@
 # Raw Knex (`DB`)
 
-Mevn ORM is intentionally thin. For joins, aggregates, or SQL Knex already expresses well, drop down to the shared Knex instance. For model operations spanning one transaction, use the [transaction facade](/guide/transactions).
+For SQL beyond the model API, use the shared Knex instance. For projected inner and left joins, see [Read joined rows](/guide/joined-rows). For model operations spanning one transaction, use the [transaction facade](/guide/transactions).
 
 ## Access
 

@@ -255,4 +255,5 @@ PasswordReset.resolveTable() // same
 
 - [Relationships](/guide/relationships)
 - [Serialization](/guide/serialization)
-- [Raw Knex](/guide/raw-knex) for joins and advanced SQL
+- [Read joined rows](/guide/joined-rows) for typed, read-only joins
+- [Raw Knex](/guide/raw-knex) for advanced SQL

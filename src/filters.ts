@@ -237,5 +237,5 @@ const applyFilter = (query: Knex.QueryBuilder, node: FilterNode): void => {
 	query.whereRaw(sql, bindings as Knex.RawBinding[])
 }
 
-export { FilterBuilder, FilterGroup, escapeLike, applyFilter }
+export { FilterBuilder, FilterGroup, escapeLike, applyFilter, boundValue }
 export type { FilterNode, ComparisonOperator }

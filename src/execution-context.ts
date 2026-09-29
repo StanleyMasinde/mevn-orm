@@ -12,6 +12,10 @@ class ExecutionContext {
 				this.assertActive()
 				return guardQuery(raw.query(table), this)
 			},
+			...(raw.joinedRows && { joinedRows: (plan: Parameters<NonNullable<Backend['joinedRows']>>[0], count: boolean) => {
+				this.assertActive()
+				return raw.joinedRows!(plan, count)
+			} }),
 			...(raw.transaction && { transaction: <T>(callback: (backend: Backend) => Promise<T>) => {
 				this.assertActive()
 				return raw.transaction!(callback)

@@ -4,6 +4,7 @@ import type { Row } from './attributes.js'
 import type { Backend, TableQuery } from './backend.js'
 import { setBackend } from './backend.js'
 import { applyFilter, type FilterNode } from './filters.js'
+import { buildJoinedQuery } from './join-sql.js'
 
 type Dialect = 'sqlite' | 'mysql'
 
@@ -148,6 +149,11 @@ export const configureDb0 = (db: Database): Database => {
 	const compiler = knex({ client: dialect === 'mysql' ? 'mysql2' : 'sqlite3', useNullAsDefault: dialect === 'sqlite' })
 	const backend: Backend = {
 		query: (table) => new Db0TableQuery(db, dialect, compiler<Row>(identifier(table))),
+		joinedRows: async (plan, count) => {
+			const statement = buildJoinedQuery(compiler, plan, count).toSQL()
+			const rows = await db.prepare(statement.sql).all(...bindings(statement.bindings, dialect)) as Row[]
+			return count ? Number(rows[0]?.count ?? 0) : rows
+		},
 	}
 	setBackend(backend)
 	return db

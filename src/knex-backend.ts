@@ -2,6 +2,7 @@ import type { Knex } from 'knex'
 import type { Row } from './attributes.js'
 import type { Backend, TableQuery } from './backend.js'
 import { applyFilter, type FilterNode } from './filters.js'
+import { buildJoinedQuery } from './join-sql.js'
 
 class KnexTableQuery implements TableQuery {
 	constructor(
@@ -68,6 +69,10 @@ export const knexBackend = (db: Knex, transactionBound = false): Backend => {
 	const lockSupported = ['pg', 'postgres', 'postgresql', 'mysql', 'mysql2'].includes(dialect)
 	return {
 		query: (table) => new KnexTableQuery(db(table) as Knex.QueryBuilder<Row, Row[]>, transactionBound, lockSupported),
+		joinedRows: async (plan, count) => {
+			const rows = await buildJoinedQuery(db, plan, count)
+			return count ? Number((rows[0] as Row | undefined)?.count ?? 0) : rows as Row[]
+		},
 		transaction: async (callback) => db.transaction(async (trx) => callback(knexBackend(trx, true))),
 	}
 }

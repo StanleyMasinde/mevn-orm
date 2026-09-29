@@ -25,6 +25,7 @@ import {
 import { getTableName, toSnakeCase } from './src/inflect.js'
 import { escapeLike } from './src/filters.js'
 import { transaction, TransactionContext, TransactionModel } from './src/transaction.js'
+import { joinRows, JoinQuery } from './src/join.js'
 
 export type {
 	PaginatedResult,
@@ -63,4 +64,6 @@ export {
 	transaction,
 	TransactionContext,
 	TransactionModel,
+	joinRows,
+	JoinQuery,
 }

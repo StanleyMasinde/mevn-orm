@@ -59,6 +59,7 @@ export default defineConfig({
 						{ text: 'Configuration', link: '/guide/configuration' },
 						{ text: 'Models', link: '/guide/models' },
 						{ text: 'Queries', link: '/guide/queries' },
+						{ text: 'Joined rows', link: '/guide/joined-rows' },
 						{ text: 'Transactions', link: '/guide/transactions' },
 						{ text: 'Relationships', link: '/guide/relationships' },
 						{ text: 'Serialization', link: '/guide/serialization' },
@@ -82,6 +83,7 @@ export default defineConfig({
 					items: [
 						{ text: 'Overview', link: '/api/' },
 						{ text: 'Model', link: '/api/model' },
+						{ text: 'Joined rows', link: '/api/joins' },
 						{ text: 'Configuration', link: '/api/configuration' },
 						{ text: 'Relationships', link: '/api/relationships' },
 						{ text: 'Transactions', link: '/api/transactions' },
