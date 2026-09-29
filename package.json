@@ -37,14 +37,14 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js",
       "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.ts"
     },
     "./db0": {
-      "types": "./dist/db0.d.ts",
+      "default": "./dist/db0.js",
       "import": "./dist/db0.js",
-      "default": "./dist/db0.js"
+      "types": "./dist/db0.d.ts"
     }
   },
   "files": [
@@ -102,5 +102,5 @@
   },
   "type": "module",
   "types": "dist/index.d.ts",
-  "version": "4.8.0"
+  "version": "4.9.0"
 }
