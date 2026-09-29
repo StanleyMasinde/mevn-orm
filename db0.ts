@@ -4,3 +4,4 @@ export type { PaginatedResult, ModelAttributes, CreateAttributes, WhereAttribute
 export { configureDb0 } from './src/db0-backend.js'
 export { getTableName, toSnakeCase } from './src/inflect.js'
 export { escapeLike } from './src/filters.js'
+export { transaction, TransactionContext, TransactionModel } from './src/transaction.js'
