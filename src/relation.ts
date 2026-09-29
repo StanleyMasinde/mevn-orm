@@ -1,4 +1,4 @@
-import type { Row, WhereAttributes } from './attributes.js'
+import type { AttributeColumn, Row, WhereAttributes } from './attributes.js'
 import type { TableQuery } from './backend.js'
 
 interface RelationshipModel {
@@ -9,6 +9,17 @@ interface RelationshipModel {
 }
 
 type RelatedModelCtor<T extends RelationshipModel = RelationshipModel> = new (properties?: Row) => T
+
+/** Pagination metadata for a relation, with its existing array result shape. */
+interface RelationPaginatedResult<T extends RelationshipModel> {
+	data: T[]
+	total: number
+	per_page: number
+	current_page: number
+	next_page: number | null
+	prev_page: number | null
+	last_page: number
+}
 
 /**
  * Lazy relation query wrapper backed by the configured database.
@@ -37,6 +48,54 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 	where(conditions: WhereAttributes<TRelated>): this {
 		this.query?.where(conditions)
 		return this
+	}
+
+	/** Orders related rows while retaining the parent key constraint. */
+	orderBy(column: AttributeColumn<TRelated>, direction: 'asc' | 'desc' = 'asc'): this {
+		this.query?.orderBy(column, direction)
+		return this
+	}
+
+	/** Limits related rows. */
+	limit(count: number): this {
+		this.query?.limit(count)
+		return this
+	}
+
+	/** Skips related rows. */
+	offset(count: number): this {
+		this.query?.offset(count)
+		return this
+	}
+
+	/** Counts all rows matching the relation scope, ignoring order, limit, and offset. */
+	async count(column = '*'): Promise<number> {
+		return this.query ? this.query.count(column) : 0
+	}
+
+	/** Returns relation rows and the same page metadata used by model queries. */
+	async paginate(perPage = 15, page = 1, columns: string | string[] = '*'): Promise<RelationPaginatedResult<TRelated>> {
+		if (!Number.isSafeInteger(perPage) || perPage <= 0) throw new RangeError('perPage must be a positive integer')
+		if (!Number.isSafeInteger(page) || page <= 0) throw new RangeError('page must be a positive integer')
+		const total = await this.count()
+		const lastPage = Math.max(1, Math.ceil(total / perPage))
+		const currentPage = Math.min(page, lastPage)
+		const rows = this.query
+			? await this.query.clone().limit(perPage).offset((currentPage - 1) * perPage).select(columns)
+			: []
+		const data = rows.map((row) => {
+			const related = new this.Related(row)
+			return related.stripColumns(related)
+		})
+		return {
+			data,
+			total,
+			per_page: perPage,
+			current_page: currentPage,
+			next_page: currentPage < lastPage ? currentPage + 1 : null,
+			prev_page: currentPage > 1 ? currentPage - 1 : null,
+			last_page: lastPage,
+		}
 	}
 
 	/**
@@ -133,5 +192,6 @@ export {
 	BelongsToRelation,
 	type RelationshipModel,
 	type RelatedModelCtor,
+	type RelationPaginatedResult,
 	type Row,
 }

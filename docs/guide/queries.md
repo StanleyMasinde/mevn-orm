@@ -20,6 +20,7 @@ const leads = await Lead
 | `orderBy(column, direction?)` | Sort (`'asc'` \| `'desc'`, default `'asc'`) |
 | `limit(count)` | Maximum rows |
 | `offset(count)` | Skip rows (often with `limit`) |
+| `clone()` | Fork the current filters, ordering, limit, and offset into an independent query |
 
 ```ts
 // Equality object
@@ -35,6 +36,11 @@ await Post
 
 // orderBy without a prior where (queries the whole table)
 await Lead.orderBy('created_at', 'desc').all()
+
+// Branch without changing the reusable base query
+const base = Post.where({ published: true })
+const recent = base.clone().orderBy('created_at', 'desc').limit(10)
+const featured = base.clone().where({ featured: true })
 ```
 
 ## Terminal methods
@@ -42,7 +48,11 @@ await Lead.orderBy('created_at', 'desc').all()
 | Method | Returns |
 | --- | --- |
 | `first(columns?)` | First matching model, or `null` |
+| `firstOrFail(columns?)` | First matching model, or throws if missing |
 | `all(columns?)` | `ModelCollection` of models |
+| `exists()` | Whether the current filtered, limited, and offset result contains a row |
+| `value(column)` | First column value, or `undefined` if no row matches |
+| `pluck(column)` | Array of column values in result order |
 | `count(column?)` | Number of matching rows |
 | `paginate(perPage?, page?, columns?)` | Page data + metadata |
 | `update(properties)` | Rows updated (number) |
@@ -68,6 +78,20 @@ Without a prior scope, `first()` / `all()` operate on the whole table:
 const anyone = await User.first()
 const everyone = await User.all()
 ```
+
+### Scalar reads
+
+```ts
+const query = User.where({ active: true }).orderBy('id')
+const hasUsers = await query.exists()
+const firstName = await query.value('name')
+const names = await query.pluck('name')
+const firstUser = await query.firstOrFail()
+```
+
+These helpers leave `query` reusable. `value()` and `pluck()` select only the requested column and return its declared TypeScript type when the model declares fields; untyped models return `unknown`. `value()` returns `undefined` for no row and preserves a SQL `NULL` as `null`. `pluck()` returns `[]` for no rows and preserves `null` entries. `exists()` respects `offset()` and returns `false` for `limit(0)`. `count()` still counts the full filtered scope, ignoring limit and offset. Scalar reads return requested database values directly, including columns marked `hidden`; avoid exposing those values in API responses.
+
+The new helpers are available on `ModelQuery` objects such as `User.where(...)` or `User.orderBy(...)`. They add no names to `Model` itself, so subclasses can retain methods with the same names.
 
 ### Count
 
@@ -147,6 +171,11 @@ export async function listPosts(req: { query: { page?: string; perPage?: string 
 - Page numbers are clamped into a valid range (never less than 1, never past `last_page`).
 - Empty tables still return a valid structure with `total: 0` and `last_page: 1`.
 - The query object can be reused after `paginate()`; other chains are independent.
+- Relation pagination uses the same metadata, with `data` as an array of related models.
+
+## Backend support
+
+Query cloning and scalar helpers use the existing query backend operations. They work with the Knex backend and db0's supported SQLite and MySQL connectors. Relation sorting, counting, and pagination use the same operations. No backend interface methods are required beyond those already used by model queries, and no migration is needed.
 
 ## ModelCollection
 

@@ -66,6 +66,21 @@ const runSuite = (label: string, makeDb: () => Database, dispose = false) => {
 			expect(() => Person.orderBy('name; DROP TABLE people')).toThrow()
 		})
 
+		it('supports query helpers and relation pagination', async () => {
+			configureDb0(db)
+			const person = await Person.create({ name: 'Query Person', active: true })
+			await Post.create({ person_id: person.id, title: 'Zed' })
+			await Post.create({ person_id: person.id, title: 'Amy' })
+			const base = Post.where({ person_id: person.id }).orderBy('title')
+			expect(await base.clone().limit(1).pluck('title')).toEqual(['Amy'])
+			expect(await base.value('title')).toBe('Amy')
+			expect(await base.exists()).toBe(true)
+			expect(await base.clone().limit(0).exists()).toBe(false)
+			expect((await base.firstOrFail()).title).toBe('Amy')
+			expect((await person.posts().orderBy('title').paginate(1, 2)).data[0]?.title).toBe('Zed')
+			expect(await person.posts().limit(1).count()).toBe(2)
+		})
+
 		it('uses db0 after configuring a separate Knex migration connection', async () => {
 			const migrationDb = configureDatabase({
 				client: 'better-sqlite3',

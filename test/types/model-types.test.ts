@@ -10,6 +10,11 @@ class User extends Model {
 	}
 }
 
+class TypedItem extends Model {
+	declare name: string
+	declare score: number | null
+}
+
 declare const userId: number
 
 async function assertDerivedTypes() {
@@ -51,6 +56,17 @@ async function assertDerivedTypes() {
 	const paginated = await User.paginate(10, 1)
 	expectTypeOf(paginated).toEqualTypeOf<PaginatedResult<User>>()
 	expectTypeOf(paginated.data).toEqualTypeOf<ModelCollection<User>>()
+
+	const typed = TypedItem.where({ name: 'desk' }).clone()
+	expectTypeOf(typed).toEqualTypeOf<ModelQuery<TypedItem>>()
+	expectTypeOf(await typed.firstOrFail()).toEqualTypeOf<TypedItem>()
+	expectTypeOf(await typed.exists()).toEqualTypeOf<boolean>()
+	expectTypeOf(await typed.value('name')).toEqualTypeOf<string | undefined>()
+	expectTypeOf(await typed.value('score')).toEqualTypeOf<number | null | undefined>()
+	expectTypeOf(await typed.pluck('score')).toEqualTypeOf<(number | null)[]>()
+	// @ts-expect-error only declared columns can be selected
+	await typed.pluck('unknown_column')
+	expectTypeOf(await User.where({ id: userId }).value('anything')).toEqualTypeOf<unknown>()
 }
 
 describe('Model static method return types', () => {

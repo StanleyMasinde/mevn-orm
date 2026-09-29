@@ -85,7 +85,7 @@ const farms = await farmer.farms()      // Farm[]
 
 ### Chain then execute
 
-Relation instances support `where()`, `first()`, and `get()`:
+Relation instances support `where()`, `orderBy()`, `limit()`, `offset()`, `first()`, `get()`, `count()`, and `paginate()`:
 
 ```ts
 const farmer = await Farmer.findOrFail(1)
@@ -98,7 +98,14 @@ const westFarms = await farmer.farms().where({ region: 'west' }).get()
 
 // belongsTo / hasOne with filters
 const profile = await farmer.profile().where({ published: true }).first()
+
+const page = await farmer.farms().orderBy('name').paginate(20, 1)
+// page.data is Farm[]; page.total counts every matching farm
+
+const nextFarm = await farmer.farms().orderBy('name').offset(1).limit(1)
 ```
+
+Ordering and paging retain the parent key filter. A direct `await` still returns a single model or an array according to the relation type. `count()` ignores order, limit, and offset, as model counts do. Pagination defaults to 15 rows on page 1, clamps a page past the end, and returns `total`, `per_page`, `current_page`, `next_page`, `prev_page`, and `last_page`. An unsaved parent yields zero rows and a valid empty page. Related models still have hidden fields stripped.
 
 ### Behaviour by relation type
 

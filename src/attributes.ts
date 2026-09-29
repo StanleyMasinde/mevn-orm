@@ -61,6 +61,9 @@ type UpdateAttributes<T> = WhereAttributes<T>
  */
 type AttributeColumn<T> = HasDeclaredColumns<T> extends false ? string : Extract<keyof RawAttributes<T>, string>
 
+/** Value of a selected column; untyped models return `unknown`. */
+type AttributeValue<T, K extends AttributeColumn<T>> = ModelAttributes<T>[K & keyof ModelAttributes<T>]
+
 export type {
 	Row,
 	ModelAttributes,
@@ -68,4 +71,5 @@ export type {
 	WhereAttributes,
 	UpdateAttributes,
 	AttributeColumn,
+	AttributeValue,
 }

@@ -1,4 +1,4 @@
-import type { AttributeColumn, CreateAttributes, Row, UpdateAttributes, WhereAttributes } from './attributes.js'
+import type { AttributeColumn, AttributeValue, CreateAttributes, Row, UpdateAttributes, WhereAttributes } from './attributes.js'
 import { getBackend, type TableQuery } from './backend.js'
 import { getTableName, toSnakeCase } from './inflect.js'
 import { BelongsToRelation, HasManyRelation, HasOneRelation } from './relation.js'
@@ -519,7 +519,16 @@ class Model {
 
 /** An independent model query; safe to keep or run alongside other queries. */
 class ModelQuery<T extends Model> {
+	private limitCount: number | undefined
+
 	constructor(private readonly ModelClass: new (properties?: Row) => T, private readonly query: TableQuery) {}
+
+	/** Forks this query, including its current filters, ordering, limit, and offset. */
+	clone(): ModelQuery<T> {
+		const copy = new ModelQuery(this.ModelClass, this.query.clone())
+		copy.limitCount = this.limitCount
+		return copy
+	}
 
 	where(conditions: WhereAttributes<T>): this {
 		this.query.where(conditions)
@@ -531,6 +540,7 @@ class ModelQuery<T extends Model> {
 	}
 	limit(count: number): this {
 		this.query.limit(count)
+		this.limitCount = count
 		return this
 	}
 	offset(count: number): this {
@@ -540,6 +550,28 @@ class ModelQuery<T extends Model> {
 	async first(columns: string | string[] = '*'): Promise<T | null> {
 		const row = await this.query.first(columns)
 		return row ? new this.ModelClass(row) : null
+	}
+	/** Returns the first matching model, or throws if no row matches. */
+	async firstOrFail(columns: string | string[] = '*'): Promise<T> {
+		const row = await this.query.clone().first(columns)
+		if (!row) throw new Error(`${this.ModelClass.name} not found`)
+		return new this.ModelClass(row)
+	}
+	/** Checks whether the current page contains at least one row. */
+	async exists(): Promise<boolean> {
+		if (this.limitCount === 0) return false
+		return await this.query.clone().limit(1).first() !== null
+	}
+	/** Selects one scalar without constructing a model; missing rows return `undefined`. */
+	async value<K extends AttributeColumn<T>>(column: K): Promise<AttributeValue<T, K> | undefined> {
+		if (this.limitCount === 0) return undefined
+		const row = await this.query.clone().limit(1).first(column)
+		return row?.[column] as AttributeValue<T, K> | undefined
+	}
+	/** Selects one column from every matching row without constructing models. */
+	async pluck<K extends AttributeColumn<T>>(column: K): Promise<AttributeValue<T, K>[]> {
+		const rows = await this.query.clone().select(column)
+		return rows.map((row) => row[column] as AttributeValue<T, K>)
 	}
 	async all(columns: string | string[] = '*'): Promise<ModelCollection<T>> {
 		const rows = await this.query.select(columns)
@@ -644,3 +676,4 @@ export { Model, ModelCollection, ModelQuery }
 export type { PaginatedResult }
 export type { ModelAttributes, CreateAttributes, WhereAttributes, UpdateAttributes, AttributeColumn } from './attributes.js'
 export { HasOneRelation, HasManyRelation, BelongsToRelation, Relation } from './relation.js'
+export type { RelationPaginatedResult } from './relation.js'
