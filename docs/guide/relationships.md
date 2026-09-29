@@ -149,7 +149,7 @@ INSERT INTO comment_posts VALUES
 Declare the relation in `Comment`. The discriminator keeps `comment_posts` rows for other parent types out of this relation:
 
 ```ts
-import { Model } from 'mevn-orm'
+import { Model, manyToMany } from 'mevn-orm'
 
 class Post extends Model {
   declare title: string
@@ -159,7 +159,7 @@ class Comment extends Model {
   declare body: string
 
   post() {
-    return this.belongsToMany(Post, {
+    return manyToMany(this, Post, {
       table: 'comment_posts',
       pivot: ['position'] as const,
       discriminator: { column: 'comment_type', value: 'comment' },
@@ -168,7 +168,7 @@ class Comment extends Model {
 }
 ```
 
-`belongsToMany()` infers `comment_id` from `Comment` and `post_id` from `Post`, following the same `{modelName}_id` convention as the other relation helpers. Set `parentKey` or `relatedKey` only when the junction table uses different names. `parentColumn` and `relatedColumn` default to `id`.
+`manyToMany()` infers `comment_id` from `Comment` and `post_id` from `Post`, following the same `{modelName}_id` convention as the other relation helpers. Set `parentKey` or `relatedKey` only when the junction table uses different names. `parentColumn` and `relatedColumn` default to `id`.
 
 Now load the comment and query its posts. Callers do not pass the discriminator again:
 

@@ -2,7 +2,7 @@ import { afterAll, describe, expect, it } from 'vitest'
 import knex, { type Knex } from 'knex'
 import { createDatabase, type Database } from 'db0'
 import sqlite from 'db0/connectors/node-sqlite'
-import { Model, configure } from '../index.js'
+import { Model, configure, manyToMany } from '../index.js'
 import { configureDb0 } from '../db0.js'
 import { getBackend, setBackend } from '../src/backend.js'
 
@@ -12,7 +12,7 @@ class Farmer extends Model {
 	declare name: string
 
 	farms() {
-		return this.belongsToMany(Farm, {
+		return manyToMany(this, Farm, {
 			table: 'm2m_farmer_farms', parentKey: 'farmer_code', relatedKey: 'farm_code',
 			parentColumn: 'code', relatedColumn: 'code', pivot: ['rate', 'position'] as const,
 		}).typedPivot<{ rate: number, position: number }>().orderBy('name')
@@ -34,7 +34,7 @@ class CollatedFarmer extends Model {
 	override table = 'm2m_collated_farmers'
 	declare code: string
 	farms() {
-		return this.belongsToMany(CollatedFarm, {
+		return manyToMany(this, CollatedFarm, {
 			table: 'm2m_collated_links', parentKey: 'farmer_code', relatedKey: 'farm_code',
 			parentColumn: 'code', relatedColumn: 'code', pivot: ['rate'] as const,
 		}).typedPivot<{ rate: number }>()
@@ -47,7 +47,7 @@ class Post extends Model {
 class Comment extends Model {
 	override table = 'm2m_comments'
 	post() {
-		return this.belongsToMany(Post, {
+		return manyToMany(this, Post, {
 			table: 'm2m_comment_posts',
 			discriminator: { column: 'comment_type', value: 'comment' },
 			pivot: ['position'] as const,
@@ -56,12 +56,12 @@ class Comment extends Model {
 }
 class InvalidComment extends Model {
 	post() {
-		return this.belongsToMany(Post, { table: 'bad;name', pivot: [] })
+		return manyToMany(this, Post, { table: 'bad;name', pivot: [] })
 	}
 }
 class SelfComment extends Model {
 	comments() {
-		return this.belongsToMany(SelfComment, { table: 'm2m_comment_posts', pivot: [] })
+		return manyToMany(this, SelfComment, { table: 'm2m_comment_posts', pivot: [] })
 	}
 }
 

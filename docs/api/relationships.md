@@ -60,9 +60,9 @@ const owner = await farm.farmer() // Farmer | null
 
 Pass `foreignKey` when your column does not follow the default naming convention, such as `this.belongsTo(Farmer, 'owner_id')`.
 
-### `belongsToMany(Related, options): ManyToManyRelation`
+### `manyToMany(parent, Related, options): ManyToManyRelation`
 
-Use this protected helper inside a model's relation method. Callers query the method, such as `await comment.post()`. See [Read a many-to-many relation from a model](/guide/relationships#read-a-many-to-many-relation-from-a-model) for the complete `Comment` and `Post` example.
+Import this factory from `mevn-orm` and call it inside a model's relation method. Pass the model instance as `parent`. Callers query the method, such as `await comment.post()`. See [Read a many-to-many relation from a model](/guide/relationships#read-a-many-to-many-relation-from-a-model) for the complete `Comment` and `Post` example.
 
 | Option | Meaning |
 | --- | --- |

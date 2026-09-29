@@ -26,6 +26,9 @@ import { getTableName, toSnakeCase } from './src/inflect.js'
 import { escapeLike } from './src/filters.js'
 import { transaction, TransactionContext, TransactionModel } from './src/transaction.js'
 import { joinRows, JoinQuery } from './src/join.js'
+import { manyToMany, ManyToManyRelation } from './src/many-to-many.js'
+
+export type { ManyToManyEntry, ManyToManyOptions } from './src/many-to-many.js'
 
 export type {
 	PaginatedResult,
@@ -66,4 +69,6 @@ export {
 	TransactionModel,
 	joinRows,
 	JoinQuery,
+	manyToMany,
+	ManyToManyRelation,
 }

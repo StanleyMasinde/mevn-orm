@@ -4,7 +4,7 @@ import { bindModel, modelContext, type ExecutionContext } from './execution-cont
 import { sqlIdentifier } from './join-sql.js'
 import type { Model } from './model.js'
 
-interface ManyToManyOptions<Parent extends Model, Related extends Model, K extends string> {
+interface ManyToManyOptions<Related extends Model, K extends string> {
 	/** Junction table name. */
 	table: string
 	/** Junction column pointing to the parent; defaults to {parentModelName}_id. */
@@ -12,7 +12,7 @@ interface ManyToManyOptions<Parent extends Model, Related extends Model, K exten
 	/** Junction column pointing to the related model; defaults to {relatedModelName}_id. */
 	relatedKey?: string
 	/** Column on the parent model; defaults to id. */
-	parentColumn?: AttributeColumn<Parent>
+	parentColumn?: string
 	/** Column on the related model; defaults to id. */
 	relatedColumn?: AttributeColumn<Related>
 	/** Junction columns copied to each entry's separate pivot object. */
@@ -109,7 +109,7 @@ class ManyToManyRelation<Related extends Model, K extends string, Pivot extends 
 const manyToMany = <Parent extends Model, RelatedClass extends typeof Model, K extends string>(
 	parent: Parent,
 	Related: RelatedClass,
-	options: ManyToManyOptions<Parent, InstanceType<RelatedClass>, K>,
+	options: ManyToManyOptions<InstanceType<RelatedClass>, K>,
 ): ManyToManyRelation<InstanceType<RelatedClass>, K> => {
 	const relatedTable = Related.resolveTable()
 	const parentKey = options.parentKey ?? `${parent.modelName}_id`
