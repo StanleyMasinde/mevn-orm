@@ -5,6 +5,7 @@ import { getTableName, toSnakeCase } from './inflect.js'
 import { FilterBuilder, type FilterNode } from './filters.js'
 import { BelongsToRelation, HasManyRelation, HasOneRelation } from './relation.js'
 import { createRelationshipMethods } from './relationships.js'
+import { manyToMany, type ManyToManyOptions, type ManyToManyRelation } from './many-to-many.js'
 
 /**
  * Paginated query result returned by {@link Model.paginate}.
@@ -141,6 +142,14 @@ class Model {
 		this.#private = ['fillable', 'hidden']
 		this.modelName = toSnakeCase(this.constructor.name)
 		this.table = getTableName(this.constructor.name)
+	}
+
+	/** Defines a read-only junction relation for a method on a model subclass. */
+	protected belongsToMany<R extends typeof Model, K extends string>(
+		Related: R,
+		options: ManyToManyOptions<Model, InstanceType<R>, K>,
+	): ManyToManyRelation<InstanceType<R>, K> {
+		return manyToMany(this, Related, options)
 	}
 
 	/**

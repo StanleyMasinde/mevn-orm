@@ -124,6 +124,78 @@ Comparisons, membership, ranges, NULL checks, and text filters can also be chain
 | `HasManyRelation` | array of models | posts, farms |
 | `BelongsToRelation` | single model or `null` | author, owner |
 
+## Read a many-to-many relation from a model
+
+When a junction table links models, define the relation in the model and query it through the instance. For example, `comment_posts` can link a comment to several posts and store a `position` for each link. Its columns are `comment_id`, `post_id`, `comment_type`, and `position`; `comments` and `posts` each have an `id` column.
+
+The following schema and rows demonstrate two links for comment 1. The `photo` row shares the same numeric parent key, so the relation must check the type as well:
+
+```sql
+CREATE TABLE comments (id INTEGER PRIMARY KEY, body TEXT);
+CREATE TABLE posts (id INTEGER PRIMARY KEY, title TEXT);
+CREATE TABLE comment_posts (
+  comment_id INTEGER, post_id INTEGER,
+  comment_type VARCHAR(50), position INTEGER
+);
+
+INSERT INTO comments VALUES (1, 'Useful');
+INSERT INTO posts VALUES (10, 'First'), (20, 'Second');
+INSERT INTO comment_posts VALUES
+  (1, 10, 'comment', 1),
+  (1, 20, 'comment', 2),
+  (1, 10, 'photo', 99);
+```
+
+Declare the relation in `Comment`. The discriminator keeps `comment_posts` rows for other parent types out of this relation:
+
+```ts
+import { Model } from 'mevn-orm'
+
+class Post extends Model {
+  declare title: string
+}
+
+class Comment extends Model {
+  declare body: string
+
+  post() {
+    return this.belongsToMany(Post, {
+      table: 'comment_posts',
+      pivot: ['position'] as const,
+      discriminator: { column: 'comment_type', value: 'comment' },
+    }).typedPivot<{ position: number }>()
+  }
+}
+```
+
+`belongsToMany()` infers `comment_id` from `Comment` and `post_id` from `Post`, following the same `{modelName}_id` convention as the other relation helpers. Set `parentKey` or `relatedKey` only when the junction table uses different names. `parentColumn` and `relatedColumn` default to `id`.
+
+Now load the comment and query its posts. Callers do not pass the discriminator again:
+
+```ts
+const comment = await Comment.findOrFail(1)
+const entries = await comment.post().orderBy('title')
+
+const summary = entries.map(({ related: post, pivot }) => ({
+  postId: post.id,
+  title: post.title,
+  position: pivot.position,
+}))
+```
+
+If comment 1 links to posts 10 and 20, `summary` is an array like this:
+
+```ts
+[
+  { postId: 10, title: 'First', position: 1 },
+  { postId: 20, title: 'Second', position: 2 },
+]
+```
+
+`await comment.post()` loads all post columns. Use `comment.post().get(['id', 'title'])` to select columns. Each entry contains a `Post` instance in `related` and the matching junction values in `pivot`. Duplicate junction rows produce separate entries; an absent comment key or no matches produces `[]`. The model's hidden fields are stripped from `related`.
+
+The fixed `comment_type = 'comment'` condition is applied to the relation query and bound as a value. A row with `comment_id = 1` and `comment_type = 'photo'` cannot appear in `comment.post()`. A database join pairs each junction row with its post in one read, using the database's key equality rules. `typedPivot()` declares TypeScript values for selected junction columns; it does not convert database values.
+
 ## End-to-end example
 
 ```ts

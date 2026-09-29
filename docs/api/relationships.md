@@ -60,6 +60,26 @@ const owner = await farm.farmer() // Farmer | null
 
 Pass `foreignKey` when your column does not follow the default naming convention, such as `this.belongsTo(Farmer, 'owner_id')`.
 
+### `belongsToMany(Related, options): ManyToManyRelation`
+
+Use this protected helper inside a model's relation method. Callers query the method, such as `await comment.post()`. See [Read a many-to-many relation from a model](/guide/relationships#read-a-many-to-many-relation-from-a-model) for the complete `Comment` and `Post` example.
+
+| Option | Meaning |
+| --- | --- |
+| `table` | Junction table name. Required. |
+| `parentKey` | Junction column for this model's key. Defaults to `{this.modelName}_id`. |
+| `relatedKey` | Junction column for the related model's key. Defaults to `{related.modelName}_id`. |
+| `parentColumn` | Column on this model. Defaults to `id`. |
+| `relatedColumn` | Column on the related model. Defaults to `id`. |
+| `pivot` | Junction columns copied into each entry's `pivot` object. Required; can be empty. |
+| `discriminator` | Optional fixed `{ column, value }` condition on junction rows. |
+
+The returned relation is awaitable and supports `get(columns?)`, `orderBy(column, direction?)`, and `typedPivot<P>()`. It returns `{ related, pivot }[]`. `related` is a model with hidden fields stripped; `pivot` is a separate plain object. `get([])` throws. Duplicate junction rows produce separate entries. The discriminator is applied on every read and cannot be omitted by the caller.
+
+For a self-relation, pass distinct `parentKey` and `relatedKey` values; inferred keys would have the same name.
+
+Knex and supported db0 SQLite and MySQL connectors support this read-only relation. A third-party backend needs the optional `Backend.joinedRows` capability to match junction and related keys using the database's equality rules. If it lacks that capability, the read throws before querying the junction table.
+
 ---
 
 ## Relation Classes
