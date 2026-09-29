@@ -4,7 +4,11 @@ import type { Backend, TableQuery } from './backend.js'
 import { applyFilter, type FilterNode } from './filters.js'
 
 class KnexTableQuery implements TableQuery {
-	constructor(private readonly query: Knex.QueryBuilder<Row, Row[]>) {}
+	constructor(
+		private readonly query: Knex.QueryBuilder<Row, Row[]>,
+		private readonly transactionBound: boolean,
+		private readonly lockSupported: boolean,
+	) {}
 
 	where(conditions: Row): this {
 		this.query.where(conditions)
@@ -12,6 +16,13 @@ class KnexTableQuery implements TableQuery {
 	}
 	filter(predicate: FilterNode): this {
 		applyFilter(this.query, predicate)
+		return this
+	}
+	lock(mode: 'update' | 'share'): this {
+		if (!this.transactionBound) throw new Error('Row locking requires a transaction')
+		if (!this.lockSupported) throw new Error('Row locking is not supported by this database dialect')
+		if (mode === 'update') this.query.forUpdate()
+		else this.query.forShare()
 		return this
 	}
 	orderBy(column: string, direction: 'asc' | 'desc'): this {
@@ -27,7 +38,7 @@ class KnexTableQuery implements TableQuery {
 		return this
 	}
 	clone(): TableQuery {
-		return new KnexTableQuery(this.query.clone())
+		return new KnexTableQuery(this.query.clone(), this.transactionBound, this.lockSupported)
 	}
 	async select(columns: string | string[] = '*'): Promise<Row[]> {
 		return this.query.clone().select<Row[]>(columns as never)
@@ -52,6 +63,11 @@ class KnexTableQuery implements TableQuery {
 	}
 }
 
-export const knexBackend = (db: Knex): Backend => ({
-	query: (table) => new KnexTableQuery(db(table) as Knex.QueryBuilder<Row, Row[]>),
-})
+export const knexBackend = (db: Knex, transactionBound = false): Backend => {
+	const dialect = String(db.client.config.client)
+	const lockSupported = ['pg', 'postgres', 'postgresql', 'mysql', 'mysql2'].includes(dialect)
+	return {
+		query: (table) => new KnexTableQuery(db(table) as Knex.QueryBuilder<Row, Row[]>, transactionBound, lockSupported),
+		transaction: async (callback) => db.transaction(async (trx) => callback(knexBackend(trx, true))),
+	}
+}

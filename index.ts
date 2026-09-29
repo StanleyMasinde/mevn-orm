@@ -24,6 +24,7 @@ import {
 } from './src/config.js'
 import { getTableName, toSnakeCase } from './src/inflect.js'
 import { escapeLike } from './src/filters.js'
+import { transaction, TransactionContext, TransactionModel } from './src/transaction.js'
 
 export type {
 	PaginatedResult,
@@ -59,4 +60,7 @@ export {
 	getTableName,
 	toSnakeCase,
 	escapeLike,
+	transaction,
+	TransactionContext,
+	TransactionModel,
 }

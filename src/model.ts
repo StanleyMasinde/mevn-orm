@@ -1,5 +1,6 @@
 import type { AttributeColumn, AttributeValue, CreateAttributes, Row, UpdateAttributes, WhereAttributes } from './attributes.js'
-import { getBackend, type TableQuery } from './backend.js'
+import { getBackend, getBackendFor, type TableQuery } from './backend.js'
+import { bindModel, currentContext, modelContext, type ExecutionContext } from './execution-context.js'
 import { getTableName, toSnakeCase } from './inflect.js'
 import { FilterBuilder, type FilterNode } from './filters.js'
 import { BelongsToRelation, HasManyRelation, HasOneRelation } from './relation.js'
@@ -148,14 +149,15 @@ class Model {
 	 * @returns This instance with database-assigned fields (including `id`) populated.
 	 */
 	async save(): Promise<this> {
+		modelContext(this)?.assertActive()
 		try {
 			const rows: Row = {}
 			for (const field of this.fillable) {
 				rows[field] = this[field]
 			}
 
-			const id = await getBackend().query(this.table).insert(rows)
-			const fields = await getBackend().query(this.table).where({ id }).first()
+			const id = await getBackendFor(this).query(this.table).insert(rows)
+			const fields = await getBackendFor(this).query(this.table).where({ id }).first()
 
 			if (!fields) {
 				throw new Error(`Failed to load inserted record for table "${this.table}"`)
@@ -177,20 +179,21 @@ class Model {
 	 * @throws When the instance has no `id`.
 	 */
 	async update(properties: UpdateAttributes<this>): Promise<this> {
+		modelContext(this)?.assertActive()
 		if (this.id === undefined) {
 			throw new Error('Cannot update model without id')
 		}
 
 		try {
-			await getBackend().query(this.table).where({ id: this.id }).update(properties)
-			const fields = await getBackend().query(this.table).where({ id: this.id }).first()
+			await getBackendFor(this).query(this.table).where({ id: this.id }).update(properties)
+			const fields = await getBackendFor(this).query(this.table).where({ id: this.id }).first()
 
 			if (!fields) {
 				throw new Error(`Failed to load updated record for table "${this.table}"`)
 			}
 
 			const next = new (this.constructor as new (props: Row) => this)(fields)
-			return this.stripColumns(next)
+			return bindModel(this.stripColumns(next), modelContext(this))
 		} catch (error) {
 			throw toError(error)
 		}
@@ -202,12 +205,13 @@ class Model {
 	 * @throws When the instance has no `id`.
 	 */
 	async delete(): Promise<void> {
+		modelContext(this)?.assertActive()
 		if (this.id === undefined) {
 			throw new Error('Cannot delete model without id')
 		}
 
 		try {
-			await getBackend().query(this.table).where({ id: this.id }).delete()
+			await getBackendFor(this).query(this.table).where({ id: this.id }).delete()
 		} catch (error) {
 			throw toError(error)
 		}
@@ -522,13 +526,17 @@ class Model {
 class ModelQuery<T extends Model> extends FilterBuilder<T> {
 	private limitCount: number | undefined
 
-	constructor(private readonly ModelClass: new (properties?: Row) => T, private readonly query: TableQuery) {
+	constructor(
+		private readonly ModelClass: new (properties?: Row) => T,
+		private readonly query: TableQuery,
+		private readonly context: ExecutionContext | undefined = currentContext(),
+	) {
 		super()
 	}
 
 	/** Forks this query, including its current filters, ordering, limit, and offset. */
 	clone(): ModelQuery<T> {
-		const copy = new ModelQuery(this.ModelClass, this.query.clone())
+		const copy = new ModelQuery(this.ModelClass, this.query.clone(), this.context)
 		copy.limitCount = this.limitCount
 		return copy
 	}
@@ -540,6 +548,22 @@ class ModelQuery<T extends Model> extends FilterBuilder<T> {
 		}
 		if (!this.query.filter) throw new Error('This backend does not support extended filters')
 		this.query.filter(node)
+	}
+	/** Locks selected rows for update when the backend and transaction support it. */
+	forUpdate(): this {
+		if (!this.context) throw new Error('Row locking requires a transaction')
+		this.context.assertActive()
+		if (!this.query.lock) throw new Error('This backend does not support row locking')
+		this.query.lock('update')
+		return this
+	}
+	/** Locks selected rows for shared reads when supported. */
+	forShare(): this {
+		if (!this.context) throw new Error('Row locking requires a transaction')
+		this.context.assertActive()
+		if (!this.query.lock) throw new Error('This backend does not support row locking')
+		this.query.lock('share')
+		return this
 	}
 	orderBy(column: AttributeColumn<T>, direction: 'asc' | 'desc' = 'asc'): this {
 		this.query.orderBy(column, direction)
@@ -556,21 +580,23 @@ class ModelQuery<T extends Model> extends FilterBuilder<T> {
 	}
 	async first(columns: string | string[] = '*'): Promise<T | null> {
 		const row = await this.query.first(columns)
-		return row ? new this.ModelClass(row) : null
+		return row ? bindModel(new this.ModelClass(row), this.context) : null
 	}
 	/** Returns the first matching model, or throws if no row matches. */
 	async firstOrFail(columns: string | string[] = '*'): Promise<T> {
 		const row = await this.query.clone().first(columns)
 		if (!row) throw new Error(`${this.ModelClass.name} not found`)
-		return new this.ModelClass(row)
+		return bindModel(new this.ModelClass(row), this.context)
 	}
 	/** Checks whether the current page contains at least one row. */
 	async exists(): Promise<boolean> {
+		this.context?.assertActive()
 		if (this.limitCount === 0) return false
 		return await this.query.clone().limit(1).first() !== null
 	}
 	/** Selects one scalar without constructing a model; missing rows return `undefined`. */
 	async value<K extends AttributeColumn<T>>(column: K): Promise<AttributeValue<T, K> | undefined> {
+		this.context?.assertActive()
 		if (this.limitCount === 0) return undefined
 		const row = await this.query.clone().limit(1).first(column)
 		return row?.[column] as AttributeValue<T, K> | undefined
@@ -583,7 +609,7 @@ class ModelQuery<T extends Model> extends FilterBuilder<T> {
 	async all(columns: string | string[] = '*'): Promise<ModelCollection<T>> {
 		const rows = await this.query.select(columns)
 		const collection = new ModelCollection<T>()
-		for (const row of rows) collection.push(new this.ModelClass(row))
+		for (const row of rows) collection.push(bindModel(new this.ModelClass(row), this.context))
 		return collection
 	}
 	async count(column = '*'): Promise<number> {
@@ -603,7 +629,7 @@ class ModelQuery<T extends Model> extends FilterBuilder<T> {
 		const currentPage = Math.min(page, lastPage)
 		const rows = await this.query.clone().limit(perPage).offset((currentPage - 1) * perPage).select(columns)
 		const data = new ModelCollection<T>()
-		for (const row of rows) data.push(new this.ModelClass(row))
+		for (const row of rows) data.push(bindModel(new this.ModelClass(row), this.context))
 		return {
 			data,
 			total,
@@ -677,7 +703,7 @@ interface Model {
 	): BelongsToRelation<InstanceType<T>>
 }
 
-Object.assign(Model.prototype, createRelationshipMethods(getBackend) as Pick<Model, 'hasOne' | 'hasMany' | 'belongsTo'>)
+Object.assign(Model.prototype, createRelationshipMethods(getBackendFor) as Pick<Model, 'hasOne' | 'hasMany' | 'belongsTo'>)
 
 export { Model, ModelCollection, ModelQuery }
 export type { PaginatedResult }

@@ -1,6 +1,6 @@
 # Raw Knex (`DB`)
 
-Mevn ORM is intentionally thin. For joins, transactions, aggregates, or SQL Knex already expresses well, drop down to the shared Knex instance.
+Mevn ORM is intentionally thin. For joins, aggregates, or SQL Knex already expresses well, drop down to the shared Knex instance. For model operations spanning one transaction, use the [transaction facade](/guide/transactions).
 
 ## Access
 
@@ -62,9 +62,7 @@ await getDB().transaction(async (trx) => {
 const user = await User.where({ email: 'jane@example.com' }).first()
 ```
 
-::: tip Models and transactions
-Static model methods use the global Knex client, not an arbitrary `trx`. For multi-step atomic writes that must share one transaction, prefer raw Knex/`trx` inside `transaction()`, or keep transactional units on one connection yourself.
-:::
+Static model methods use the global Knex client, not an arbitrary raw `trx`. Use [`transaction(async tx => ...)`](/guide/transactions) and `tx.model(User)` to enlist model methods, reloads, and relations. The raw Knex form remains useful for SQL outside the model API.
 
 ## Aggregates and reporting
 
@@ -109,7 +107,7 @@ Prefer `Model` for:
 Use raw Knex for:
 
 - Multi-table joins and complex filters
-- Transactions spanning several tables
+- SQL operations outside the transaction model facade
 - Bulk copy / analytics queries
 - Vendor-specific SQL
 

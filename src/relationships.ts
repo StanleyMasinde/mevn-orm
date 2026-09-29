@@ -1,4 +1,5 @@
 import type { Backend } from './backend.js'
+import { modelContext } from './execution-context.js'
 import {
 	BelongsToRelation,
 	HasManyRelation,
@@ -30,7 +31,7 @@ interface RelationshipMethods {
 }
 
 /** Builds relationship methods that run against the active backend. */
-const createRelationshipMethods = (getDB: () => Backend): RelationshipMethods => ({
+const createRelationshipMethods = (getDB: (model: RelationshipModel) => Backend): RelationshipMethods => ({
 	hasOne<T extends RelationshipModel>(
 		this: RelationshipModel,
 		Related: RelatedModelCtor<T>,
@@ -42,11 +43,11 @@ const createRelationshipMethods = (getDB: () => Backend): RelationshipMethods =>
 		const relationKey = foreignKey ?? `${this.modelName}_id`
 
 		if (keyValue === undefined) {
-			return new HasOneRelation<T>(Related, null)
+			return new HasOneRelation<T>(Related, null, modelContext(this))
 		}
 
-		const query = getDB().query(table).where({ [relationKey]: keyValue })
-		return new HasOneRelation<T>(Related, query)
+		const query = getDB(this).query(table).where({ [relationKey]: keyValue })
+		return new HasOneRelation<T>(Related, query, modelContext(this))
 	},
 	hasMany<T extends RelationshipModel>(
 		this: RelationshipModel,
@@ -59,11 +60,11 @@ const createRelationshipMethods = (getDB: () => Backend): RelationshipMethods =>
 		const relationKey = foreignKey ?? `${this.modelName}_id`
 
 		if (keyValue === undefined) {
-			return new HasManyRelation<T>(Related, null)
+			return new HasManyRelation<T>(Related, null, modelContext(this))
 		}
 
-		const query = getDB().query(table).where({ [relationKey]: keyValue })
-		return new HasManyRelation<T>(Related, query)
+		const query = getDB(this).query(table).where({ [relationKey]: keyValue })
+		return new HasManyRelation<T>(Related, query, modelContext(this))
 	},
 	belongsTo<T extends RelationshipModel>(
 		this: RelationshipModel,
@@ -76,11 +77,11 @@ const createRelationshipMethods = (getDB: () => Backend): RelationshipMethods =>
 		const relationValue = this[relationKey]
 
 		if (relationValue === undefined || relationValue === null) {
-			return new BelongsToRelation<T>(Related, null)
+			return new BelongsToRelation<T>(Related, null, modelContext(this))
 		}
 
-		const query = getDB().query(table).where({ [ownerKey]: relationValue })
-		return new BelongsToRelation<T>(Related, query)
+		const query = getDB(this).query(table).where({ [ownerKey]: relationValue })
+		return new BelongsToRelation<T>(Related, query, modelContext(this))
 	},
 })
 

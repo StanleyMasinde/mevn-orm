@@ -25,6 +25,9 @@ import {
   migrateList,
   getTableName,
   toSnakeCase,
+  transaction,
+  TransactionContext,
+  TransactionModel,
 } from 'mevn-orm'
 
 import type {
@@ -66,6 +69,14 @@ import type {
 | [`HasManyRelation`](/api/relationships) | One-to-many lazy relation |
 | [`BelongsToRelation`](/api/relationships) | Belongs-to lazy relation |
 | `Relation` | Abstract base (Promise-like) |
+
+## Transactions
+
+| Export | Description |
+| --- | --- |
+| [`transaction`](/api/transactions) | Commit or roll back a callback of bound model work |
+| `TransactionContext` | Live transaction scope with `model()`, `bind()`, and nested `transaction()` |
+| `TransactionModel` | Typed facade for model reads, writes, and queries |
 
 ## Migrations
 

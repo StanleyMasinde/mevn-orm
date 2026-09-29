@@ -1,6 +1,7 @@
 import type { AttributeColumn, Row } from './attributes.js'
 import type { TableQuery } from './backend.js'
 import { FilterBuilder, type FilterNode } from './filters.js'
+import { bindModel, type ExecutionContext } from './execution-context.js'
 
 interface RelationshipModel {
 	[key: string]: unknown
@@ -32,11 +33,13 @@ interface RelationPaginatedResult<T extends RelationshipModel> {
 abstract class Relation<TResult, TRelated extends RelationshipModel = RelationshipModel> extends FilterBuilder<TRelated> implements PromiseLike<TResult> {
 	protected readonly Related: RelatedModelCtor<TRelated>
 	protected readonly query: TableQuery | null
+	protected readonly context: ExecutionContext | undefined
 
-	constructor(Related: RelatedModelCtor<TRelated>, query: TableQuery | null) {
+	constructor(Related: RelatedModelCtor<TRelated>, query: TableQuery | null, context?: ExecutionContext) {
 		super()
 		this.Related = Related
 		this.query = query
+		this.context = context
 	}
 
 	/**
@@ -47,6 +50,7 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 	 * @returns This relation instance for chaining.
 	 */
 	protected addFilter(node: FilterNode): void {
+		this.context?.assertActive()
 		if (!this.query) return
 		if (node.kind === 'object') {
 			this.query.where(node.conditions)
@@ -58,29 +62,34 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 
 	/** Orders related rows while retaining the parent key constraint. */
 	orderBy(column: AttributeColumn<TRelated>, direction: 'asc' | 'desc' = 'asc'): this {
+		this.context?.assertActive()
 		this.query?.orderBy(column, direction)
 		return this
 	}
 
 	/** Limits related rows. */
 	limit(count: number): this {
+		this.context?.assertActive()
 		this.query?.limit(count)
 		return this
 	}
 
 	/** Skips related rows. */
 	offset(count: number): this {
+		this.context?.assertActive()
 		this.query?.offset(count)
 		return this
 	}
 
 	/** Counts all rows matching the relation scope, ignoring order, limit, and offset. */
 	async count(column = '*'): Promise<number> {
+		this.context?.assertActive()
 		return this.query ? this.query.count(column) : 0
 	}
 
 	/** Returns relation rows and the same page metadata used by model queries. */
 	async paginate(perPage = 15, page = 1, columns: string | string[] = '*'): Promise<RelationPaginatedResult<TRelated>> {
+		this.context?.assertActive()
 		if (!Number.isSafeInteger(perPage) || perPage <= 0) throw new RangeError('perPage must be a positive integer')
 		if (!Number.isSafeInteger(page) || page <= 0) throw new RangeError('page must be a positive integer')
 		const total = await this.count()
@@ -91,7 +100,7 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 			: []
 		const data = rows.map((row) => {
 			const related = new this.Related(row)
-			return related.stripColumns(related)
+			return bindModel(related.stripColumns(related), this.context)
 		})
 		return {
 			data,
@@ -111,6 +120,7 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 	 * @returns Related model instance, or `null` when no row matches.
 	 */
 	async first(columns: string | string[] = '*'): Promise<TRelated | null> {
+		this.context?.assertActive()
 		if (!this.query) {
 			return null
 		}
@@ -121,7 +131,7 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 		}
 
 		const related = new this.Related(row)
-		return related.stripColumns(related)
+		return bindModel(related.stripColumns(related), this.context)
 	}
 
 	/**
@@ -131,6 +141,7 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 	 * @returns Array of related model instances (empty when no rows match).
 	 */
 	async get(columns: string | string[] = '*'): Promise<TRelated[]> {
+		this.context?.assertActive()
 		if (!this.query) {
 			return []
 		}
@@ -138,7 +149,7 @@ abstract class Relation<TResult, TRelated extends RelationshipModel = Relationsh
 		const rows = await this.query.select(columns)
 		return rows.map((row) => {
 			const related = new this.Related(row)
-			return related.stripColumns(related)
+			return bindModel(related.stripColumns(related), this.context)
 		})
 	}
 
