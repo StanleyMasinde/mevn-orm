@@ -1,6 +1,7 @@
 import type { AttributeColumn, AttributeValue, CreateAttributes, Row, UpdateAttributes, WhereAttributes } from './attributes.js'
 import { getBackend, type TableQuery } from './backend.js'
 import { getTableName, toSnakeCase } from './inflect.js'
+import { FilterBuilder, type FilterNode } from './filters.js'
 import { BelongsToRelation, HasManyRelation, HasOneRelation } from './relation.js'
 import { createRelationshipMethods } from './relationships.js'
 
@@ -518,10 +519,12 @@ class Model {
 }
 
 /** An independent model query; safe to keep or run alongside other queries. */
-class ModelQuery<T extends Model> {
+class ModelQuery<T extends Model> extends FilterBuilder<T> {
 	private limitCount: number | undefined
 
-	constructor(private readonly ModelClass: new (properties?: Row) => T, private readonly query: TableQuery) {}
+	constructor(private readonly ModelClass: new (properties?: Row) => T, private readonly query: TableQuery) {
+		super()
+	}
 
 	/** Forks this query, including its current filters, ordering, limit, and offset. */
 	clone(): ModelQuery<T> {
@@ -530,9 +533,13 @@ class ModelQuery<T extends Model> {
 		return copy
 	}
 
-	where(conditions: WhereAttributes<T>): this {
-		this.query.where(conditions)
-		return this
+	protected addFilter(node: FilterNode): void {
+		if (node.kind === 'object') {
+			this.query.where(node.conditions)
+			return
+		}
+		if (!this.query.filter) throw new Error('This backend does not support extended filters')
+		this.query.filter(node)
 	}
 	orderBy(column: AttributeColumn<T>, direction: 'asc' | 'desc' = 'asc'): this {
 		this.query.orderBy(column, direction)
@@ -677,3 +684,4 @@ export type { PaginatedResult }
 export type { ModelAttributes, CreateAttributes, WhereAttributes, UpdateAttributes, AttributeColumn } from './attributes.js'
 export { HasOneRelation, HasManyRelation, BelongsToRelation, Relation } from './relation.js'
 export type { RelationPaginatedResult } from './relation.js'
+export type { ComparisonOperator } from './filters.js'

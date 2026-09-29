@@ -35,6 +35,19 @@ class MergedUser extends Model {
 	override fillable = ['name', 'email']
 }
 
+class TypedFilterItem extends Model {
+	declare owner_id: number
+	declare price: number
+	declare title: string
+	declare expires_at: string | null
+}
+
+class TypedFilterOwner extends Model {
+	items() {
+		return this.hasMany(TypedFilterItem)
+	}
+}
+
 declare const typedUser: TypedUser
 
 async function assertLooseWritesRemainOpen() {
@@ -97,6 +110,40 @@ async function assertTypedWrites() {
 	await MergedUser.create({ name: 'Ada' })
 }
 
+async function assertTypedFilters() {
+	const query = TypedFilterItem.where({ owner_id: 1 })
+		.where('price', '>=', 100)
+		.whereIn('title', ['Desk', 'Chair'])
+		.whereNotIn('price', [0])
+		.whereBetween('price', [100, 200])
+		.whereNull('expires_at')
+		.whereNotNull('title')
+		.whereLike('title', '%desk%')
+		.whereILike('title', '%DESK%')
+		.where((group) => group.where('price', '>', 100).orWhereLike('title', '%desk%'))
+	await query.all()
+	TypedFilterItem.where({}).where('expires_at', '>', new Date())
+	// @ts-expect-error unknown column
+	TypedFilterItem.where({}).whereIn('unknown_column', [1])
+	// @ts-expect-error price is numeric
+	TypedFilterItem.where({}).where('price', '>=', '100')
+	// @ts-expect-error LIKE requires a text field on typed models
+	TypedFilterItem.where({}).whereLike('price', '%100%')
+	// @ts-expect-error price membership is numeric
+	TypedFilterItem.where({}).whereIn('price', ['100'])
+	// @ts-expect-error unsupported operator
+	TypedFilterItem.where({}).where('price', 'contains', 100)
+	// @ts-expect-error invalid range endpoint
+	TypedFilterItem.where({}).whereBetween('price', [0, '100'])
+
+	const owner = new TypedFilterOwner({ id: 1 })
+	await owner.items().where('price', '>', 100).where((group) => group.whereNull('expires_at').orWhereILike('title', '%DESK%')).get()
+	// @ts-expect-error related model has no such column
+	owner.items().whereLike('unknown_column', '%x%')
+
+	LooseUser.where({}).where('anything', '=', new Date()).whereIn('whatever', [1, null, 'x'])
+}
+
 describe('write payload types', () => {
 	it('keeps untyped models loose', () => {
 		expectTypeOf<CreateAttributes<LooseUser>>().toEqualTypeOf<Record<string, unknown>>()
@@ -134,5 +181,9 @@ describe('write payload types', () => {
 			name: string
 			email: string
 		}>()
+	})
+
+	it('types filters on queries and relations while retaining untyped models', () => {
+		expectTypeOf(assertTypedFilters).returns.resolves.toBeVoid()
 	})
 })

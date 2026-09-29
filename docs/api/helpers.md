@@ -41,3 +41,13 @@ await getDB()(tableFor(User)).select('*')
 ```
 
 Prefer `Model.currentTable` / `override table` when working with model subclasses so explicit overrides are respected.
+
+## `escapeLike(value: string): string`
+
+Escapes literal `%`, `_`, and `!` characters for `whereLike()` and `whereILike()` patterns. The escape character is `!` on both SQLite and MySQL.
+
+```ts
+import { escapeLike } from 'mevn-orm'
+
+await Item.where({}).whereLike('title', `%${escapeLike('50% off')}%`).all()
+```

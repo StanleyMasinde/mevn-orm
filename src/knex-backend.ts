@@ -1,12 +1,17 @@
 import type { Knex } from 'knex'
 import type { Row } from './attributes.js'
 import type { Backend, TableQuery } from './backend.js'
+import { applyFilter, type FilterNode } from './filters.js'
 
 class KnexTableQuery implements TableQuery {
 	constructor(private readonly query: Knex.QueryBuilder<Row, Row[]>) {}
 
 	where(conditions: Row): this {
 		this.query.where(conditions)
+		return this
+	}
+	filter(predicate: FilterNode): this {
+		applyFilter(this.query, predicate)
 		return this
 	}
 	orderBy(column: string, direction: 'asc' | 'desc'): this {

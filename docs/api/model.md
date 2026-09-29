@@ -199,6 +199,8 @@ Chain scopes on an independent `ModelQuery`, then call a terminal method. The qu
 User.where({ active: true }).orderBy('name').limit(10).all()
 ```
 
+The static `where` method retains its equality-object signature. On a returned `ModelQuery`, `where` also accepts `(column, operator, value)` and a grouped callback. Query objects provide `whereIn`, `whereNotIn`, `whereBetween`, `whereNull`, `whereNotNull`, `whereLike`, and `whereILike`. Group callbacks support matching `orWhere` variants, including nested groups. See [Queries](/guide/queries) for NULL, wildcard, and Date semantics.
+
 ### Terminals
 
 | Method | Returns |

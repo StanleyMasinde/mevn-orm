@@ -23,6 +23,7 @@ import {
 	migrateRollback, migrateCurrentVersion, migrateList,
 } from './src/config.js'
 import { getTableName, toSnakeCase } from './src/inflect.js'
+import { escapeLike } from './src/filters.js'
 
 export type {
 	PaginatedResult,
@@ -32,6 +33,7 @@ export type {
 	WhereAttributes,
 	UpdateAttributes,
 	AttributeColumn,
+	ComparisonOperator,
 } from './src/model.js'
 
 export {
@@ -56,4 +58,5 @@ export {
 	migrateList,
 	getTableName,
 	toSnakeCase,
+	escapeLike,
 }
