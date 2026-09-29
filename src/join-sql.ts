@@ -10,6 +10,7 @@ export interface JoinPlan {
 	limit?: number
 	offset?: number
 	projection?: Record<string, string>
+	selectAllFrom?: string
 }
 
 export const sqlIdentifier = (value: string, qualified = false): string => {
@@ -39,8 +40,9 @@ export const buildJoinedQuery = (db: Knex, plan: JoinPlan, count: boolean): Knex
 		else query.whereRaw(`?? ${filter.operator} ?`, [filter.column, filter.value as Knex.RawBinding])
 	}
 	if (count) return query.count({ count: '*' })
-	if (!plan.projection) throw new Error('Select a projection before reading joined rows')
-	query.select(Object.fromEntries(Object.entries(plan.projection).map(([alias, column]) => [alias, column])))
+	if (!plan.projection && !plan.selectAllFrom) throw new Error('Select a projection before reading joined rows')
+	if (plan.selectAllFrom) query.select(`${sqlIdentifier(plan.selectAllFrom)}.*`)
+	if (plan.projection) query.select(Object.fromEntries(Object.entries(plan.projection).map(([alias, column]) => [alias, column])))
 	for (const order of plan.order) query.orderBy(order.column, order.direction)
 	if (plan.limit !== undefined) query.limit(plan.limit)
 	if (plan.offset !== undefined) query.offset(plan.offset)
